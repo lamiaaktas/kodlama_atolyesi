@@ -1,1 +1,10 @@
-# kodlama_atolyesi
+# Kodlama Atölyesi
+
+1. sınıflar için blok tabanlı kodlama sitesi. Google Apps Script üzerinde çalışır.
+
+- `Index.html` – sitenin ekranı. Apps Script bu dosyayı buradan okur; buraya gönderilen her güncelleme en geç 5 dakikada siteye yansır.
+- `Code.gs` – Apps Script'teki sunucu kodunun kopyası (öğretmen şifresi burada değil, yalnızca Apps Script'te yazılıdır).
+
+Çocukların çalışmaları, sınıf listeleri ve profiller bu depoda değil, öğretmenin Google Drive'ında tutulur.
+
+Karakter çizimleri: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (MIT lisansı).
