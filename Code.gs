@@ -481,3 +481,18 @@ function siniflariKaydet(sifre, liste) {
   CacheService.getScriptCache().remove('siniflar');
   return siniflariGetir();
 }
+
+/* Sorun giderme: GitHub'a ulaşılıyor mu ve sitede hangi sayfa var? Çalıştırıp Yürütme günlüğüne bakın. */
+function kontrol() {
+  let r, t = '';
+  try {
+    r = UrlFetchApp.fetch(SAYFA_URL + '?t=' + Date.now(), { muteHttpExceptions: true });
+    t = r.getContentText('UTF-8');
+    Logger.log('GitHub cevabı: ' + r.getResponseCode() + ' · uzunluk: ' + t.length + ' · robot var mı: ' + (t.indexOf('ROBOT FABR') >= 0));
+  } catch (e) {
+    Logger.log('GitHub\'a ulaşılamadı: ' + e.message);
+  }
+  sayfaTazele();
+  const s = onbellektenSayfa_();
+  Logger.log('Sitedeki sayfa: ' + (s ? (s.indexOf('ROBOT FABR') >= 0 ? 'YENİ (robotlu)' : 'ESKİ') : 'önbellek boş'));
+}
