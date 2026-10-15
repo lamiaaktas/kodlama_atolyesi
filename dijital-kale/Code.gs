@@ -164,7 +164,10 @@ function getLive(cls) {
   const k = 'live_' + key_(cls);
   let v = cache_().get(k);
   if (v === null) { v = props_().getProperty(k) || ''; cache_().put(k, v, 21600); }
-  return v ? JSON.parse(v) : null;
+  if (!v) return null;
+  const o = JSON.parse(v);
+  o.now = Date.now();
+  return o;
 }
 
 function getMine(cls, student) {
@@ -233,11 +236,19 @@ function tLogin(pin) {
 
 function tSetLive(pin, cls, live) {
   needPin_(pin);
-  const v = JSON.stringify({ open: !!live.open, lesson: Number(live.lesson) || 1, step: Number(live.step) || 0, at: Date.now() });
+  const o = JSON.parse(JSON.stringify(live || {}));
+  delete o.now;
+  o.open = !!o.open;
+  o.lesson = Number(o.lesson) || 1;
+  o.step = Number(o.step) || 0;
+  o.at = Date.now();
+  const v = JSON.stringify(o);
+  if (v.length > 4000) throw new Error('Ders durumu çok büyük');
   const k = 'live_' + key_(cls);
   props_().setProperty(k, v);
   cache_().put(k, v, 21600);
-  return JSON.parse(v);
+  o.now = Date.now();
+  return o;
 }
 
 function tGetLive(pin, cls) { needPin_(pin); return getLive(cls); }

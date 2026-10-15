@@ -229,6 +229,14 @@ details summary{cursor:pointer;font-weight:700}
 .codebox b{font-family:var(--font-pixel);font-size:30px;letter-spacing:3px}
 .hintsm{font-size:13px;color:var(--ink-soft);margin:0}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
+
+.clock{font-family:var(--font-pixel);font-weight:700;font-size:26px;background:var(--ink);color:var(--gold);border:3px solid #000;padding:2px 12px;font-variant-numeric:tabular-nums;box-shadow:inset 3px 3px 0 #444;white-space:nowrap}
+.clock.low{color:#fff;background:var(--bad);animation:blink 1s steps(2) infinite}
+.clock.over{color:#fff;background:var(--bad)}
+.stage.locked{pointer-events:none}
+.stage.locked .opt,.stage.locked .item,.stage.locked .bucket,.stage.locked textarea,.stage.locked input,.stage.locked .rf-btns{opacity:.6}
+.lockmsg{border-color:var(--bad)!important;background:var(--bad-bg)!important}
+.timerrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;border:3px solid var(--ink);padding:10px 12px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:520px){h1{font-size:24px}.brand{font-size:18px}.stage .q{font-size:19px}.hotbar{gap:4px}.slot span{font-size:10px}.slot .ic{width:30px;height:30px}}
 </style>
@@ -322,8 +330,8 @@ const LESSONS=[
   {type:'discuss',title:'Sınıfça konuşalım',prompts:['Kimliği taklit edilen öğrencinin bunu bilmeye hakkı var mı? Ona söyler miydin, ne derdin?','Hesabı açan kişiye kapatmasını söylemek kolay mı? Kendini rahat hissetmezsen ne yapabilirsin?','Ailede herkesin aynı şifreyi kullanması ne gibi riskler taşır? Arkadaşlar eve geldiğinde aile şifrelerini nasıl koruruz?']},
   {type:'sort',tag:'Etkinlik',q:'Gizlilik seviyeleri: Her bilgiyi kime söyleyebileceğine göre yerleştir. Önce bir karta, sonra bir kutuya dokun.',
    buckets:['Herkes bilebilir','Yakın arkadaşlarım bilebilir','Sadece ben ve ailem'],
-   items:[{t:'En sevdiğim hayvan',ok:[0,1]},{t:'Ev adresim',ok:[2]},{t:'Şifrelerim',ok:[2]},{t:'Telefon numaram',ok:[1,2]},{t:'Tatildeyken evimizin boş olduğu',ok:[2]},{t:'Adımın olmadığı bir resim çizimim',ok:[0,1]},{t:'Doğum günü partime kimleri çağırdığım',ok:[1,2]}],
-   fb:'Bazı bilgiler herkesle paylaşılabilir, bazıları sadece yakınlarla, bazıları ise yalnızca ailemizle. Bazı kartlarda birden fazla doğru cevap var. Önemli olan paylaşmadan önce düşünmek!'},
+   items:[{t:'En sevdiğim hayvan',ok:[0,1]},{t:'Ev adresim',ok:[1,2]},{t:'Şifrelerim',ok:[2]},{t:'Telefon numaram',ok:[1,2]},{t:'Tatildeyken evimizin boş olduğu',ok:[2]},{t:'Adımın olmadığı bir resim çizimim',ok:[0,1]},{t:'Doğum günü partime kimleri çağırdığım',ok:[1,2]}],
+   fb:'Bazı bilgiler herkesle paylaşılabilir, bazıları sadece yakınlarla, bazıları ise yalnızca ailemizle. Ev adresimi yakın arkadaşlarım bilebilir ama internette herkesle paylaşmam. Bazı kartlarda birden fazla doğru cevap var. Önemli olan paylaşmadan önce düşünmek!'},
   {type:'exit',q:'Bu derste öğrendiğin en önemli şey nedir?'}
  ]},
 {id:3,part:'Gözcü Kulesi',title:'Oltaya Gelme',sub:'Kimlik avı ve dolandırıcılık işaretleri',tex:'stone',badge:'İz Sürücü',
@@ -395,6 +403,11 @@ const call=(fn,...a)=>new Promise((res,rej)=>{try{google.script.run.withSuccessH
 /* ---------- Durum ---------- */
 let LIVE=null,liveKnown=false,MINE={},mineLoaded=false,TANS={},TCLS=[],net='ok',SHEET_URL='';
 const STS={};
+let OFFSET=0,LOCKED=false,TWARN=false;
+const srvNow=()=>Date.now()+OFFSET;
+function gotLive(v){if(v&&typeof v.now==='number')OFFSET=v.now-Date.now();return v}
+const timerOf=(l,st)=>(LIVE&&LIVE.timer&&LIVE.timer.lesson===l&&LIVE.timer.step===st&&LIVE.timer.endsAt)?LIVE.timer:null;
+const fmt=ms=>{const t=Math.max(0,Math.ceil(ms/1000));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 const student=()=>LOC.student?{name:LOC.student}:null;
 const tcls=()=>TCLS.find(c=>c.name===LOC.tClass);
 
@@ -406,9 +419,9 @@ async function poll(){
     if(LOC.teacher&&LOC.pin&&LOC.tClass){
       const c=LOC.tClass,l=LOC.tLesson;
       const [lv,ag]=await Promise.all([call('tGetLive',LOC.pin,c),LOC.tTab==='classes'?Promise.resolve(null):call('tAgg',LOC.pin,c,l)]);
-      if(c===LOC.tClass){LIVE=lv;liveKnown=true;if(ag&&l===LOC.tLesson)TANS=ag}
+      if(c===LOC.tClass){LIVE=gotLive(lv);liveKnown=true;if(ag&&l===LOC.tLesson)TANS=ag}
     }else if(!LOC.teacher&&LOC.cls&&LOC.student){
-      LIVE=await call('getLive',LOC.cls);liveKnown=true;
+      LIVE=gotLive(await call('getLive',LOC.cls));liveKnown=true;
     }
     setNet('ok');render();
   }catch(e){setNet('err')}
@@ -426,7 +439,7 @@ function screenKey(){
     const sig=JSON.stringify(TCLS.map(c=>[c.name,c.code,c.students.length]));
     if(LOC.tTab==='classes')return 't:classes:'+sig;
     if(LOC.tTab==='answers')return `t:answers:${LOC.tClass}:${LOC.tLesson}:${sig}`;
-    return `t:live:${LOC.tClass}:${LOC.tLesson}:${liveKnown}:${liveOpen()?LIVE.lesson+':'+LIVE.step:'off:'+LOC.tStep}:${sig}`;
+    return `t:live:${LOC.tClass}:${LOC.tLesson}:${liveKnown}:${liveOpen()?LIVE.lesson+':'+LIVE.step+':'+(LIVE.timer?LIVE.timer.endsAt:0):'off:'+LOC.tStep}:${TWARN}:${sig}`;
   }
   if(!LOC.cls)return 's:code';
   if(!LOC.student)return 's:name:'+LOC.cls+LOC.students.length;
@@ -547,7 +560,7 @@ function studentLesson(){
   CUR=L;const st=stFor(L.id);
   const pips=L.steps.map((_,k)=>`<span class="pip ${k<i?'done':k===i?'now':''}"></span>`).join('');
   app.innerHTML=`<div class="banner" id="netbar" ${net==='ok'?'hidden':''}>Bağlantı koptu. Tekrar bağlanmaya çalışılıyor…</div>
-  <section class="panel lesson-bar"><div class="ttl"><span class="eyebrow">Ders ${L.id} · ${L.part} · <span class="dotw"></span> Canlı</span><h2>${L.title}</h2></div><span class="sv" id="sv"></span><div class="pips" aria-label="Adım ${i+1} / ${L.steps.length}">${pips}</div></section>
+  <section class="panel lesson-bar"><div class="ttl"><span class="eyebrow">Ders ${L.id} · ${L.part} · <span class="dotw"></span> Canlı</span><h2>${L.title}</h2></div><span class="sv" id="sv"></span><span class="clock" id="sclock" hidden aria-live="off"></span><div class="pips" aria-label="Adım ${i+1} / ${L.steps.length}">${pips}</div></section>
   <section class="panel stage" id="stage"></section>
   <div class="nav" id="nav"></div>`;
   setSave(saveState==='ok'?'ok':saveState==='err'?'err':'');
@@ -559,9 +572,31 @@ function studentLesson(){
         const b=document.getElementById('send');if(b)b.onclick=()=>{if(b.disabled)return;st.done=true;commit();finish(L,st,i);refresh()}}
     }else nav.innerHTML=`<p class="waitnote"><span class="dotw"></span> Öğretmenin bir sonraki sayfaya geçince ekranın değişecek.</p>`;
   };
-  const ctx={L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh,commit,award:(ok)=>{if(st.first[i]===undefined)st.first[i]=!!ok;commit();const m=Object.assign({},MINE);m[L.id]=st;document.getElementById('xp').textContent='XP '+xpOf(m)}};
+  const ctx={L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh,commit:d=>{if(!LOCKED)commit(d)},award:(ok)=>{if(LOCKED)return;if(st.first[i]===undefined)st.first[i]=!!ok;commit();const m=Object.assign({},MINE);m[L.id]=st;document.getElementById('xp').textContent='XP '+xpOf(m)}};
   R[step.type](stage,step,st,i,ctx);refresh();window.scrollTo(0,0);
+  LOCKED=false;tick();
 }
+function isLocked(){if(!liveOpen())return false;const t=timerOf(LIVE.lesson,LIVE.step|0);return !!(t&&srvNow()>=t.endsAt)}
+function lockStage(){
+  const stage=document.getElementById('stage'),nav=document.getElementById('nav');if(!stage||!CUR)return;
+  const i=Math.min(LIVE.step|0,CUR.steps.length-1),step=CUR.steps[i],st=stFor(CUR.id);
+  if(step.type==='exit'&&!st.done&&(st.ans[i]||'').trim().length>=3)st.done=true;
+  if(wTimer||step.type==='exit'){clearTimeout(wTimer);flush()}
+  stage.classList.add('locked');
+  if(document.activeElement&&stage.contains(document.activeElement))document.activeElement.blur();
+  stage.querySelectorAll('button,input,textarea').forEach(el=>{if(el.tagName==='TEXTAREA'||el.tagName==='INPUT')el.readOnly=true;else el.disabled=true});
+  stage.querySelectorAll('[tabindex]').forEach(el=>el.tabIndex=-1);
+  if(!stage.querySelector('.lockmsg'))stage.insertAdjacentHTML('afterbegin','<div class="fb bad lockmsg"><b>⏰ Süre doldu!</b><span>Bu sayfadaki cevaplar kilitlendi. Öğretmenini bekle.</span></div>');
+  if(nav)nav.innerHTML=step.type==='exit'&&st.done?'<p class="waitnote">✓ Çıkış kartın öğretmenine gönderildi.</p>':'<p class="waitnote">⏰ Süre doldu. Öğretmenin bir sonraki sayfaya geçince ekranın değişecek.</p>';
+}
+function tick(){
+  const sc=document.getElementById('sclock');
+  if(sc&&LIVE){const t=timerOf(LIVE.lesson,LIVE.step|0);sc.hidden=!t;if(t){const r=t.endsAt-srvNow();sc.textContent='⏱ '+fmt(r);sc.className='clock'+(r<=0?' over':r<=10000?' low':'')}}
+  const tc=document.getElementById('tclock');
+  if(tc&&LIVE){const t=timerOf(LIVE.lesson,LIVE.step|0);if(t){const r=t.endsAt-srvNow();tc.hidden=false;tc.textContent=r>0?'⏱ '+fmt(r):'⏰ Süre doldu';tc.className='clock'+(r<=0?' over':r<=10000?' low':'')}else tc.hidden=true}
+  if(!LOC.teacher&&lastKey.startsWith('s:les')){const lk=isLocked();if(lk!==LOCKED){LOCKED=lk;if(lk)lockStage();else render(true)}}
+}
+setInterval(tick,250);
 const R={
  goals(el,s){el.insertAdjacentHTML('beforeend',`<span class="eyebrow">Ders hedeflerimiz</span><h2>${s.title}</h2><div class="goals">${s.goals.map(([a,b])=>`<div class="goal"><b>${a}</b><span>${b}</span></div>`).join('')}</div>`)},
  info(el,s){el.insertAdjacentHTML('beforeend',`<h2>${s.title}</h2><ul class="clean">${s.list.map(x=>`<li><span>${x}</span></li>`).join('')}</ul>${s.levels?`<div class="goals">${s.levels.map(([a,b],k)=>`<div class="goal" style="border-color:${['var(--ok)','var(--gold-dark)','var(--bad)'][k]}"><b style="color:${['var(--ok)','var(--gold-dark)','var(--bad)'][k]}">${a}</b><span>${b}</span></div>`).join('')}</div>`:''}`)},
@@ -652,7 +687,6 @@ function finish(L,st,exitIdx){
     <div class="badge-big px" style="background-image:url(${texURL(L.tex)})"></div>
     <h2 style="text-align:center">Rozet: ${L.badge}</h2>
     <div class="card-sum"><b>Ders ${L.id}: ${L.title}</b>${scored?`<span>İlk denemede doğru: ${right} / ${scored}</span>`:''}<span>Cevapların öğretmenine gönderildi.</span></div>
-    <p style="text-align:center">Tableti kurallara uygun teslim etmeyi unutma!</p>
     <button class="btn go" id="ok">Tamam</button></div></div>`;
   document.getElementById('ok').onclick=()=>{layer.innerHTML=''};
 }
@@ -681,7 +715,9 @@ let liveChain=Promise.resolve();
 function setLive(data){
   const c=LOC.tClass;if(!c)return;
   LIVE=Object.assign({},data);liveKnown=true;render();
-  liveChain=liveChain.then(()=>call('tSetLive',LOC.pin,c,data)).then(()=>{const e=document.getElementById('lerr');if(e)e.hidden=true}).catch(()=>{const e=document.getElementById('lerr');if(e)e.hidden=false});
+  liveChain=liveChain.then(()=>call('tSetLive',LOC.pin,c,data)).then(r=>{
+    if(r&&c===LOC.tClass){gotLive(r);const w=!!(data.timer&&!r.timer);if(w!==TWARN)TWARN=w;LIVE=r;render()}
+    const e=document.getElementById('lerr');if(e)e.hidden=true}).catch(()=>{const e=document.getElementById('lerr');if(e)e.hidden=false});
 }
 function switchT(fn){fn();LIVE=null;liveKnown=false;TANS={};saveLoc();render();poll()}
 function teacherView(){
@@ -709,6 +745,7 @@ function liveTab(){
   if(!liveKnown){tb.innerHTML=`<section class="panel"><p>Ders durumu yükleniyor…</p></section>`;return}
   const on=liveOpen()&&LIVE.lesson===L.id,otherOn=liveOpen()&&LIVE.lesson!==L.id;
   const i=on?Math.min(LIVE.step|0,L.steps.length-1):Math.min(LOC.tStep|0,L.steps.length-1),step=L.steps[i];
+  const tmr=on?timerOf(L.id,i):null;
   const pips=L.steps.map((s,k)=>`<button class="pip ${k<i?'done':k===i?'now':''} clickable" data-step="${k}" title="Adım ${k+1}" aria-label="Adım ${k+1}"></button>`).join('');
   tb.innerHTML=`<section class="panel" style="display:grid;gap:12px">
     <div class="row" style="align-items:center;justify-content:space-between"><div><span class="eyebrow">${esc(c.name)} · Ders ${L.id}</span><h2>${L.title}</h2></div>
@@ -717,6 +754,8 @@ function liveTab(){
     <div class="row">${on?`<button class="btn ghost" id="prev" ${i===0?'disabled':''}>◀ Önceki</button><button class="btn go big" id="next" ${i===L.steps.length-1?'disabled':''}>Sonraki ▶</button><button class="btn" style="background:var(--bad)" id="end">Dersi bitir</button>`
       :`<button class="btn go big" id="start">${otherOn?'Bu dersi başlat (açık dersi kapatır)':'Dersi başlat'}</button>`}
       <span style="align-self:center">Adım ${i+1} / ${L.steps.length}</span></div>
+    ${on?`<div class="timerrow"><span class="eyebrow">Zamanlayıcı</span>${tmr?`<span class="clock" id="tclock"></span><button class="btn ghost sm" id="tadd">+30 sn</button><button class="btn sm" style="background:var(--bad)" id="tstop">Süreyi kaldır</button>`:[[30,'30 sn'],[60,'1 dk'],[120,'2 dk'],[180,'3 dk'],[300,'5 dk']].map(([v,t])=>`<button class="btn gold sm" data-sec="${v}">${t}</button>`).join('')+'<span class="hintsm">Süre dolunca öğrencilerin bu sayfadaki cevapları kilitlenir.</span>'}</div>`:''}
+    ${TWARN?'<p class="warn">Zamanlayıcı kaydedilemedi: Apps Script\'teki Code.gs güncel değil. Yeni Code.gs\'yi yapıştırıp yeni sürüm olarak dağıt.</p>':''}
     <p id="lerr" class="warn" hidden>Ders durumu kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.</p>
   </section>
   <div class="split">
@@ -731,6 +770,10 @@ function liveTab(){
   if(g('next'))g('next').onclick=()=>goStep(i+1);
   if(g('end'))g('end').onclick=()=>setLive({open:false,lesson:L.id,step:i});
   if(g('start'))g('start').onclick=()=>setLive({open:true,lesson:L.id,step:i});
+  tb.querySelectorAll('[data-sec]').forEach(b=>b.onclick=()=>{const sec=+b.dataset.sec;setLive({open:true,lesson:L.id,step:i,timer:{lesson:L.id,step:i,sec,endsAt:srvNow()+sec*1000}})});
+  if(g('tadd'))g('tadd').onclick=()=>setLive({open:true,lesson:L.id,step:i,timer:{lesson:L.id,step:i,sec:tmr.sec+30,endsAt:Math.max(tmr.endsAt,srvNow())+30000}});
+  if(g('tstop'))g('tstop').onclick=()=>setLive({open:true,lesson:L.id,step:i});
+  tick();
   const pv=g('pv');pv.insertAdjacentHTML('beforeend',`<span class="eyebrow">Öğrenci ekranı önizlemesi</span>`);
   R[step.type](pv,step,{ans:{},first:{},done:false},i,{L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh(){},commit(){},award(){}});
   renderStats();
