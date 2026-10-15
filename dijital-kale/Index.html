@@ -283,7 +283,8 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .anim-dots i.d{background:var(--grass)}.anim-dots i.n{background:var(--gold)}
 .anim-cv{width:100%;max-width:100%;aspect-ratio:16/9;display:block;border:3px solid #000;background:#8cc4ee}
 .anim-cap{font-family:var(--font-pixel);font-size:22px;line-height:1.3;margin:0;min-height:2.6em;text-wrap:balance;color:#fff}
-.anim-ctrl{display:flex;flex-wrap:wrap;gap:8px}
+.anim-ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.anim-voice{font:inherit;font-size:14px;min-height:40px;border:3px solid #000;background:#fff;color:#22201c;padding:4px 8px;max-width:100%}
 .preview .anim,.preview details{pointer-events:auto}
 .anim.proj{position:fixed;inset:0;z-index:300;background:#0e1320;border:none;align-content:center;justify-items:center;
   padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -845,38 +846,50 @@ const ANIMS={
 };
 
 let ANIM_TTS=false;try{ANIM_TTS=localStorage.getItem('dk-tts')==='1'}catch(e){}
-function trVoice(){try{return (speechSynthesis.getVoices()||[]).find(v=>/^tr/i.test(v.lang))}catch(e){return null}}
+let ANIM_VOICE='';try{ANIM_VOICE=localStorage.getItem('dk-voice')||''}catch(e){}
+function vScore(v){const n=v.name;let sc=0;if(/Natural|Neural|Online/i.test(n))sc+=10;if(/Google/i.test(n))sc+=6;if(/Premium|Enhanced|Gelişmiş|Geliştirilmiş/i.test(n))sc+=5;if(/Yelda|Emel|Ahmet/i.test(n))sc+=1;if(v.localService===false)sc+=1;return sc}
+function trVoices(){try{return (speechSynthesis.getVoices()||[]).filter(v=>/^tr/i.test(v.lang)).sort((a,b)=>vScore(b)-vScore(a))}catch(e){return []}}
+function trVoice(){const vs=trVoices();return vs.find(v=>v.name===ANIM_VOICE)||vs[0]||null}
+function vLabel(v){return v.name.replace(/^Microsoft\s+/,'').replace(/\s*-\s*Turkish.*$/i,'').replace(/\s*\(Turkish.*\)$/i,'')+(vScore(v)>=5?' ★':'')}
 function animPlayer(host,key){
   const A=ANIMS[key];if(!A)return;
   host.insertAdjacentHTML('beforeend',`<div class="anim" tabindex="-1"><div class="anim-head"><b>🎬 ${esc(A.title)}</b><span class="anim-dots"></span></div>
     <canvas class="anim-cv px" width="640" height="360" aria-label="Animasyon: ${esc(A.title)}"></canvas>
     <p class="anim-cap" aria-live="polite"></p>
     <div class="anim-ctrl"><button class="btn ghost sm" data-a="first" title="Baştan">⏮</button><button class="btn go sm" data-a="play">⏸ Duraklat</button><button class="btn ghost sm" data-a="prev" title="Önceki sahne">◀</button><button class="btn ghost sm" data-a="next" title="Sonraki sahne">▶</button>
-      <button class="btn gold sm" data-a="proj">⛶ Projeksiyon</button><button class="btn ghost sm" data-a="tts" hidden>🔈 Ses kapalı</button></div></div>`);
+      <button class="btn gold sm" data-a="proj">⛶ Projeksiyon</button><button class="btn ghost sm" data-a="tts" hidden>🔈 Ses kapalı</button><select class="anim-voice" data-a="voice" hidden aria-label="Ses seç"></select></div></div>`);
   const root=host.lastElementChild,cv=root.querySelector('canvas'),g=cv.getContext('2d'),capEl=root.querySelector('.anim-cap'),dots=root.querySelector('.anim-dots');
   g.imageSmoothingEnabled=false;
   const durs=A.scenes.map(s=>Math.max(5,s.cap.length/12+2));
   let si=0,t0=performance.now(),paused=false,pausedAt=0,ended=false;
   const btn=a=>root.querySelector(`[data-a="${a}"]`);
-  const speak=()=>{try{speechSynthesis.cancel();if(!ANIM_TTS)return;const v=trVoice();if(!v)return;const u=new SpeechSynthesisUtterance(A.scenes[si].cap);u.lang='tr-TR';u.voice=v;u.rate=.92;speechSynthesis.speak(u)}catch(e){}};
+  let spoken=true,spokeAt=0;
+  const speak=()=>{spoken=true;try{speechSynthesis.cancel();if(!ANIM_TTS||paused)return;const v=trVoice();if(!v)return;
+    const txt=A.scenes[si].cap.replace(/[“”"]/g,'').replace(/·/g,',').replace(/…/g,'...');
+    const u=new SpeechSynthesisUtterance(txt);u.lang=v.lang||'tr-TR';u.voice=v;u.rate=vScore(v)>=5?1:.95;u.pitch=1;
+    const me=si;spoken=false;spokeAt=performance.now();u.onend=u.onerror=()=>{if(me===si){spoken=true;spokeAt=performance.now()}};
+    setTimeout(()=>{try{speechSynthesis.speak(u)}catch(e){spoken=true}},250)}catch(e){spoken=true}};
   const setScene=k=>{si=Math.max(0,Math.min(A.scenes.length-1,k));t0=performance.now();ended=false;if(paused)pausedAt=t0;capEl.textContent=A.scenes[si].cap;dots.innerHTML=A.scenes.map((_,j)=>`<i class="${j<si?'d':j===si?'n':''}"></i>`).join('');speak()};
   const setPlay=()=>{btn('play').textContent=ended?'↻ Tekrar izle':paused?'▶ Oynat':'⏸ Duraklat'};
   btn('first').onclick=()=>{paused=false;setScene(0);setPlay()};
   btn('prev').onclick=()=>{setScene(si-1);setPlay()};
   btn('next').onclick=()=>{setScene(si+1);setPlay()};
-  btn('play').onclick=()=>{if(ended){paused=false;setScene(0)}else if(paused){paused=false;t0+=performance.now()-pausedAt}else{paused=true;pausedAt=performance.now();try{speechSynthesis.cancel()}catch(e){}}setPlay()};
+  btn('play').onclick=()=>{if(ended){paused=false;setScene(0)}else if(paused){paused=false;t0+=performance.now()-pausedAt;speak()}else{paused=true;pausedAt=performance.now();try{speechSynthesis.cancel()}catch(e){}spoken=true}setPlay()};
   const exitProj=()=>{root.classList.remove('proj');btn('proj').textContent='⛶ Projeksiyon';try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}};
   btn('proj').onclick=()=>{if(root.classList.contains('proj'))return exitProj();root.classList.add('proj');btn('proj').textContent='✕ Küçült';try{const p=root.requestFullscreen&&root.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
   root.addEventListener('keydown',e=>{if(e.key==='Escape')exitProj();if(e.key===' '){e.preventDefault();btn('play').click()}if(e.key==='ArrowRight')btn('next').click();if(e.key==='ArrowLeft')btn('prev').click()});
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.classList.contains('proj')&&root.isConnected)exitProj()});
-  const tb=btn('tts');const showTts=()=>{if(trVoice()){tb.hidden=false;tb.textContent=ANIM_TTS?'🔊 Ses açık':'🔈 Ses kapalı'}};
+  const tb=btn('tts'),vsel=root.querySelector('.anim-voice');
+  const showTts=()=>{const vs=trVoices();if(!vs.length)return;tb.hidden=false;tb.textContent=ANIM_TTS?'🔊 Ses açık':'🔈 Ses kapalı';
+    vsel.hidden=!ANIM_TTS||vs.length<2;const cur=trVoice();vsel.innerHTML=vs.map(v=>`<option value="${esc(v.name)}" ${cur&&v.name===cur.name?'selected':''}>${esc(vLabel(v))}</option>`).join('')};
+  vsel.onchange=()=>{ANIM_VOICE=vsel.value;try{localStorage.setItem('dk-voice',ANIM_VOICE)}catch(e){}speak()};
   try{showTts();speechSynthesis.onvoiceschanged=showTts}catch(e){}
   tb.onclick=()=>{ANIM_TTS=!ANIM_TTS;try{localStorage.setItem('dk-tts',ANIM_TTS?'1':'0')}catch(e){}showTts();speak()};
   setScene(0);setPlay();
   const frame=now=>{
     if(!cv.isConnected){try{speechSynthesis.cancel()}catch(e){}return}
     const t=((paused?pausedAt:now)-t0)/1000;
-    if(!paused&&!ended&&t>durs[si]){if(si<A.scenes.length-1)setScene(si+1);else{ended=true;setPlay()}}
+    if(!paused&&!ended&&t>durs[si]&&(spoken&&now-spokeAt>700)){if(si<A.scenes.length-1)setScene(si+1);else{ended=true;setPlay()}}
     g.setTransform(2,0,0,2,0,0);g.imageSmoothingEnabled=false;
     try{A.scenes[si].draw(g,Math.min(t,durs[si]))}catch(e){}
     requestAnimationFrame(frame)};
