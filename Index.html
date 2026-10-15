@@ -406,6 +406,39 @@ button.chip{cursor:pointer}
 .etk-blok{display:flex;align-items:center;--zemin:var(--z);pointer-events:none;transform:scale(1.1)}
 .etk-blok .blk{cursor:inherit}
 @media (prefers-reduced-motion:reduce){.etk-kart{animation:none}}
+.etk-yukleniyor{grid-column:1/-1;display:grid;place-items:center;padding:60px;color:var(--muted)}
+.etk-kart.yeni-acildi{animation:etk-yeni .9s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes etk-yeni{0%{transform:scale(.4) rotate(-8deg);opacity:0}60%{transform:scale(1.06) rotate(2deg);opacity:1}}
+.etk-bekle{grid-column:1/-1;display:grid;justify-items:center;gap:10px;background:#fff;border:4px dashed var(--cizgi);border-radius:34px;padding:26px}
+.etk-bekle .uyku{position:relative;width:min(220px,60vw)}
+.etk-bekle .uyku svg{display:block;width:100%;height:auto}
+.zzz{position:absolute;top:0;right:-6px;font-family:var(--f-d);font-weight:800;color:var(--mor)}
+.zzz i{position:absolute;font-style:normal;opacity:0;animation:zzz 3s ease-in infinite}
+.zzz i:nth-child(1){font-size:24px;animation-delay:0s}.zzz i:nth-child(2){font-size:32px;animation-delay:1s}.zzz i:nth-child(3){font-size:42px;animation-delay:2s}
+@keyframes zzz{0%{transform:translate(0,40px);opacity:0}20%{opacity:1}100%{transform:translate(34px,-30px);opacity:0}}
+.nokta{display:flex;gap:10px}
+.nokta i{width:16px;height:16px;border-radius:50%;background:var(--turuncu);animation:r-parla 1.2s infinite}
+.nokta i:nth-child(2){animation-delay:.3s;background:var(--mor)}.nokta i:nth-child(3){animation-delay:.6s;background:var(--yesil)}
+@media (prefers-reduced-motion:reduce){.zzz i,.nokta i,.etk-kart.yeni-acildi{animation:none;opacity:1}}
+.etk-siniflar{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.ekutu{display:grid;gap:10px;align-content:start}
+.ekutu-bas{display:flex;align-items:baseline;gap:10px}
+.ekutu-bas h3{font-size:30px;color:var(--mor)}
+.ekutu .eylem .cb svg{font-size:16px}
+.ksatir{display:flex;align-items:center;gap:12px;padding:8px 12px 8px 8px;border-radius:20px;background:#eef8f0;border:3px solid #cfeedb;transition:background .15s}
+.ksatir.kapali{background:#f6f3ee;border-color:#ece5d8}
+.ksatir.kapali .etk-simge{filter:grayscale(1);opacity:.55}
+.ksatir b{font-family:var(--f-d);font-size:20px;margin-right:auto;min-width:0}
+.etk-simge{width:56px;height:56px;border-radius:16px;border:3px solid;display:grid;place-items:center;overflow:hidden;flex:none}
+.etk-simge svg{width:100%;height:100%;display:block}
+.mini-blk{width:34px;height:34px;border-radius:9px;background:var(--c-bas);color:#5c4400;display:grid;place-items:center;font-size:21px;box-shadow:0 3px 0 var(--c-bas-d)}
+.anahtar{display:inline-flex;align-items:center;gap:10px;font-family:var(--f-d);font-size:16px;font-weight:800;min-width:132px}
+.anahtar .ray{width:58px;height:34px;border-radius:999px;background:#e5484d;position:relative;transition:background .15s;flex:none;box-shadow:inset 0 2px 0 rgba(0,0,0,.12)}
+.anahtar .ray::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.18);transition:transform .15s}
+.anahtar[aria-checked="true"] .ray{background:var(--yesil)}
+.anahtar[aria-checked="true"] .ray::after{transform:translateX(24px)}
+.anahtar .dur{display:inline-flex;align-items:center;gap:5px;color:var(--kirmizi-k)}
+.anahtar[aria-checked="true"] .dur{color:var(--yesil-k)}
 
 /* ---------- robot fabrikası ---------- */
 #robot{display:grid;gap:12px;padding-bottom:12px}
@@ -574,7 +607,7 @@ button.chip{cursor:pointer}
 
 <!-- ETKİNLİK SEÇİMİ -->
 <section id="etkinlik" hidden>
-  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun">Bugün ne yapalım?</div></div></div>
+  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div></div>
   <div class="etk-liste" id="etkListe"></div>
   <div class="ayak"><button class="cb beyaz hap" id="eCikis"></button><span></span></div>
 </section>
@@ -622,7 +655,7 @@ button.chip{cursor:pointer}
     <div id="loginHata" style="color:var(--kirmizi-k)" hidden></div>
   </form>
   <div id="panelIc" hidden style="display:grid;gap:14px">
-    <div class="psekme"><button class="cb beyaz hap on" id="tCal">Çalışmalar</button><button class="cb beyaz hap" id="tSin">Sınıf listeleri</button></div>
+    <div class="psekme"><button class="cb beyaz hap on" id="tCal">Çalışmalar</button><button class="cb beyaz hap" id="tSin">Sınıf listeleri</button><button class="cb beyaz hap" id="tEtk">Etkinlikler</button></div>
     <div id="calBolum" style="display:grid;gap:14px">
       <div class="filtre">
         <label for="fSinif">Sınıf<select id="fSinif"></select></label>
@@ -634,6 +667,10 @@ button.chip{cursor:pointer}
       </div>
       <div class="kutu ozet" id="ozet"></div>
       <div class="isler" id="isler"></div>
+    </div>
+    <div id="etkBolum" hidden style="display:grid;gap:12px">
+      <p class="not">Kilitli etkinlikleri o sınıfın öğrencileri hiç görmez. Kilidi açtığınızda birkaç saniye içinde ekranlarında belirir. O sırada etkinliğin içinde olan öğrenci çalışmasına devam edebilir; etkinlikler ekranına dönünce kilitli kart görünmez.</p>
+      <div class="etk-siniflar" id="etkSiniflar"></div>
     </div>
     <div id="sinBolum" hidden style="display:grid;gap:12px">
       <p class="not">Her satıra bir öğrenci yazın. Çocuklar giriş ekranında adlarını bu listeden seçer, böylece dosya adları hep doğru olur.</p>
@@ -930,7 +967,10 @@ const DEMO=(function(){
     calismaAc:function(sf,id){ if(sf!=='1234') throw new Error('Şifre yanlış.'); const k=bul(id); return k?k.proje:null; },
     siniflariKaydet:function(sf,l){ if(sf!=='1234') throw new Error('Şifre yanlış.'); siniflar=l.filter(function(c){ return c.ad; }); kaydet(); return kopya(siniflar); },
     gorselAra:function(){ throw new Error('İnternetten arama bu önizlemede çalışmaz. Site Google\'a kurulunca çalışır.'); },
-    gorselGetir:function(){ throw new Error('Önizlemede çalışmaz.'); }
+    gorselGetir:function(){ throw new Error('Önizlemede çalışmaz.'); },
+    etkinlikDurumu:function(s){ return (ls('kat3:demo:etk')||{})[s]||{}; },
+    etkinlikleriGetir:function(sf){ if(sf!=='1234') throw new Error('Şifre yanlış.'); return ls('kat3:demo:etk')||{}; },
+    etkinlikKaydet:function(sf,s,d){ if(sf!=='1234') throw new Error('Şifre yanlış.'); const h=ls('kat3:demo:etk')||{}; h[s]=Object.assign(h[s]||{},d); ls('kat3:demo:etk',h); return h; }
   };
 })();
 
@@ -1823,6 +1863,7 @@ async function gonderGercek(puan,d,paket){
 $('sonAc').onclick=async function(){
   try{ const c=calismaCoz(await sunucu('sonCalismam',S.sinif,S.ogrenci));
     if(!c){ bildir('Daha önce gönderdiğin bir çalışma yok.'); return; }
+    if(c.tur==='robot'&&!etkinlikAcikMi('robot',ls('kat3:etk:'+S.sinif))){ bildir('Robot Yarat şu an kapalı.'); return; }
     if(c.tur==='robot'){ onayla({e:'🤖'},'Son gönderdiğin robot açılsın mı?',function(){ taslakKaydet(true); durdur(); robotAc(c.veri); robotTaslak(); }); return; }
     onayla({e:'📂'},'Son gönderdiğin açılsın mı?',function(){ projeYukle(c.veri); taslakKaydet(true); });
   }catch(e){ bildir(hataMetni(e)); }
@@ -1907,8 +1948,45 @@ $('loginForm').addEventListener('submit',async function(e){
     S.siniflar=await sunucu('siniflariGetir'); filtreDoldur(); $('fTarih').value=S.bugun; calismalariYukle();
   }catch(err){ $('loginHata').textContent=hataMetni(err); $('loginHata').hidden=false; }
 });
-function sekme(cal){ $('calBolum').hidden=!cal; $('sinBolum').hidden=cal; $('tCal').classList.toggle('on',cal); $('tSin').classList.toggle('on',!cal); if(!cal) siniflariDuzenle(); }
-$('tCal').onclick=function(){ sekme(true); calismalariYukle(); }; $('tSin').onclick=function(){ sekme(false); };
+function sekme(ad){
+  [['cal','tCal'],['sin','tSin'],['etk','tEtk']].forEach(function(x){ $(x[0]+'Bolum').hidden=x[0]!==ad; $(x[1]).classList.toggle('on',x[0]===ad); });
+  if(ad==='sin') siniflariDuzenle(); if(ad==='etk') kilitleriYukle();
+}
+$('tCal').onclick=function(){ sekme('cal'); calismalariYukle(); }; $('tSin').onclick=function(){ sekme('sin'); }; $('tEtk').onclick=function(){ sekme('etk'); };
+async function kilitleriYukle(){
+  const w=$('etkSiniflar'); w.innerHTML='<span class="spin"></span>';
+  try{ S.kilit=(await sunucu('etkinlikleriGetir',S.sifre))||{}; }
+  catch(e){ w.innerHTML=''; const m=hataMetni(e);
+    w.appendChild(el('div','bos',/etkinlikleriGetir/.test(m)?'Bu bölümün çalışması için Apps Script\'teki Code.gs güncellenmeli ve yeni sürüm dağıtılmalı.':m)); return; }
+  kilitKartlari();
+}
+function kilitKartlari(){
+  const w=$('etkSiniflar'); w.innerHTML='';
+  if(!S.siniflar.length){ w.appendChild(el('div','bos','Önce "Sınıf listeleri" sekmesinden sınıf ekleyin.')); return; }
+  S.siniflar.forEach(function(c){
+    const durum=S.kilit[c.ad]||{}, kart=el('div','kutu ekutu'), bas=el('div','ekutu-bas');
+    bas.append(el('h3',null,c.ad),el('span','not',c.ogrenciler.length+' öğrenci'));
+    const hepsi=function(ac){ const d={}; ETKINLIKLER.forEach(function(e){ d[e.id]=ac; }); kilitKaydet(c.ad,d,c.ad+': '+(ac?'hepsi açıldı':'hepsi kilitlendi')); };
+    const ha=el('button','cb beyaz k'); ha.innerHTML=ic('kilitAcik')+'Hepsini aç'; ha.onclick=function(){ hepsi(true); };
+    const hk=el('button','cb beyaz k'); hk.innerHTML=ic('kilit')+'Hepsini kilitle'; hk.onclick=function(){ hepsi(false); };
+    const ey=el('div','eylem'); ey.append(ha,hk); kart.append(bas,ey);
+    ETKINLIKLER.forEach(function(e){
+      const acik=etkinlikAcikMi(e.id,durum), sat=el('div','ksatir'+(acik?'':' kapali'));
+      sat.insertAdjacentHTML('beforeend','<span class="etk-simge" style="background:'+e.zemin+';border-color:'+e.renk+'">'+e.simge()+'</span>');
+      sat.appendChild(el('b',null,e.ad));
+      const an=el('button','anahtar'); an.setAttribute('role','switch'); an.setAttribute('aria-checked',String(acik)); an.setAttribute('aria-label',c.ad+' · '+e.ad);
+      an.innerHTML='<span class="ray"></span><span class="dur">'+ic(acik?'kilitAcik':'kilit')+(acik?'Açık':'Kilitli')+'</span>';
+      an.onclick=function(){ const d={}; d[e.id]=!acik; kilitKaydet(c.ad,d,c.ad+' · '+e.ad+(acik?' kilitlendi':' açıldı')); };
+      sat.appendChild(an); kart.appendChild(sat);
+    });
+    w.appendChild(kart);
+  });
+}
+async function kilitKaydet(sinif,durum,mesaj){
+  S.kilit[sinif]=Object.assign({},S.kilit[sinif]||{},durum); kilitKartlari();
+  try{ S.kilit=(await sunucu('etkinlikKaydet',S.sifre,sinif,durum))||S.kilit; kilitKartlari(); bildir(mesaj); }
+  catch(e){ bildir(hataMetni(e)); kilitleriYukle(); }
+}
 function filtreDoldur(){ const f=$('fSinif'), eski=f.value; f.innerHTML=''; const t=el('option',null,'Tüm sınıflar'); t.value=''; f.appendChild(t);
   S.siniflar.forEach(function(c){ const o=el('option',null,c.ad); o.value=c.ad; f.appendChild(o); });
   f.value=eski&&S.siniflar.some(function(c){ return c.ad===eski; })?eski:(S.siniflar[0]?S.siniflar[0].ad:''); ogrDoldur(); }
@@ -2017,27 +2095,68 @@ function konfeti(){
 
 /* ================= ETKİNLİKLER =================
    Öğrenci adını seçince bu ekran açılır. Yeni bir etkinlik eklemek için ETKINLIKLER listesine
-   bir satır ekleyin: ad, kart renkleri, kart resmi ve açılınca çalışacak işlev. */
+   bir satır ekleyin: ad, kart renkleri, kart resmi ve açılınca çalışacak işlev.
+   Öğretmen panelindeki "Etkinlikler" sekmesinden her sınıf için açılıp kilitlenir; öğretmen hiç
+   ayar yapmadıysa "varsayilan" değeri geçerlidir (yeni etkinlikler için false yapın). */
 IC.apps='<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>';
 IC.oyna='<circle cx="12" cy="12" r="9.5"/><path d="M10 8.2v7.6l6-3.8z" fill="currentColor"/>';
 const ETKINLIKLER=[
-  {id:'kod',ad:'Kodlama',renk:'#4a86e8',koyu:'#2f62b8',zemin:'#e7efff',resim:function(){ return kodKartResim(); },ac:function(){ kodGir(); }},
-  {id:'robot',ad:'Robot Yarat',renk:'#ff7a59',koyu:'#d4502f',zemin:'#fff0e8',resim:function(){ return '<div class="etk-robot">'+parcaSVG(VITRIN,'20 -10 360 480')+'</div>'; },ac:function(){ robotGir(); }}
+  {id:'kod',ad:'Kodlama',varsayilan:true,simge:function(){ return '<span class="mini-blk">'+ic('flag')+'</span>'; },renk:'#4a86e8',koyu:'#2f62b8',zemin:'#e7efff',resim:function(){ return kodKartResim(); },ac:function(){ kodGir(); }},
+  {id:'robot',ad:'Robot Yarat',varsayilan:true,simge:function(){ return parcaSVG(VITRIN,'80 15 240 220',{anim:false}); },renk:'#ff7a59',koyu:'#d4502f',zemin:'#fff0e8',resim:function(){ return '<div class="etk-robot">'+parcaSVG(VITRIN,'20 -10 360 480')+'</div>'; },ac:function(){ robotGir(); }}
 ];
 function kodKartResim(){
   return '<div class="etk-blok"><span class="blk tetik c-bas">'+ic('flag')+'</span><span class="blk c-har">'+ic('right')+'</span><span class="blk c-har">'+ic('up')+'</span><span class="blk son c-bit">'+ic('end')+'</span></div>';
 }
+IC.kilit='<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>';
+IC.kilitAcik='<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.8"/>';
+let etkZ=null, etkSunucuYok=false;
+function etkinlikAcikMi(id,durum){ const e=ETKINLIKLER.find(function(x){ return x.id===id; }); if(!e) return false;
+  return (durum&&Object.prototype.hasOwnProperty.call(durum,id))?!!durum[id]:e.varsayilan!==false; }
 function etkinlikAc(){
   goster('etkinlik'); benCiz();
-  const k=$('etkListe'); k.innerHTML='';
-  ETKINLIKLER.forEach(function(e,i){
+  const k=$('etkListe'); k.innerHTML='<div class="etk-yukleniyor"><span class="spin"></span></div>'; k.dataset.imza='__';
+  $('eSoru').textContent='Bugün ne yapalım?';
+  etkinlikYenile();
+}
+/* Öğretmen bir etkinliği açınca ya da kilitleyince öğrenci ekranı birkaç saniye içinde değişir. */
+async function etkinlikYenile(){
+  clearTimeout(etkZ);
+  if(S.ekran!=='etkinlik'||!S.sinif) return;
+  const sinif=S.sinif; let durum={};
+  if(!etkSunucuYok){
+    try{ durum=(await sunucu('etkinlikDurumu',sinif))||{}; ls('kat3:etk:'+sinif,durum); }
+    catch(e){
+      if(/etkinlikDurumu/.test(hataMetni(e))) etkSunucuYok=true;      // sunucu kodu henüz güncellenmemiş: hepsi açık
+      else { durum=ls('kat3:etk:'+sinif)||{}; if($('etkListe').dataset.imza!=='__'){ etkZ=setTimeout(etkinlikYenile,15000); return; } }
+    }
+  }
+  if(S.ekran!=='etkinlik'||S.sinif!==sinif) return;
+  etkinlikKartlari(durum);
+  if(!etkSunucuYok) etkZ=setTimeout(etkinlikYenile,12000);
+}
+document.addEventListener('visibilitychange',function(){ if(!document.hidden&&S.ekran==='etkinlik') etkinlikYenile(); });
+function etkinlikKartlari(durum){
+  const k=$('etkListe'), acik=ETKINLIKLER.filter(function(e){ return etkinlikAcikMi(e.id,durum); });
+  const imza=acik.map(function(e){ return e.id; }).join(','), ilk=k.dataset.imza==='__';
+  if(!ilk&&k.dataset.imza===imza) return;
+  const once=ilk?[]:k.dataset.imza.split(','), yeni=acik.filter(function(e){ return once.indexOf(e.id)<0; });
+  k.dataset.imza=imza; k.innerHTML='';
+  $('eSoru').textContent=acik.length?'Bugün ne yapalım?':'Öğretmenin birazdan açacak';
+  if(!acik.length){
+    const b=el('div','etk-bekle');
+    b.innerHTML='<div class="uyku">'+parcaSVG(Object.assign({},VITRIN,{goz:6,agiz:0,kol:0,panel:0,ana:8}),'20 -10 360 480')+'<span class="zzz"><i>z</i><i>z</i><i>Z</i></span></div><div class="nokta"><i></i><i></i><i></i></div>';
+    k.appendChild(b); return;
+  }
+  acik.forEach(function(e,i){
     const b=el('button','etk-kart'); b.style.setProperty('--c',e.renk); b.style.setProperty('--d',e.koyu); b.style.setProperty('--z',e.zemin);
-    b.setAttribute('aria-label',e.ad); b.style.animationDelay=(i*0.08)+'s';
+    b.setAttribute('aria-label',e.ad); b.style.animationDelay=(ilk?i*0.08:0)+'s';
+    if(!ilk&&yeni.indexOf(e)>=0) b.classList.add('yeni-acildi');
     const r=el('div','etk-resim'); r.innerHTML=e.resim();
     const a=el('div','etk-ad'); a.append(el('span',null,e.ad)); a.insertAdjacentHTML('beforeend','<span class="etk-oyna">'+ic('oyna')+'</span>');
-    b.append(r,a); b.onclick=function(){ ton(523,90); setTimeout(function(){ ton(784,120); },90); e.ac(); };
+    b.append(r,a); b.onclick=function(){ clearTimeout(etkZ); ton(523,90); setTimeout(function(){ ton(784,120); },90); e.ac(); };
     k.appendChild(b);
   });
+  if(!ilk&&yeni.length){ [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ ton(f,140); },i*120); }); konfeti(); }
 }
 $('eCikis').onclick=function(){ cikisYap(); };
 $('eAv').onclick=profilAc;

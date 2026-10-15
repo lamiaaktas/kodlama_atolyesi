@@ -427,6 +427,45 @@ function linkleriEkle() {
   return n;
 }
 
+/* ---------- etkinlik kilitleri ----------
+   Her sınıf için hangi etkinliğin açık olduğu burada tutulur: { "1-A": { "kod": true, "robot": false } }.
+   Listede olmayan etkinlik, sitedeki varsayılan değerine göre açık ya da kapalı görünür. */
+
+function etkinlikHaritasi_() {
+  try { return JSON.parse(PropertiesService.getScriptProperties().getProperty('ETKINLIK') || '{}') || {}; } catch (e) { return {}; }
+}
+
+/* Öğrenci ekranı: kendi sınıfının durumunu sorar (birkaç saniyede bir). */
+function etkinlikDurumu(sinif) {
+  return etkinlikHaritasi_()[String(sinif || '')] || {};
+}
+
+function etkinlikleriGetir(sifre) {
+  sifreKontrol_(sifre);
+  return etkinlikHaritasi_();
+}
+
+/* durum: { "robot": true, "kod": false } — yalnızca verilen etkinlikler değişir. */
+function etkinlikKaydet(sifre, sinif, durum) {
+  sifreKontrol_(sifre);
+  sinif = String(sinif || '').trim();
+  if (!sinif) throw new Error('Sınıf seçilmedi.');
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(20000);
+  try {
+    const h = etkinlikHaritasi_();
+    h[sinif] = h[sinif] || {};
+    Object.keys(durum || {}).forEach(function (id) {
+      const temiz = String(id).replace(/[^\w-]/g, '').slice(0, 30);
+      if (temiz) h[sinif][temiz] = !!durum[id];
+    });
+    PropertiesService.getScriptProperties().setProperty('ETKINLIK', JSON.stringify(h));
+    return h;
+  } finally {
+    kilit.releaseLock();
+  }
+}
+
 /* ---------- öğretmen ---------- */
 
 function ogretmenGiris(sifre) {
