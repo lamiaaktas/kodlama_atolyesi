@@ -275,6 +275,27 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
   .k-les{break-inside:avoid;page-break-inside:avoid}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+.anim{display:grid;gap:10px;background:#1d2433;border:4px solid #000;padding:10px;color:#fff;pointer-events:auto}
+.anim-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--font-pixel);font-size:18px}
+.anim-dots{display:flex;gap:4px}
+.anim-dots i{width:12px;height:12px;border:2px solid #000;background:#55585d;display:block}
+.anim-dots i.d{background:var(--grass)}.anim-dots i.n{background:var(--gold)}
+.anim-cv{width:100%;max-width:100%;aspect-ratio:16/9;display:block;border:3px solid #000;background:#8cc4ee}
+.anim-cap{font-family:var(--font-pixel);font-size:22px;line-height:1.3;margin:0;min-height:2.6em;text-wrap:balance;color:#fff}
+.anim-ctrl{display:flex;flex-wrap:wrap;gap:8px}
+.preview .anim,.preview details{pointer-events:auto}
+.anim.proj{position:fixed;inset:0;z-index:300;background:#0e1320;border:none;align-content:center;justify-items:center;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.anim.proj .anim-cv{width:min(96vw,calc(70vh * 16 / 9))}
+.anim.proj .anim-cap{font-size:clamp(22px,3.2vw,44px);max-width:min(96vw,calc(70vh * 16 / 9));text-align:center}
+.anim.proj .anim-head,.anim.proj .anim-ctrl{width:min(96vw,calc(70vh * 16 / 9))}
+.lookup{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:#1d2433;color:#fff;border:4px solid #000;padding:22px}
+.lookup img{width:96px;height:96px;flex:none;animation:bob 1.2s steps(2) infinite}
+.lookup h2{font-size:34px;color:var(--gold)}
+.lookup p{font-size:18px}
+.lookup>div{flex:1;min-width:200px;display:grid;gap:8px}
+@keyframes bob{50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:520px){h1{font-size:24px}.brand{font-size:18px}.stage .q{font-size:19px}.hotbar{gap:4px}.slot span{font-size:10px}.slot .ic{width:30px;height:30px}}
 </style>
@@ -333,7 +354,7 @@ const OWL_URL=owlURL();
 /* ---------- Ders içerikleri (öğretmenin Drive dokümanlarından) ---------- */
 const LESSONS=[
 {id:1,part:'Kalenin Kapısı',title:'Paylaşırken Düşün',sub:'Gizlilik senaryoları — 1. bölüm',tex:'plank',badge:'Sır Kalkanı',
- plan:[[5,'Hedefler ekranda gösterilir ve konuşulur.'],[7,'Isınma sorusu: Gizli kalmasını istediğin bir bilgi paylaşılsa ne hissederdin? Yanıtlar üzerine sohbet.'],[20,'Örnek 1 (Ahmet’in şifresi) ve Örnek 2 (günlük) üzerinde çalışma; her biri için yaklaşık 3’er dakika, ardından sınıf tartışması.'],[8,'Çıkış kartı ve tabletlerin kurallara uygun teslimi.']],
+ plan:[[5,'Hedefler ekranda gösterilir ve konuşulur.'],[7,'Isınma sorusu: Gizli kalmasını istediğin bir bilgi paylaşılsa ne hissederdin? Yanıtlar üzerine sohbet.'],[20,'Örnek 1 (Ahmet’in şifresi) ve Örnek 2 (günlük) üzerinde çalışma; aralarında “Şifre kimin sırrı?” animasyonu (yaklaşık 1 dk) projeksiyonda izlenir.'],[8,'Çıkış kartı ve tabletlerin kurallara uygun teslimi.']],
  steps:[
   {type:'goals',title:'Bugünkü görevimiz',goals:[['Analiz edelim','Herkesin gizlilik tercihleri farklı olabilir. Biri her şeyini internette paylaşırken, bir başkası bunu istemeyebilir.'],['Anlayalım','Çevrimiçi ortamda farklı durumlar, farklı gizlilik seviyeleri gerektirir.']]},
   {type:'open',key:'isinma',tag:'Isınma',q:'Birisi senin gizli kalmasını istediğin bir bilgiyi paylaşsa ne düşünürdün, ne hissederdin?',hint:'Birkaç cümle yaz. Doğru ya da yanlış cevap yok.'},
@@ -351,7 +372,7 @@ const LESSONS=[
   {type:'exit',q:'Bu derste öğrendiğin en önemli şey nedir?'}
  ]},
 {id:2,part:'Kale Duvarları',title:'Kime, Ne Kadar?',sub:'Gizlilik senaryoları — 2. bölüm',tex:'brick',badge:'Gizlilik Haritası',
- plan:[[3,'Geçen haftanın kısa tekrarı: Şifre ve günlük örnekleri.'],[10,'Örnek 3 (tatil mesajı) ve tartışma.'],[17,'Örnek 4 (sahte hesap) ve “Gizlilik Seviyeleri” sıralama etkinliği.'],[5,'Çıkış kartı ve tabletlerin teslimi.']],
+ plan:[[3,'Geçen haftanın kısa tekrarı: Şifre ve günlük örnekleri.'],[10,'Örnek 3 (tatil mesajı) ve tartışma.'],[17,'Örnek 4 (sahte hesap), “Kime, ne kadar?” animasyonu ve “Gizlilik Seviyeleri” sıralama etkinliği.'],[5,'Çıkış kartı ve tabletlerin teslimi.']],
  steps:[
   {type:'info',title:'Hatırlayalım',list:['Şifremizi en yakın arkadaşımızla bile paylaşmayız; yalnızca annemiz, babamız ya da yasal vasimiz bilebilir.','Başkasına ait özel bilgileri (günlük gibi) izinsiz paylaşmayız.','Bugün, farklı bilgilerin farklı gizlilik seviyelerine ihtiyaç duyduğunu keşfedeceğiz.']},
   {type:'choice',tag:'Örnek 3',story:'Biri, arkadaşının herkese açık sosyal medya sayfasına “İyi tatiller!” yazıyor.',
@@ -373,7 +394,7 @@ const LESSONS=[
   {type:'exit',q:'Bu derste öğrendiğin en önemli şey nedir?'}
  ]},
 {id:3,part:'Gözcü Kulesi',title:'Oltaya Gelme',sub:'Kimlik avı ve dolandırıcılık işaretleri',tex:'stone',badge:'İz Sürücü',
- plan:[[3,'Ders hedefleri gösterilir.'],[10,'Sahtekârlık belirtileri ve günlük hayattan örnekler; kandırılırsan neler yapmalısın.'],[17,'İpucu soruları ve “Hangi adres gerçek?” etkinliği (ikili gruplar).'],[5,'Cevaplar açıklanır, çıkış kartı, tabletlerin teslimi.']],
+ plan:[[3,'Ders hedefleri gösterilir.'],[10,'“Oltacı nasıl çalışır?” animasyonu: sahtekârlık belirtileri ve kandırılırsan neler yapmalısın; günlük hayattan örnekler.'],[17,'İpucu soruları ve “Hangi adres gerçek?” etkinliği (ikili gruplar).'],[5,'Cevaplar açıklanır, çıkış kartı, tabletlerin teslimi.']],
  steps:[
   {type:'goals',title:'Bugünkü görevimiz',goals:[['Öğrenmek','İnsanların internette ve cihazlarda başkalarını kandırmak için kullandığı yöntemleri öğrenmek.'],['Tanımak','Dolandırıcılık denemelerinin işaretlerini tanımak.'],['Dikkatli olmak','Kişisel bilgilerimizi nasıl ve kimlerle paylaştığımıza dikkat etmek.'],['Bilmek','Kandırıldığını düşünürsen güvendiğin bir yetişkinle konuşmak.']]},
   {type:'info',title:'Gözcünün ipuçları',list:['Profesyonel görünüyor mu? Logo doğru mu, yazım hatası var mı?','Adres (URL) aradığın şirketin adıyla birebir eşleşiyor mu?','Sinir bozucu açılır pencereler (pop-up) var mı?','Adres, yanında küçük bir kilit olan https:// ile mi başlıyor?','Küçük yazıda (dipnotta) ne yazıyor?','Gerçek olamayacak kadar iyi bir şey mi sunuyor?','Mesaj biraz garip mi geliyor? “Seni tanıyorum” diyor ama emin olamıyor musun?']},
@@ -389,7 +410,7 @@ const LESSONS=[
   {type:'exit',q:'Bugün öğrendiğin en önemli şey nedir?'}
  ]},
 {id:4,part:'Kale Hendeği',title:'Gerçek mi, Sahte mi?',sub:'Oltaya Gelme etkinliği',tex:'water',badge:'Olta Avcısı',
- plan:[[3,'Hedefler ve ipuçlarının kısa tekrarı.'],[5,'İpucu soruları kartı birlikte okunur. Not: İnternot Posta’nın gerçek, güvenilir bir hizmet olduğunu varsayın.'],[25,'Öğrenciler yanındaki arkadaşıyla grup olur; her mesaj için sahtekârlık izlerini arar ve tartışarak karar verir.'],[7,'Öğretmen cevapları ve nedenlerini açıklar; çıkış kartı, tabletlerin teslimi.']],
+ plan:[[3,'Hedefler ve ipuçlarının kısa tekrarı.'],[5,'“Sahte mesajın 5 işareti” animasyonu izlenir. Not: İnternot Posta’nın gerçek, güvenilir bir hizmet olduğunu varsayın.'],[25,'Öğrenciler yanındaki arkadaşıyla grup olur; her mesaj için sahtekârlık izlerini arar ve tartışarak karar verir.'],[7,'Öğretmen cevapları ve nedenlerini açıklar; çıkış kartı, tabletlerin teslimi.']],
  steps:[
   {type:'info',title:'Yanındaki arkadaşınla grup ol!',list:['Her ekranda bir mesaj, açılır pencere ya da uygulama göreceksiniz.','Birlikte inceleyin ve tartışın: Gerçek mi, sahte mi?','İpuçları: Doğru görünüyor mu? Bedava bir şey mi sunuyor? Kişisel bilgi istiyor mu? Zincir mesaj mı? Küçük yazı var mı?','Not: Bu etkinlikte “İnternot Posta” gerçek ve güvenilir bir hizmettir.']},
   {type:'rf',kind:'mail',from:'İnternot Posta <guvenlik@internotposta.com>',subject:'Şifreniz değiştirildi',body:'Merhaba,<br>Hesabınızın şifresi bugün değiştirildi. Bu değişikliği siz yaptıysanız bir şey yapmanıza gerek yok. Siz yapmadıysanız, internotposta.com adresine kendiniz girerek hesap ayarlarınızdan şifrenizi yenileyin.',fake:false,
@@ -409,7 +430,7 @@ const LESSONS=[
   {type:'exit',q:'Bugün öğrendiğin en önemli şey nedir? Bir dahaki sefere hangi ipucuna ilk bakacaksın?'}
  ]},
 {id:5,part:'Hazine Kilidi',title:'Sırlarını Koru',sub:'Güçlü bir şifre nasıl oluşturulur?',tex:'gold',badge:'Şifre Ustası',
- plan:[[3,'Ders hedefleri gösterilir.'],[10,'Isınma: Kötü bir şifreyi nasıl tanımlarsın? Neden güçlü şifre belirlemeliyiz?'],[10,'En çok kullanılan şifreler tahmini ve güçlü şifre tarifi.'],[12,'İkili gruplar: Öğretmen için şifre oluşturma ve arkadaşın şifresinde zayıf nokta arama.'],[5,'Doğru/yanlış etkinliği, çıkış kartı, tabletlerin teslimi.']],
+ plan:[[3,'Ders hedefleri gösterilir.'],[10,'Isınma: Kötü bir şifreyi nasıl tanımlarsın? Neden güçlü şifre belirlemeliyiz?'],[10,'En çok kullanılan şifreler tahmini ve “Şifre makinesi” animasyonu (güçlü şifre tarifi).'],[12,'İkili gruplar: Öğretmen için şifre oluşturma ve arkadaşın şifresinde zayıf nokta arama.'],[5,'Doğru/yanlış etkinliği, çıkış kartı, tabletlerin teslimi.']],
  steps:[
   {type:'goals',title:'Bugünkü görevimiz',goals:[['Anlamak','Şifrelerimizi anne, baba veya yasal vasimiz dışında kimseyle paylaşmamanın önemini anlamak.'],['Bilmek','Güçlü bir şifre oluşturmanın kurallarını bilmek.'],['Öğrenmek','Tahmin edilmesi zor, hatırlanması kolay şifre oluşturmayı öğrenmek.']]},
   {type:'open',key:'kotu',tag:'Isınma',q:'Kullanıcı adı: internaut — Şifre: 123456. Kötü bir şifreyi nasıl tanımlarsın?',hint:'Bu şifrede neyin yanlış olduğunu düşün.'},
@@ -732,6 +753,151 @@ function finish(L,st,exitIdx){
 }
 
 
+
+/* ---------- Animasyonlar (projeksiyon) ---------- */
+const PAL={k:'#22201c',w:'#ffffff',s:'#f2c9a0',h:'#6b4423',H:'#2a2522',y:'#f2c230',Y:'#b8860b',g:'#8e9298',G:'#55585d',r:'#d23c32',R:'#8a1f19',b:'#3d7bd6',B:'#24508f',n:'#5f9f37',N:'#3f7424',p:'#3b3a5a',o:'#f0a030',l:'#e9d3a8',m:'#b85a4a',t:'#2bb3a0',T:'#16786b',v:'#8a5cd6',V:'#5b3a96'};
+const SPR={
+ kid:["..hhhh..",".hhhhhh.",".hssssh.",".skssks.",".ssssss.","..smms..","..cccc..",".cccccc.","sccccccs",".cccccc.",".pp..pp.",".kk..kk."],
+ adult:["..HHHH..",".HHHHHH.",".HssssH.",".skssks.",".ssssss.","..smms..","..cccc..",".cccccc.","sccccccs","sccccccs",".cccccc.",".pp..pp.",".pp..pp.",".pp..pp.",".kk..kk."],
+ thief:["..GGGG..",".GGGGGG.",".GkkkkG.",".kwkkwk.",".GkkkkG.","..GGGG..","..kkkk..",".kkkkkk.","GkkkkkkG",".kkkkkk.",".kk..kk.",".GG..GG."],
+ key:[".yy.......","y..yyyyyyy","y..y..y.y.",".yy......."],
+ lock:["..gggg..",".g....g.",".g....g.",".g....g.","yyyyyyyy","yyyYYyyy","yyyYYyyy","yyyyYyyy","yyyyyyyy","YYYYYYYY"],
+ lockOpen:["..gggg..",".g....g.",".g......",".g......","yyyyyyyy","yyyYYyyy","yyyYYyyy","yyyyYyyy","yyyyyyyy","YYYYYYYY"],
+ phone:["kkkkkkk","kbbbbbk","kbbbbbk","kbbbbbk","kbbbbbk","kbbbbbk","kbbbbbk","kbbbbbk","kbbbbbk","kkkwkkk","kkkkkkk"],
+ env:["kkkkkkkkkkkk","kwGwwwwwwGwk","kwwGwwwwGwwk","kwwwGwwGwwwk","kwwwwGGwwwwk","kwwwwwwwwwwk","kwwwwwwwwwwk","kkkkkkkkkkkk"],
+ gift:["....rr....","..rr..rr..","...rrrr...","vvvvrrvvvv","vvvvrrvvvv","VVVVrrVVVV",".vvvrrvvv.",".vvvrrvvv.",".vvvrrvvv.",".VVVrrVVV."],
+ house:["......RR......",".....RRRR.....","....RRRRRR....","...RRRRRRRR...","..RRRRRRRRRR..",".RRRRRRRRRRRR.","..llllllllll..","..lbbllllbbl..","..lbbllllbbl..","..llllYYllll..","..llllYYllll..","..llllYYllll.."],
+ robot:["....yy....","....gg....",".gggggggg.",".gwkggwkg.",".gggggggg.",".ggrrrrgg.","..gggggg..","ggGGGGGGgg","g.GGGGGG.g","..GGGGGG..","..GG..GG..","..gg..gg.."],
+ globe:["...bbbb...",".bbnnbbbb.",".bnnnbbnb.","bbnnbbbnnb","bbbnbbnnnb","bbbbbbnnbb","bnnbbbbbbb",".bnnnbbbb.",".bbnnbbbb.","...bbbb..."],
+ heart:[".rr.rr.","rrrrrrr","rrrrrrr",".rrrrr.","..rrr..","...r..."],
+ shield:["tttttttttt","tTTTTTTTTt","tTTTTTTwTt","tTTTTTwwTt","tTwTTwwTTt","tTwwwwTTTt",".tTwwTTTt.",".tTTTTTTt.","..tTTTTt..","...tTTt...","....tt...."],
+ mag:["..gggg....",".gwwwwg...","gwwbwwwg..","gwbwwwwg..","gwwwwwwg..",".gwwwwg...","..ggggGG..","......GGG.",".......GGG","........GG"],
+ owl:OWL.map(r=>r.replace(/b/g,'h').replace(/l/g,'l').replace(/o/g,'o'))
+};
+function spr(g,name,x,y,s,over){const rows=SPR[name];for(let j=0;j<rows.length;j++){const row=rows[j];for(let i=0;i<row.length;i++){const ch=row[i];if(ch==='.')continue;let col=(over&&over[ch])||PAL[ch];if(name==='owl'&&ch==='h')col='#7a4a2a';if(name==='owl'&&ch==='l')col='#d9b48a';if(!col)continue;g.fillStyle=col;g.fillRect(x+i*s,y+j*s,s,s)}}}
+const clamp=v=>Math.max(0,Math.min(1,v));
+const ap=(t,at,d)=>clamp((t-at)/(d||.4));
+const ease=v=>1-Math.pow(1-v,3);
+const lerp=(a,b,v)=>a+(b-a)*v;
+function aBg(g,t,night){
+  const gr=g.createLinearGradient(0,0,0,144);gr.addColorStop(0,night?'#2a3b6b':'#8cc4ee');gr.addColorStop(1,night?'#4a5d8f':'#bfe0f7');g.fillStyle=gr;g.fillRect(0,0,320,144);
+  g.fillStyle='rgba(255,255,255,.95)';[[30,20,40],[150,12,56],[250,28,36]].forEach(([x,y,w],k)=>{const xx=((x+t*(4+k*2))%(360))-20;g.fillRect(xx,y,w,8);g.fillRect(xx+8,y-6,w-16,6)});
+  for(let x=0;x<320;x+=16){g.drawImage(TEX.grass,x,144,16,16);g.drawImage(TEX.dirt,x,160,16,16);g.drawImage(TEX.dirt,x,176,16,16)}
+}
+function aText(g,txt,x,y,o){o=o||{};if(o.a!==undefined&&o.a<=0)return;g.font=`${o.bold===false?'':'bold '}${o.size||12}px "Pixelify Sans","Courier New",monospace`;g.textAlign=o.align||'center';g.textBaseline='middle';
+  if(o.bg){const w=g.measureText(txt).width+(o.pad||8)*2,h=(o.size||12)+(o.pad||8);const lx=o.align==='left'?x-(o.pad||8):x-w/2;g.fillStyle=o.border||'#22201c';g.fillRect(lx-2,y-h/2-2,w+4,h+4);g.fillStyle=o.bg;g.fillRect(lx,y-h/2,w,h)}
+  g.fillStyle=o.col||'#22201c';g.fillText(txt,x,y+1)}
+function aBubble(g,txt,x,y,a){if(a<=0)return;g.save();g.globalAlpha=a;g.font='bold 11px "Pixelify Sans","Courier New",monospace';const w=g.measureText(txt).width+14;g.fillStyle='#22201c';g.fillRect(x-w/2-2,y-11,w+4,22);g.fillRect(x-4,y+9,8,6);g.fillStyle='#fff';g.fillRect(x-w/2,y-9,w,18);g.fillRect(x-2,y+9,4,4);g.fillStyle='#22201c';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,x,y+1);g.restore()}
+function aPop(g,name,x,y,s,a,over){if(a<=0)return;const rows=SPR[name],w=rows[0].length*s,h=rows.length*s,k=ease(a);g.save();g.translate(x+w/2,y+h/2);g.scale(k,k);spr(g,name,-w/2,-h/2,s,over);g.restore()}
+function aCheck(g,x,y,ok,a){if(a<=0)return;g.save();g.globalAlpha=a;g.fillStyle=ok?'#3f8f2a':'#b8322a';g.fillRect(x-9,y-9,18,18);g.fillStyle='#fff';g.font='bold 14px "Pixelify Sans",monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(ok?'✓':'✗',x,y+1);g.restore()}
+function aUrl(g,txt,x,y,w,lock){g.fillStyle='#22201c';g.fillRect(x-2,y-2,w+4,24);g.fillStyle='#fff';g.fillRect(x,y,w,20);if(lock)spr(g,'lock',x+6,y+3,1.4);aText(g,txt,x+(lock?22:8),y+10,{align:'left',size:12,bold:false,col:'#22201c'})}
+function aMeter(g,x,y,w,v,col){g.fillStyle='#22201c';g.fillRect(x-2,y-2,w+4,14);g.fillStyle='#444';g.fillRect(x,y,w,10);g.fillStyle=col;g.fillRect(x,y,w*clamp(v),10)}
+function aZig(g,x,y,t){if(Math.floor(t*4)%2)return;g.fillStyle='#d23c32';[[0,0],[6,6],[0,12],[6,18]].forEach(([dx,dy])=>g.fillRect(x+dx,y+dy,8,6))}
+const SH={ahmet:{c:'#3d7bd6'},mete:{c:'#d23c32'},k3:{c:'#2bb3a0'},k4:{c:'#f0a030'},k5:{c:'#8a5cd6'},mom:{c:'#5f9f37'},teach:{c:'#8a5cd6'}};
+
+const ANIMS={
+ a1:{title:'Şifre kimin sırrı?',scenes:[
+  {cap:'Şifren, dijital evinin anahtarıdır.',draw(g,t){aBg(g,t);spr(g,'house',190,96,4);spr(g,'kid',80,96,4,SH.ahmet);aPop(g,'key',82,66+Math.sin(t*3)*3,3,ap(t,.6));aText(g,'Ahmet',96,90,{size:10,bg:'#fff',pad:3})}},
+  {cap:'Ahmet yeni şifresini en yakın arkadaşı Mete’ye söyledi.',draw(g,t){aBg(g,t);spr(g,'kid',80,96,4,SH.ahmet);spr(g,'kid',210,96,4,SH.mete);aBubble(g,'Şifrem: Oyun123',96,66,ap(t,.3));const v=ease(ap(t,1.8,1.6));spr(g,'key',lerp(84,214,v),lerp(80,80,v)-Math.sin(v*Math.PI)*30,3);aText(g,'Ahmet',96,150+8,{size:9,col:'#fff'});aText(g,'Mete',226,158,{size:9,col:'#fff'})}},
+  {cap:'Ama arkadaşlıklar bazen bozulur, insanlar birbirine küser.',draw(g,t){aBg(g,t);const v=ease(ap(t,.2,1.2));spr(g,'kid',lerp(80,50,v),96,4,SH.ahmet);spr(g,'kid',lerp(210,240,v),96,4,SH.mete);if(t>1)aZig(g,156,100,t);aBubble(g,'Hıh!',256,66,ap(t,1.4));spr(g,'key',lerp(214,244,v),24,3)}},
+  {cap:'Şifreni bilen biri senin adına giriş yapıp kötü mesajlar yazabilir.',draw(g,t){aBg(g,t);spr(g,'phone',132,20,8);g.fillStyle='#fff';g.fillRect(142,34,36,10);aText(g,'Ahmet',160,39,{size:7,col:'#24508f'});[0,1,2].forEach(k=>{const a=ap(t,.8+k*.8);if(a>0){g.fillStyle='#d23c32';g.fillRect(142,52+k*16,lerp(4,36,a),9)}});spr(g,'kid',40,96,4,SH.ahmet);aBubble(g,'Ben yazmadım!',56,66,ap(t,3));spr(g,'kid',250,96,4,SH.mete)}},
+  {cap:'Herkes o mesajları Ahmet’in yazdığını sanır.',draw(g,t){aBg(g,t);spr(g,'kid',144,96,4,SH.ahmet);[[40,'k3'],[90,'k4'],[210,'k5'],[260,'mete']].forEach(([x,c],k)=>{spr(g,'kid',x,96,4,SH[c]);aBubble(g,'!',x+16,72,ap(t,.4+k*.4))});aBubble(g,':(',160,72,ap(t,2.4))}},
+  {cap:'Şifreni yalnızca annen, baban ya da yasal vasinle paylaş.',draw(g,t){aBg(g,t);spr(g,'adult',90,84,4,SH.mom);spr(g,'kid',190,96,4,SH.ahmet);const closed=t>2.2;spr(g,closed?'lock':'lockOpen',144,48,4);aPop(g,'heart',150,22,3,ap(t,2.6))}},
+  {cap:'Şifren senin sırrındır. Paylaşmadan önce düşün!',draw(g,t){aBg(g,t);aPop(g,'shield',130,40,6,ap(t,.2,.6));spr(g,'owl',60,90,4.5);[[230,40],[260,80],[210,100]].forEach(([x,y],k)=>{if(Math.floor(t*3+k)%2){g.fillStyle='#f2c230';g.fillRect(x,y,6,6);g.fillRect(x-4,y+2,14,2);g.fillRect(x+2,y-4,2,14)}})}}
+ ]},
+ a2:{title:'Kime, ne kadar?',scenes:[
+  {cap:'Her bilgi herkesle paylaşılmaz. Bilgilerin de kalenin duvarları gibi katmanları vardır.',draw(g,t){aBg(g,t);const c=[[90,76,56,'#3d7bd6','HERKES'],[90,76,38,'#f0a030','YAKIN ARKADAŞLAR'],[90,76,20,'#d23c32','BEN VE AİLEM']];c.forEach(([x,y,r,col,lb],k)=>{const a=ap(t,.3+k*.8);if(a<=0)return;g.save();g.globalAlpha=a;g.strokeStyle=col;g.lineWidth=6;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.stroke();g.restore()});['HERKES','YAKIN ARKADAŞLAR','BEN VE AİLEM'].forEach((lb,k)=>aText(g,lb,236,40+k*26,{size:10,bg:['#cfe0fb','#ffe2b8','#f7d3cd'][k],pad:4,col:'#22201c',a:ap(t,.3+k*.8)}))}},
+  {cap:'Herkes bilebilir: en sevdiğin hayvan ya da üzerinde adın olmayan bir resmin.',draw(g,t){aBg(g,t);aPop(g,'globe',40,50,6,ap(t,.1));['En sevdiğin hayvan','Adının olmadığı bir resim'].forEach((s,k)=>{if(ap(t,.6+k*.8)>0)aText(g,s,210,60+k*34,{size:12,bg:'#cfe0fb',pad:6})});aCheck(g,300,60,true,ap(t,2));aCheck(g,300,94,true,ap(t,2.3))}},
+  {cap:'Yakın arkadaşların bilebilir: telefon numaran, ev adresin, doğum günü partine kimleri çağırdığın.',draw(g,t){aBg(g,t);spr(g,'kid',30,96,4,SH.ahmet);spr(g,'kid',70,96,4,SH.mete);aPop(g,'heart',58,70,3,ap(t,.3));['Telefon numaran','Ev adresin','Doğum günü davetlilerin'].forEach((s,k)=>{if(ap(t,.6+k*.7)>0)aText(g,s,215,40+k*30,{size:12,bg:'#ffe2b8',pad:6})})}},
+  {cap:'Sadece sen ve ailen bilir: şifrelerin ve tatildeyken evinizin boş olduğu.',draw(g,t){aBg(g,t);spr(g,'house',16,96,4);spr(g,'adult',80,84,3.2,SH.mom);spr(g,'kid',108,108,3,SH.ahmet);aPop(g,'lock',100,50,3,ap(t,.4));['Şifrelerin','Evin boş olduğu zaman'].forEach((s,k)=>{if(ap(t,.8+k*.8)>0)aText(g,s,222,60+k*34,{size:11,bg:'#f7d3cd',pad:6})})}},
+  {cap:'Herkese açık sayfaya “İyi tatiller!” yazmak, evin boş olduğunu herkese duyurur.',draw(g,t){aBg(g,t,true);spr(g,'house',200,96,4);spr(g,'phone',30,30,7);aText(g,'“İyi tatiller!”',120,52,{size:12,bg:'#fff',pad:6,col:'#24508f'});aText(g,'Herkese açık',120,80,{size:9,bg:'#ffe2b8',pad:4});const v=ease(ap(t,1.5,2));spr(g,'thief',lerp(330,262,v),96,4);aBubble(g,'Ev boşmuş…',276,72,ap(t,3.2))}},
+  {cap:'Biri bir arkadaşını kötü gösteren sahte bir hesap açarsa, o arkadaş çok üzülür.',draw(g,t){aBg(g,t);spr(g,'phone',132,16,8);g.fillStyle='#fff';g.fillRect(142,30,36,30);spr(g,'kid',150,32,2,SH.k3);g.fillStyle='#d23c32';g.fillRect(142,66,36,8);g.fillRect(142,80,28,8);aPop(g,'heart',40,40,3,ap(t,.5),{r:'#8e9298'});spr(g,'kid',40,96,4,SH.k3);aBubble(g,':(',56,72,ap(t,1.2))}},
+  {cap:'Güvendiğin bir yetişkine söyle. Bu ispiyonculuk değil, arkadaşını korumaktır.',draw(g,t){aBg(g,t);const v=ease(ap(t,.2,1.6));spr(g,'kid',lerp(30,150,v),96,4,SH.ahmet);spr(g,'adult',220,84,4,SH.teach);aBubble(g,'Yardım eder misiniz?',166,70,ap(t,1.9));aPop(g,'heart',230,40,3,ap(t,3))}},
+  {cap:'Paylaşmadan önce düşün: Bunu kim görecek?',draw(g,t){aBg(g,t);spr(g,'owl',70,70,6);aPop(g,'mag',190,50,6,ap(t,.3));aText(g,'?',230,40,{size:30,col:'#22201c'})}}
+ ],ask:true},
+ a3:{title:'Oltacı nasıl çalışır?',scenes:[
+  {cap:'İnternette bazı kişiler olta atar. Amaçları seni kandırıp bilgilerini almaktır.',draw(g,t){aBg(g,t);for(let y=96;y<144;y+=16)for(let x=0;x<64;x+=16)g.drawImage(TEX.stone,x,y,16,16);spr(g,'thief',20,48,4);g.strokeStyle='#6b4a2b';g.lineWidth=3;g.beginPath();g.moveTo(50,70);g.lineTo(120,30);g.stroke();g.strokeStyle='#22201c';g.lineWidth=1;const hy=90+Math.sin(t*2.5)*6;g.beginPath();g.moveTo(120,30);g.lineTo(150,hy);g.stroke();spr(g,'gift',140,hy,3);spr(g,'kid',240,96,4,SH.ahmet);aBubble(g,'Hediye mi?!',256,72,ap(t,1.5))}},
+  {cap:'Yem çoğu zaman bedava bir hediyedir: “Tebrikler, kazandın!”',draw(g,t){aBg(g,t);aPop(g,'env',40,40,8,ap(t,.1));if(Math.floor(t*3)%2)aText(g,'BEDAVA!',220,50,{size:20,bg:'#d23c32',col:'#fff',pad:8});aText(g,'TEBRİKLER, KAZANDIN!',220,100,{size:11,bg:'#fff',pad:6})}},
+  {cap:'Adresi harf harf oku: google.com ile g00gle.co aynı değil!',draw(g,t){aBg(g,t);aUrl(g,'www.google.com',60,40,170);aCheck(g,250,50,true,ap(t,.6));aUrl(g,'www.g00gle.co',60,84,170);aCheck(g,250,94,false,ap(t,2.6));const v=ease(ap(t,1,1.4));spr(g,'mag',lerp(60,104,v),74,3)}},
+  {cap:'Adreste kilit ve https:// varsa bağlantı şifrelidir. Ama bu tek başına yetmez!',draw(g,t){aBg(g,t);aUrl(g,'https://www.internotposta.com',30,40,240,true);aPop(g,'lock',70,76,4,ap(t,.8));aText(g,'+ diğer ipuçlarına da bak!',200,100,{size:11,bg:'#ffe2b8',pad:5,a:ap(t,1.8)})}},
+  {cap:'Küçük yazıyı oku: “Bedava” telefon için her ay para ödemen gerekebilir!',draw(g,t){aBg(g,t);g.fillStyle='#22201c';g.fillRect(28,18,184,120);g.fillStyle='#fff';g.fillRect(30,20,180,116);aText(g,'BEDAVA TELEFON!',120,46,{size:16,col:'#d23c32'});g.fillStyle='#bbb';g.fillRect(50,120,140,3);const v=ease(ap(t,1.2,1));if(v>0){g.fillStyle='#22201c';g.fillRect(200,82,112,46);g.fillStyle='#fff8de';g.fillRect(202,84,108,42);aText(g,'Her ay',256,96,{size:11});aText(g,'200 TL öde!',256,112,{size:12,col:'#d23c32'})}spr(g,'mag',lerp(150,176,v),100,4)}},
+  {cap:'Şifreni, adresini ya da telefon numaranı isteyen mesajlara dikkat!',draw(g,t){aBg(g,t);spr(g,'phone',120,12,9);g.fillStyle='#fff';['Şifre','Adres','Telefon'].forEach((s,k)=>{g.fillStyle='#fff';g.fillRect(132,30+k*22,39,14);aText(g,s,152,37+k*22,{size:8,bold:false,col:'#555'})});if(Math.floor(t*2)%2)aText(g,'!',240,60,{size:40,col:'#d23c32'})}},
+  {cap:'Kandırıldıysan panik yapma: hemen güvendiğin bir yetişkine söyle ve şifreni değiştir.',draw(g,t){aBg(g,t);const v=ease(ap(t,.2,1.6));spr(g,'kid',lerp(20,140,v),96,4,SH.ahmet);spr(g,'adult',220,84,4,SH.mom);aBubble(g,'Bir şey oldu!',156,72,ap(t,1.9));spr(g,t>3.2?'lock':'lockOpen',230,30,3)}}
+ ]},
+ a4:{title:'Sahte mesajın 5 işareti',scenes:[
+  {cap:'Bir mesajı açmadan önce gözcü gibi bak! İşte sahte mesajların 5 işareti.',draw(g,t){aBg(g,t);spr(g,'owl',60,70,6);aPop(g,'mag',180,40,6,ap(t,.4));aText(g,'5 İŞARET',250,30,{size:14,bg:'#f2c230',pad:6})}},
+  {cap:'1. Doğru görünüyor mu? Yazım hatalarına, özensiz resimlere ve çok az yoruma dikkat et.',draw(g,t){aBg(g,t);aText(g,'1',24,24,{size:18,bg:'#f2c230',pad:6});g.fillStyle='#22201c';g.fillRect(48,36,224,72);g.fillStyle='#fff';g.fillRect(50,38,220,68);aText(g,'Süpr Blok Yapıcı PRO',160,56,{size:13});aText(g,'Ücretsz indir!!',160,84,{size:13,col:'#d23c32'});if(ap(t,1.2)>0){g.strokeStyle='#d23c32';g.lineWidth=3;g.beginPath();g.ellipse(160,84,64,13,0,0,Math.PI*2);g.stroke()}aText(g,'★ 12 yorum',160,122,{size:11,bg:'#fff',pad:4})}},
+  {cap:'2. Bedava bir şey mi sunuyor? Bedava teklifler çoğunlukla bir tuzaktır.',draw(g,t){aBg(g,t);aText(g,'2',24,24,{size:18,bg:'#f2c230',pad:6});aPop(g,'gift',60,40,7,ap(t,.2));if(Math.floor(t*3)%2)aText(g,'BEDAVA!',230,70,{size:20,bg:'#d23c32',col:'#fff',pad:8})}},
+  {cap:'3. Kişisel bilgi istiyor mu? Gerçek şirketler şifreni mesajla istemez.',draw(g,t){aBg(g,t);aText(g,'3',24,24,{size:18,bg:'#f2c230',pad:6});spr(g,'phone',120,12,9);['Şifre','Adres','Telefon'].forEach((s,k)=>{g.fillStyle='#fff';g.fillRect(132,30+k*22,39,14);aText(g,s,152,37+k*22,{size:8,bold:false,col:'#555'})});aCheck(g,250,70,false,ap(t,1))}},
+  {cap:'4. Zincir mesaj mı? “Bunu 10 kişiye ilet!” diyen mesajları iletme.',draw(g,t){aBg(g,t);aText(g,'4',24,24,{size:18,bg:'#f2c230',pad:6});spr(g,'env',60,60,4);for(let k=0;k<6;k++){const a=ap(t,.5+k*.35);if(a>0)spr(g,'env',120+(k%3)*56,30+Math.floor(k/3)*50,2.6)}aText(g,'İLET!!!',84,48,{size:11,bg:'#d23c32',col:'#fff',pad:4})}},
+  {cap:'5. Küçük yazı var mı? En önemli bilgi bazen en küçük yazıdadır.',draw(g,t){aBg(g,t);aText(g,'5',24,24,{size:18,bg:'#f2c230',pad:6});g.fillStyle='#22201c';g.fillRect(48,30,184,100);g.fillStyle='#fff';g.fillRect(50,32,180,96);aText(g,'KAMPANYA',140,60,{size:16});g.fillStyle='#bbb';g.fillRect(70,116,140,3);const v=ease(ap(t,1,1));spr(g,'mag',lerp(220,150,v),90,4)}},
+  {cap:'Şimdi yanındaki arkadaşınla grup olun! Bu oyunda “İnternot Posta” gerçek ve güvenilir bir hizmettir.',draw(g,t){aBg(g,t);spr(g,'kid',100,96,4,SH.ahmet);spr(g,'kid',140,96,4,SH.k5);aPop(g,'heart',130,66,3,ap(t,.5));aText(g,'İnternot Posta = gerçek',240,50,{size:11,bg:'#d6efc6',pad:6})}}
+ ]},
+ a5:{title:'Şifre makinesi',scenes:[
+  {cap:'Tahmin makineleri kötü şifreleri saniyeler içinde bulur.',draw(g,t){aBg(g,t);spr(g,'robot',40,64,6.5);const list=['123456','password','bilgisayar','qwerty'];const k=Math.min(list.length-1,Math.floor(t*1.2));aText(g,list[k],190,50,{size:16,bg:'#fff',pad:8});if(t>3)aText(g,'BULDUM!',190,90,{size:16,bg:'#d23c32',col:'#fff',pad:6});spr(g,t>3?'lockOpen':'lock',270,100,3)}},
+  {cap:'Adın, takma adın, evcil hayvanının adı… Seni tanıyan biri bunları kolayca tahmin eder.',draw(g,t){aBg(g,t);spr(g,'thief',60,96,4);aBubble(g,'Kedisinin adı Ares…',80,70,ap(t,.4));['Aresiseverim','Cikolatayiseverim'].forEach((s,k)=>{if(ap(t,1+k*.8)>0){aText(g,s,220,36+k*74,{size:13,bg:'#fff',pad:6});aCheck(g,302,36+k*74,false,ap(t,1.4+k*.8))}})}},
+  {cap:'Zayıf, orta ve güçlü şifre: Aresiseverim · Ataturkilkogretim · 34sAIO!',draw(g,t){aBg(g,t);[['Aresiseverim','ZAYIF','#d23c32',.3],['Ataturkilkogretim','ORTA','#f2c230',.65],['34sAIO!','GÜÇLÜ','#5f9f37',1]].forEach(([s,l,c,v],k)=>{const y=34+k*38;aText(g,s,20,y,{size:12,align:'left',bg:'#fff',pad:5});aMeter(g,170,y-5,90,v*ease(ap(t,.4+k*.6,1)),c);aText(g,l,290,y,{size:10,col:'#22201c'})})}},
+  {cap:'Kolay hatırladığın bir cümle düşün: “3. ve 4. sınıfı Atatürk İlköğretim Okulu’nda okudum.”',draw(g,t){aBg(g,t);for(let x=20;x<300;x+=16)g.drawImage(TEX.plank,x,40,16,16),g.drawImage(TEX.plank,x,56,16,16),g.drawImage(TEX.plank,x,72,16,16);g.fillStyle='#6b4a2b';g.fillRect(150,88,12,56);const w='3. ve 4. sınıfı Atatürk İlköğretim Okulu’nda okudum'.split(' ');const n=Math.min(w.length,Math.floor(t*2.2)+1);aText(g,w.slice(0,Math.min(n,4)).join(' '),160,56,{size:12,col:'#fff'});if(n>4)aText(g,w.slice(4,n).join(' '),160,76,{size:12,col:'#fff'})}},
+  {cap:'Her kelimenin ilk harfini al ve şifreni oluştur: 34sAIO',draw(g,t){aBg(g,t);const L=['3','4','s','A','I','O'];L.forEach((c,k)=>{const v=ease(ap(t,.4+k*.4,.6));const x=70+k*32,y=lerp(120,50,v);g.fillStyle='#22201c';g.fillRect(x-2,y-2,28,32);g.fillStyle='#f2c230';g.fillRect(x,y,24,28);aText(g,c,x+12,y+14,{size:16})})}},
+  {cap:'Sembol ekle, büyük ve küçük harfleri karıştır, en az 8 karakter olsun: 34sAIO!?',draw(g,t){aBg(g,t);const s='34sAIO!?';const n=Math.min(8,6+Math.floor(ap(t,.6,1.2)*2.99));for(let k=0;k<n;k++){const x=32+k*32;g.fillStyle='#22201c';g.fillRect(x-2,38,28,32);g.fillStyle=k>5?'#5f9f37':'#f2c230';g.fillRect(x,40,24,28);aText(g,s[k],x+12,54,{size:16,col:k>5?'#fff':'#22201c'})}aMeter(g,60,100,200,ease(ap(t,.4,3)),'#5f9f37');aText(g,'GÜÇLÜ!',160,124,{size:14,col:'#3f7424',bg:'#d6efc6',pad:5})}},
+  {cap:'Makine denedi ama bulamadı! Şifreni annen, baban ya da yasal vasin dışında kimseyle paylaşma.',draw(g,t){aBg(g,t);spr(g,'robot',40,64,6.5);aText(g,'???',190,50,{size:20,bg:'#fff',pad:8});spr(g,'lock',250,60,5);aPop(g,'shield',250,8,4,ap(t,1.5))}}
+ ]}
+};
+
+let ANIM_TTS=false;try{ANIM_TTS=localStorage.getItem('dk-tts')==='1'}catch(e){}
+function trVoice(){try{return (speechSynthesis.getVoices()||[]).find(v=>/^tr/i.test(v.lang))}catch(e){return null}}
+function animPlayer(host,key){
+  const A=ANIMS[key];if(!A)return;
+  host.insertAdjacentHTML('beforeend',`<div class="anim" tabindex="-1"><div class="anim-head"><b>🎬 ${esc(A.title)}</b><span class="anim-dots"></span></div>
+    <canvas class="anim-cv px" width="640" height="360" aria-label="Animasyon: ${esc(A.title)}"></canvas>
+    <p class="anim-cap" aria-live="polite"></p>
+    <div class="anim-ctrl"><button class="btn ghost sm" data-a="first" title="Baştan">⏮</button><button class="btn go sm" data-a="play">⏸ Duraklat</button><button class="btn ghost sm" data-a="prev" title="Önceki sahne">◀</button><button class="btn ghost sm" data-a="next" title="Sonraki sahne">▶</button>
+      <button class="btn gold sm" data-a="proj">⛶ Projeksiyon</button><button class="btn ghost sm" data-a="tts" hidden>🔈 Ses kapalı</button></div></div>`);
+  const root=host.lastElementChild,cv=root.querySelector('canvas'),g=cv.getContext('2d'),capEl=root.querySelector('.anim-cap'),dots=root.querySelector('.anim-dots');
+  g.imageSmoothingEnabled=false;
+  const durs=A.scenes.map(s=>Math.max(5,s.cap.length/12+2));
+  let si=0,t0=performance.now(),paused=false,pausedAt=0,ended=false;
+  const btn=a=>root.querySelector(`[data-a="${a}"]`);
+  const speak=()=>{try{speechSynthesis.cancel();if(!ANIM_TTS)return;const v=trVoice();if(!v)return;const u=new SpeechSynthesisUtterance(A.scenes[si].cap);u.lang='tr-TR';u.voice=v;u.rate=.92;speechSynthesis.speak(u)}catch(e){}};
+  const setScene=k=>{si=Math.max(0,Math.min(A.scenes.length-1,k));t0=performance.now();ended=false;if(paused)pausedAt=t0;capEl.textContent=A.scenes[si].cap;dots.innerHTML=A.scenes.map((_,j)=>`<i class="${j<si?'d':j===si?'n':''}"></i>`).join('');speak()};
+  const setPlay=()=>{btn('play').textContent=ended?'↻ Tekrar izle':paused?'▶ Oynat':'⏸ Duraklat'};
+  btn('first').onclick=()=>{paused=false;setScene(0);setPlay()};
+  btn('prev').onclick=()=>{setScene(si-1);setPlay()};
+  btn('next').onclick=()=>{setScene(si+1);setPlay()};
+  btn('play').onclick=()=>{if(ended){paused=false;setScene(0)}else if(paused){paused=false;t0+=performance.now()-pausedAt}else{paused=true;pausedAt=performance.now();try{speechSynthesis.cancel()}catch(e){}}setPlay()};
+  const exitProj=()=>{root.classList.remove('proj');btn('proj').textContent='⛶ Projeksiyon';try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}};
+  btn('proj').onclick=()=>{if(root.classList.contains('proj'))return exitProj();root.classList.add('proj');btn('proj').textContent='✕ Küçült';try{const p=root.requestFullscreen&&root.requestFullscreen();if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+  root.addEventListener('keydown',e=>{if(e.key==='Escape')exitProj();if(e.key===' '){e.preventDefault();btn('play').click()}if(e.key==='ArrowRight')btn('next').click();if(e.key==='ArrowLeft')btn('prev').click()});
+  document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.classList.contains('proj')&&root.isConnected)exitProj()});
+  const tb=btn('tts');const showTts=()=>{if(trVoice()){tb.hidden=false;tb.textContent=ANIM_TTS?'🔊 Ses açık':'🔈 Ses kapalı'}};
+  try{showTts();speechSynthesis.onvoiceschanged=showTts}catch(e){}
+  tb.onclick=()=>{ANIM_TTS=!ANIM_TTS;try{localStorage.setItem('dk-tts',ANIM_TTS?'1':'0')}catch(e){}showTts();speak()};
+  setScene(0);setPlay();
+  const frame=now=>{
+    if(!cv.isConnected){try{speechSynthesis.cancel()}catch(e){}return}
+    const t=((paused?pausedAt:now)-t0)/1000;
+    if(!paused&&!ended&&t>durs[si]){if(si<A.scenes.length-1)setScene(si+1);else{ended=true;setPlay()}}
+    g.setTransform(2,0,0,2,0,0);g.imageSmoothingEnabled=false;
+    try{A.scenes[si].draw(g,Math.min(t,durs[si]))}catch(e){}
+    requestAnimationFrame(frame)};
+  requestAnimationFrame(frame);
+}
+R.anim=(el,s,st,i,c)=>{
+  const A=ANIMS[s.key];
+  if(c&&c.teacher){
+    animPlayer(el,s.key);
+    if(s.ask&&s.ask.length)el.insertAdjacentHTML('beforeend',`<details class="teacher"><summary>Animasyondan sonra sorabileceğin sorular</summary><ul class="clean" style="margin-top:10px">${s.ask.map(x=>`<li><span>${x}</span></li>`).join('')}</ul></details>`);
+    if(s.note&&s.note.length)el.insertAdjacentHTML('beforeend',`<details class="teacher"><summary>Animasyondaki ipuçları (özet)</summary><ul class="clean" style="margin-top:10px">${s.note.map(x=>`<li><span>${x}</span></li>`).join('')}</ul></details>`);
+    return;
+  }
+  el.insertAdjacentHTML('beforeend',`<div class="lookup"><img class="px owl-blink" src="${OWL_URL}" alt=""><div><span class="tag">Animasyon</span><h2>👀 Tahtaya bak!</h2><p>Öğretmenin “${esc(A?A.title:'')}” animasyonunu gösteriyor. Dikkatle izle!</p></div></div>`);
+};
+/* Tartışma ve bilgi sayfalarının yerine animasyonlar (sayfa sıraları değişmez, kayıtlı cevaplar etkilenmez) */
+(function(){
+  const put=(lid,idx,key,from)=>{const L=LESSONS.find(l=>l.id===lid),old=L.steps[idx];if(!old||old.type!==from)return;L.steps[idx]={type:'anim',key,ask:old.prompts||null,note:old.list||null,title:ANIMS[key].title}};
+  put(1,4,'a1','discuss');put(2,6,'a2','discuss');put(3,1,'a3','info');put(4,0,'a4','info');put(5,3,'a5','info');
+})();
+
 /* ---------- Öğretmen girişi ---------- */
 function teacherLogin(){
   layer.innerHTML=`<div class="overlay"><form class="panel" id="pf"><h2>Öğretmen girişi</h2>
@@ -816,7 +982,7 @@ function liveTab(){
   if(g('tstop'))g('tstop').onclick=()=>setLive({open:true,lesson:L.id,step:i});
   tick();
   const pv=g('pv');pv.insertAdjacentHTML('beforeend',`<span class="eyebrow">Öğrenci ekranı önizlemesi</span>`);
-  R[step.type](pv,step,{ans:{},first:{},done:false},i,{L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh(){},commit(){},award(){}});
+  R[step.type](pv,step,{ans:{},first:{},done:false},i,{teacher:true,L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh(){},commit(){},award(){}});
   renderStats();
 }
 
