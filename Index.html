@@ -351,7 +351,7 @@ button.chip{cursor:pointer}
 .ogr .av{width:88px;height:88px;display:grid;place-items:center}
 .ogr .av .yuz-av{width:88px;height:88px}
 .bos{background:#fff;border:3px dashed var(--cizgi);border-radius:22px;padding:22px;color:var(--muted);max-width:62ch}
-.ayak{display:flex;justify-content:flex-end}
+.ayak{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 
 /* ---------- öğretmen paneli ---------- */
 #panel{display:grid;gap:16px;padding-block:18px;max-width:1240px;margin:0 auto}
@@ -401,7 +401,7 @@ button.chip{cursor:pointer}
     <div class="adim"><button class="cb beyaz yuvarlak kucuk" id="geriSinif" aria-label="Sınıflara dön"></button><span class="no" aria-hidden="true">2</span><h2 id="adim2Baslik"></h2></div>
     <div class="tiles" id="ogrListe"></div>
   </div>
-  <div class="ayak"><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
+  <div class="ayak"><button class="cb beyaz hap" id="tamEkranGiris"></button><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
 </section>
 
 <!-- STÜDYO -->
@@ -414,7 +414,7 @@ button.chip{cursor:pointer}
       <span class="ay"></span>
       <button class="ab" id="izgaraBtn" aria-label="Izgara" title="Izgara" aria-pressed="false"></button>
       <button class="ab" id="basaAl" aria-label="Karakterleri yerine koy" title="Yerine koy"></button>
-      <button class="ab" id="sunumBtn" aria-label="Büyük ekran" title="Büyük ekran"></button>
+      <button class="ab" id="sunumBtn" aria-label="Sahneyi büyüt" title="Sahneyi büyüt"></button>
       <button class="ab" id="arkaBtn" aria-label="Arka plan" title="Arka plan"></button>
       <span class="ay ogr-ozel"></span>
       <button class="ab yeni ogr-ozel" id="yeniBtn" aria-label="Yeni boş proje" title="Yeni boş proje"></button>
@@ -424,6 +424,7 @@ button.chip{cursor:pointer}
     <div class="sag">
       <button class="ben" id="benBtn" aria-label="Profilim"><span id="kimAv"></span><span class="ben-yazi"><b id="kimAd"></b><small id="kimAlt"></small></span><span class="etiket" id="kimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="benKalem"></span></button>
       <button class="cb gonder ogr-ozel" id="gonder" aria-label="Öğretmene gönder"><span class="z" id="gonderIc"></span>Gönder</button>
+      <button class="ab" id="tamEkranBtn" aria-label="Tam ekran" title="Tam ekran"></button>
       <button class="ab ogr-ozel" id="cikis" aria-label="Çıkış" title="Çıkış"></button>
       <button class="cb beyaz hap" id="panelDon" hidden></button>
     </div>
@@ -547,6 +548,8 @@ const IC = {
   full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
   image:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M3 18l6-5 4 3 3-2 5 4"/>',
   newp:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M12 11v6M9 14h6"/>',
+  tamac:'<rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/><path d="M7 8.5V7h2M17 8.5V7h-2M7 12.5V14h2M17 12.5V14h-2"/>',
+  tamkapa:'<rect x="2.5" y="4" width="19" height="13" rx="2.5"/><path d="M8 21h8M12 17v4"/><path d="M9 7v2H7M15 7v2h2M9 14v-2H7M15 14v-2h2"/>',
   save:'<path d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2z"/><path d="M8 3v5h7V3M8 21v-6h8v6"/>',
   folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3z"/><path d="M3 10h18l-2 9H5z"/>',
   mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>',
@@ -1667,6 +1670,21 @@ $('sonAc').onclick=async function(){
 };
 $('benBtn').onclick=profilAc;
 $('yeniBtn').onclick=function(){ onayla({e:'✨'},'Yeni boş proje açılsın mı? Ekrandaki çalışma silinir. Göndermediysen önce gönder.',function(){ projeYukle(yeniProje()); taslakKaydet(true); bildir('Yeni proje hazır'); }); };
+function tamEkranMi(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+function tamEkranGuncelle(){ const a=tamEkranMi(); setIc('tamEkranBtn',a?'tamkapa':'tamac'); $('tamEkranBtn').title=a?'Tam ekrandan çık':'Tam ekran'; $('tamEkranBtn').setAttribute('aria-label',$('tamEkranBtn').title);
+  $('tamEkranGiris').innerHTML=ic(a?'tamkapa':'tamac')+(a?'Tam ekrandan çık':'Tam ekran'); setTimeout(sahneBoyut,150); }
+function tamEkran(){
+  const d=document, e=d.documentElement;
+  try{
+    if(tamEkranMi()){ (d.exitFullscreen||d.webkitExitFullscreen).call(d); return; }
+    const f=e.requestFullscreen||e.webkitRequestFullscreen;
+    if(!f) throw new Error('yok');
+    const r=f.call(e); if(r&&r.catch) r.catch(function(){ tamEkranIpucu(); });
+  }catch(err){ tamEkranIpucu(); }
+}
+function tamEkranIpucu(){ bildir('Tam ekran için klavyede Control + Command + F tuşlarına birlikte bas.'); }
+$('tamEkranBtn').onclick=tamEkran; $('tamEkranGiris').onclick=tamEkran;
+document.addEventListener('fullscreenchange',tamEkranGuncelle); document.addEventListener('webkitfullscreenchange',tamEkranGuncelle);
 $('kaydetBtn').onclick=function(){ taslakKaydet(true); bildir('Kaydedildi ✓'); };
 $('cikis').onclick=function(){ onayla({e:'👋'},'Çıkış yapılsın mı? Çalışman bu bilgisayarda saklı kalır.',cikisYap); };
 $('basla').onclick=$('sBasla').onclick=function(){ baslat('flag'); };
@@ -1831,7 +1849,7 @@ function konfeti(){
 /* ================= açılış ================= */
 function simgeler(){
   setIc('geriSinif','back'); setIc('basla','flag'); setIc('dur','stop'); setIc('izgaraBtn','grid'); setIc('basaAl','reset'); setIc('sunumBtn','full'); setIc('arkaBtn','image');
-  setIc('yeniBtn','newp'); setIc('kaydetBtn','save'); setIc('sonAc','folder'); setIc('gonderIc','mail'); setIc('cikis','exit'); setIc('benKalem','pencil'); setIc('sBasla','flag'); setIc('sDur','stop'); setIc('sKapat','x');
+  setIc('yeniBtn','newp'); setIc('kaydetBtn','save'); setIc('sonAc','folder'); setIc('gonderIc','mail'); setIc('cikis','exit'); tamEkranGuncelle(); setIc('benKalem','pencil'); setIc('sBasla','flag'); setIc('sDur','stop'); setIc('sKapat','x');
   $('geriAl').innerHTML=ic('undo')+'GERİ AL'; $('yinele').innerHTML=ic('redo')+'YİNELE'; $('temizle').innerHTML=ic('trash')+'TEMİZLE';
 }
 function parametreler(){ return new Promise(function(res){ if(GAS&&google.script.url){ google.script.url.getLocation(function(l){ res((l&&l.parameter)||{}); }); } else res({}); }); }
