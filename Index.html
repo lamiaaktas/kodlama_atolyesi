@@ -431,6 +431,10 @@ button.chip{cursor:pointer}
 .y-kart.calisiyor{outline:4px solid var(--ink);outline-offset:2px;transform:translateY(-4px) scale(1.06)}
 .y-say{position:absolute;bottom:-9px;right:-7px;min-width:28px;height:28px;padding:0 4px;border-radius:999px;background:#fff;color:var(--ink);font-family:var(--f-d);font-size:17px;border:2.5px solid var(--ink);display:grid;place-items:center}
 .y-sil{position:absolute;top:-9px;right:-9px;width:26px;height:26px;border-radius:50%;background:var(--kirmizi);color:#fff;font-size:13px;display:grid;place-items:center;border:2.5px solid #fff}
+.y-ipucu{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff8ec;border-radius:16px;padding:8px;font-family:var(--f-d);font-size:22px;color:#8a6a32}
+.y-mk{width:44px;font-size:22px;box-shadow:0 3px 0 var(--d);pointer-events:none}
+.y-mk .y-say{min-width:22px;height:22px;font-size:13px;bottom:-7px;right:-7px}
+.y-kart.arti{animation:r-pop .35s cubic-bezier(.3,1.7,.5,1)}
 .y-palet{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .y-pk{font-size:42px}
 .y-pk:hover{transform:translateY(-2px)}
@@ -806,7 +810,7 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-say{opacity:.45;poi
       <div class="y-tahta-kap"><div class="y-tahta" id="yTahta"></div></div>
     </div>
     <div class="y-sag">
-      <div class="y-kutu"><div class="y-baslik"><span>KODUN</span><span id="yKartSay"></span></div><div class="y-slotlar" id="ySlotlar"></div>
+      <div class="y-kutu"><div class="y-baslik"><span>KODUN</span><span id="yKartSay"></span></div><div class="y-ipucu" id="yIpucu" hidden aria-hidden="true"></div><div class="y-slotlar" id="ySlotlar"></div>
         <div class="y-eylem"><button class="cb beyaz yuvarlak kucuk" id="yGeriKart" aria-label="Son kartı çıkar" title="Son kartı çıkar"></button><button class="cb beyaz yuvarlak kucuk" id="yTemizle" aria-label="Hepsini sil" title="Hepsini sil"></button><button class="cb beyaz yuvarlak kucuk" id="yBastan" aria-label="Robotu başa al" title="Robotu başa al"></button></div></div>
       <div class="y-kutu"><div class="y-baslik"><span>OKLAR</span></div><div class="y-palet" id="yPalet"></div></div>
       <button class="cb yesil y-oyna" id="yOyna" aria-label="Oyna"></button>
@@ -2849,7 +2853,7 @@ const Y_SEVIYE=[
   {say:1,h:['......','......','S....P','......','......']},
   {say:1,h:['P.....','......','......','......','.....S']},
   {say:1,h:['S.#...','..#...','..#.#.','....#P','......']},
-  {say:1,h:['S....#','####.#','.....#','.#####','.....P']},
+  {say:1,h:['S...##','###.##','.....P','.####.','......']},
   {say:1,h:['..#..P','..#.#.','S.#.#.','....#.','###...']},
   {say:1,h:['P.....','#####.','.#S...','.####.','......']}
 ];
@@ -2981,12 +2985,18 @@ function yKodCiz(){
     k.appendChild(b);
   }
   $('yKartSay').textContent=Y.kartlar.length+' / '+Y_SLOT;
+  const ip=$('yIpucu'); ip.hidden=!say;
+  if(say&&!ip.firstChild) ip.innerHTML='<span class="y-kart y-r y-mk">'+ic('right')+'</span><b>+</b><span class="y-kart y-r y-mk">'+ic('right')+'</span><b>=</b><span class="y-kart y-r y-mk">'+ic('right')+'<span class="y-say">2</span></span>';
 }
 function yPaletCiz(){
   const p=$('yPalet'); p.innerHTML='';
   [['u','Yukarı'],['l','Sola'],['r','Sağa'],['d','Aşağı']].forEach(function(t){
     const b=el('button','y-kart y-'+t[0]+' y-pk'); b.innerHTML=ic(Y_OK[t[0]]); b.setAttribute('aria-label',t[1]);
-    b.onclick=function(){ if(Y.calisiyor) return; if(Y.kartlar.length>=Y_SLOT){ bildir('Kodun doldu!'); return; } Y.kartlar.push({d:t[0],n:1}); ton(520,70,'triangle'); yKodCiz(); };
+    b.onclick=function(){ if(Y.calisiyor) return;
+      const say=yHarita(S.yuru.secili).say, son=Y.kartlar[Y.kartlar.length-1];
+      if(say&&son&&son.d===t[0]&&son.n<5){ son.n++; ton(400+son.n*80,70,'triangle'); yKodCiz(); const k=$('ySlotlar').children[Y.kartlar.length-1]; if(k) k.classList.add('arti'); return; }
+      if(Y.kartlar.length>=Y_SLOT){ bildir(say?'Kodun doldu! Aynı oka tekrar dokun, sayı artsın.':'Kodun doldu!'); return; }
+      Y.kartlar.push({d:t[0],n:1}); ton(520,70,'triangle'); yKodCiz(); };
     p.appendChild(b);
   });
 }
