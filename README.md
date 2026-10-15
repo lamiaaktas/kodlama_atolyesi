@@ -8,3 +8,7 @@
 Çocukların çalışmaları, sınıf listeleri ve profiller bu depoda değil, öğretmenin Google Drive'ında tutulur.
 
 Karakter çizimleri: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (MIT lisansı).
+
+## Diğer uygulamalar
+
+- [`dijital-kale/`](dijital-kale/) – Dijital Kale Macerası: 4. sınıflar için dijital vatandaşlık dersleri (ayrı Apps Script projesi).

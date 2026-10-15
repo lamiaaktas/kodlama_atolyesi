@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: blok dünyası — gökyüzü zemini, üstte çimen şeridi, ortada taş/tahta paneller; tek bir görsel dünya (tek tema) */
+:root{
+  --sky:#8cc4ee; --sky-deep:#5d9fd6;
+  --grass:#5f9f37; --grass-dark:#3f7424;
+  --dirt:#86573a; --dirt-dark:#5e3b25;
+  --panel:#e4dccb; --panel-hi:#f6f0e2; --panel-lo:#a89a80;
+  --ink:#22201c; --ink-soft:#4d473d;
+  --stone:#82868c; --stone-dark:#55585d;
+  --plank:#b48a52; --gold:#f2c230; --gold-dark:#b8860b;
+  --ok:#3f8f2a; --ok-bg:#d6efc6; --bad:#b8322a; --bad-bg:#f7d3cd;
+  --water:#3d7bd6;
+  --font-pixel:"Pixelify Sans","Courier New",monospace;
+  --font-body:"Nunito","Trebuchet MS",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--sky);color:var(--ink)}
+body{font-family:var(--font-body);font-size:17px;line-height:1.5;min-height:100vh;
+  background:linear-gradient(var(--sky) 0 60%, var(--sky-deep)) fixed;}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
+.px{image-rendering:pixelated;image-rendering:crisp-edges}
+
+/* üst şerit */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--grass) var(--tex-grass-strip,none) repeat-x;background-size:32px 32px;
+  border-bottom:4px solid var(--dirt-dark)}
+.top-in{max-width:960px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{font-family:var(--font-pixel);font-weight:700;font-size:22px;color:#fff;text-shadow:3px 3px 0 var(--grass-dark);letter-spacing:.5px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xp{font-family:var(--font-pixel);font-size:16px;background:var(--ink);color:var(--gold);padding:4px 10px;border:3px solid #000;box-shadow:inset -3px -3px 0 #000,inset 3px 3px 0 #444;white-space:nowrap}
+.who{font-family:var(--font-pixel);color:#fff;text-shadow:2px 2px 0 var(--grass-dark);white-space:nowrap;max-width:30vw;overflow:hidden;text-overflow:ellipsis}
+
+main{max-width:960px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+
+/* paneller */
+.panel{background:var(--panel);border:4px solid var(--ink);box-shadow:inset 4px 4px 0 var(--panel-hi),inset -4px -4px 0 var(--panel-lo),6px 6px 0 rgba(0,0,0,.28);padding:20px}
+h1,h2,h3{font-family:var(--font-pixel);font-weight:700;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:30px} h2{font-size:24px} h3{font-size:19px}
+.eyebrow{font-family:var(--font-pixel);font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft)}
+p{margin:0}
+
+/* butonlar */
+.btn{font-family:var(--font-pixel);font-weight:600;font-size:18px;border:3px solid #000;padding:10px 18px;background:var(--stone);color:#fff;
+  box-shadow:inset 3px 3px 0 rgba(255,255,255,.35),inset -3px -3px 0 rgba(0,0,0,.35);text-shadow:2px 2px 0 rgba(0,0,0,.45);min-height:48px}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{box-shadow:inset -3px -3px 0 rgba(255,255,255,.3),inset 3px 3px 0 rgba(0,0,0,.4)}
+.btn.go{background:var(--grass)}
+.btn.gold{background:var(--gold-dark)}
+.btn.ghost{background:var(--panel-lo)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+
+/* kale */
+.castle-wrap{display:grid;gap:14px}
+.castle{width:100%;max-width:100%;aspect-ratio:28/16;display:block;border:4px solid var(--ink);background:var(--sky)}
+.hotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.slot{background:#3b3a36;border:3px solid #000;box-shadow:inset 3px 3px 0 #1c1b19,inset -3px -3px 0 #67645c;padding:8px 4px;display:grid;justify-items:center;gap:6px;text-align:center;min-width:0}
+.slot .ic{width:40px;height:40px;background-size:cover;border:2px solid #000;opacity:.25;filter:grayscale(1)}
+.slot.got .ic{opacity:1;filter:none}
+.slot span{font-family:var(--font-pixel);font-size:12px;color:#cfc8b8;line-height:1.1}
+.slot.got span{color:var(--gold)}
+
+.hub-head{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hub-head .mascot{width:72px;height:72px;flex:none}
+.hub-head > div{flex:1;min-width:220px;display:grid;gap:6px}
+
+.levels{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.level{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center;text-align:left;padding:14px;background:var(--panel);border:4px solid var(--ink);
+  box-shadow:inset 3px 3px 0 var(--panel-hi),inset -3px -3px 0 var(--panel-lo),5px 5px 0 rgba(0,0,0,.25)}
+.level:hover{transform:translate(-1px,-1px);box-shadow:inset 3px 3px 0 var(--panel-hi),inset -3px -3px 0 var(--panel-lo),7px 7px 0 rgba(0,0,0,.25)}
+.level .blk{width:64px;height:64px;border:3px solid #000;background-size:cover;box-shadow:inset -6px -6px 0 rgba(0,0,0,.25),inset 6px 6px 0 rgba(255,255,255,.18)}
+.level .meta{display:grid;gap:4px;min-width:0}
+.level .t{font-family:var(--font-pixel);font-weight:700;font-size:19px;line-height:1.1}
+.level .s{font-size:14px;color:var(--ink-soft)}
+.chip{justify-self:start;font-family:var(--font-pixel);font-size:13px;padding:2px 8px;border:2px solid #000;background:#fff}
+.chip.done{background:var(--ok);color:#fff}
+.chip.prog{background:var(--gold)}
+
+/* ders ekranı */
+.lesson-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.lesson-bar .ttl{flex:1;min-width:200px;display:grid;gap:2px}
+.pips{display:flex;flex-wrap:wrap;gap:4px}
+.pip{width:18px;height:18px;border:2px solid #000;background:#fff}
+.pip.done{background:var(--grass)}
+.pip.now{background:var(--gold)}
+.stage{display:grid;gap:16px;min-height:300px}
+.stage .q{font-size:21px;font-weight:800;line-height:1.35}
+.story{background:#fffaf0;border:3px dashed var(--plank);padding:14px 16px;font-size:18px}
+.story b{font-family:var(--font-pixel)}
+.tag{font-family:var(--font-pixel);display:inline-block;background:var(--ink);color:#fff;padding:2px 8px;font-size:13px;letter-spacing:1px}
+.goals{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.goal{background:#fff;border:3px solid var(--ink);padding:12px;display:grid;gap:4px}
+.goal b{font-family:var(--font-pixel);font-size:16px;color:var(--grass-dark);text-transform:uppercase;letter-spacing:.5px}
+ul.clean{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+ul.clean li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+ul.clean li::before{content:"";width:14px;height:14px;margin-top:5px;background:var(--grass);border:2px solid #000}
+
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.opt{text-align:left;background:#fff;border:3px solid var(--ink);padding:12px 14px;font-weight:700;font-size:18px;min-height:56px;
+  box-shadow:inset -3px -3px 0 #cfc6b4}
+.opt:hover:not([disabled]){background:#fff8de}
+.opt.sel{background:#fff1b8;border-color:var(--gold-dark)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok)}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.opt .mk{float:right;font-family:var(--font-pixel)}
+.fb{border:3px solid var(--ink);padding:12px 14px;background:#fff;display:grid;gap:6px}
+.fb.ok{border-color:var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb.info{border-color:var(--water);background:#dbe8fb}
+.fb b{font-family:var(--font-pixel);font-size:18px}
+
+textarea,input[type=text]{width:100%;font:inherit;font-size:18px;border:3px solid var(--ink);padding:10px 12px;background:#fff;color:var(--ink);box-shadow:inset 3px 3px 0 #ddd5c4}
+textarea{min-height:110px;resize:vertical}
+label.lb{font-family:var(--font-pixel);font-size:16px;display:block;margin-bottom:6px}
+
+/* sıralama */
+.pool{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:10px;border:3px dashed var(--panel-lo);background:#f3eddf}
+.item{background:#fff;border:3px solid var(--ink);padding:8px 12px;font-weight:700;font-size:16px;box-shadow:3px 3px 0 rgba(0,0,0,.2)}
+.item.sel{background:var(--gold);transform:translate(-2px,-2px)}
+.item.ok{background:var(--ok-bg);border-color:var(--ok)}
+.item.bad{background:var(--bad-bg);border-color:var(--bad)}
+.buckets{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.bucket{border:4px solid var(--ink);background:var(--stone) var(--tex-stone,none);background-size:48px 48px;padding:10px;display:grid;gap:8px;align-content:start;min-height:130px;text-align:left}
+.bucket .bh{font-family:var(--font-pixel);font-size:16px;color:#fff;text-shadow:2px 2px 0 #000;background:rgba(0,0,0,.45);padding:4px 8px}
+.bucket .in{display:flex;flex-wrap:wrap;gap:6px}
+.bucket.target{outline:4px solid var(--gold);outline-offset:-4px}
+
+/* gerçek mi sahte mi */
+.mock{background:#fff;border:3px solid #333;font-family:system-ui,Arial,sans-serif;color:#222;max-width:560px;width:100%;justify-self:center;font-size:16px}
+.mock .bar{background:#e9ecf1;border-bottom:2px solid #c9ced6;padding:8px 12px;font-size:14px;display:grid;gap:2px;word-break:break-word}
+.mock .bd{padding:14px;display:grid;gap:10px}
+.mock .fine{font-size:10px;color:#777;line-height:1.3}
+.mock .cta{justify-self:start;background:#e8462f;color:#fff;font-weight:700;padding:8px 14px;border-radius:4px}
+.mock .cta.blue{background:#2a6fdb}
+.mock.popup{border:4px solid #c00;background:#fff4f4}
+.mock.popup .bar{background:#c00;color:#fff;border-color:#900;font-weight:700}
+.url{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #c9ced6;border-radius:14px;padding:4px 10px;font-family:ui-monospace,Menlo,monospace;font-size:14px;word-break:break-all}
+.stars{color:#e0a400;letter-spacing:2px}
+.rf-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.rf-btns .btn{min-width:150px;font-size:20px}
+.rf-btns .real{background:var(--ok)}
+.rf-btns .fake{background:var(--bad)}
+
+/* şifre lab */
+.meter{height:22px;border:3px solid #000;background:#333;display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:2px}
+.meter i{background:#555}
+.meter.l1 i:nth-child(-n+3){background:var(--bad)}
+.meter.l2 i:nth-child(-n+5){background:var(--gold)}
+.meter.l3 i{background:var(--grass)}
+.checks{display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.chk{display:flex;gap:8px;align-items:center;font-weight:700;font-size:15px}
+.chk::before{content:"";flex:none;width:16px;height:16px;border:2px solid #000;background:#fff}
+.chk.on::before{background:var(--grass)}
+.idea{font-family:ui-monospace,Menlo,monospace;font-size:20px;background:var(--ink);color:var(--gold);padding:6px 12px;display:inline-block;word-break:break-all}
+.warn{font-weight:800;color:var(--bad)}
+
+.nav{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}
+details.teacher{background:#fff;border:3px solid var(--ink);padding:10px 14px}
+details.teacher summary{font-family:var(--font-pixel);font-size:16px;cursor:pointer}
+details.teacher ol{margin:10px 0 0;padding-left:0;list-style:none;display:grid;gap:8px}
+details.teacher li{display:grid;grid-template-columns:52px 1fr;gap:10px;font-size:15px}
+details.teacher li b{font-family:var(--font-pixel);background:var(--plank);color:#fff;text-align:center;border:2px solid #000;height:fit-content;font-variant-numeric:tabular-nums}
+
+/* katman */
+.overlay{position:fixed;inset:0;background:rgba(20,30,50,.6);display:grid;place-items:center;z-index:50;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow:auto}
+.overlay .panel{max-width:520px;width:100%;display:grid;gap:14px}
+.badge-big{width:96px;height:96px;justify-self:center;border:4px solid #000;background-size:cover;animation:pop .6s steps(6) both}
+@keyframes pop{0%{transform:scale(.2) rotate(-20deg)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.card-sum{background:#fff;border:3px dashed var(--ink);padding:12px;display:grid;gap:6px;font-size:15px}
+.card-sum b{font-family:var(--font-pixel)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px;color:#21324a}
+.linkish{background:none;border:none;text-decoration:underline;padding:4px;color:#21324a}
+
+.btn.sm{font-size:15px;padding:6px 12px;min-height:40px}
+.btn.big{font-size:22px;padding:12px 24px;min-height:56px}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.namebtn{background:#fff;border:3px solid var(--ink);padding:14px 12px;font-weight:800;font-size:18px;text-align:left;box-shadow:inset -3px -3px 0 #cfc6b4,4px 4px 0 rgba(0,0,0,.2);min-height:60px}
+.namebtn:hover{background:#fff1b8}
+.wait{display:grid;gap:14px;justify-items:center;text-align:center}
+.wait-line,.waitnote{font-weight:700;color:var(--ink-soft);display:flex;align-items:center;gap:8px;margin:0}
+.dotw{display:inline-block;width:12px;height:12px;background:#e23b2e;border:2px solid #000;animation:blink 1.2s steps(2) infinite;vertical-align:middle}
+@keyframes blink{50%{opacity:.25}}
+.livechip{font-family:var(--font-pixel);background:#000;color:#fff;padding:4px 10px;display:inline-flex;gap:8px;align-items:center}
+.banner{background:var(--bad-bg);border:3px solid var(--bad);padding:10px 14px;font-weight:800}
+.sv{font-family:var(--font-pixel);font-size:14px;color:var(--ink-soft)}
+.sv.ok{color:var(--ok)}.sv.err{color:var(--bad)}
+.nav{align-items:center}
+.split{display:grid;gap:16px;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.preview{pointer-events:none}
+.pip.clickable{cursor:pointer;width:24px;height:24px;padding:0}
+.bars{display:grid;gap:8px}
+.bar-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 32px;gap:8px;align-items:center;font-size:15px;font-weight:700}
+.bar-t{height:20px;border:2px solid #000;background:#fff;display:block}
+.bar-t i{display:block;height:100%;background:var(--stone)}
+.bar-row.ok .bar-t i{background:var(--ok)}
+.bar-row b{font-variant-numeric:tabular-nums;text-align:right}
+.count{font-size:18px;margin:0}
+.texts{display:grid;gap:8px;max-height:380px;overflow:auto}
+.tx{background:#fff;border:2px solid var(--ink);padding:8px 10px;display:grid;gap:2px;font-size:15px}
+.tx b{font-family:var(--font-pixel)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:15px}
+th,td{border:2px solid var(--ink);padding:6px 8px;text-align:left;vertical-align:top}
+thead th{font-family:var(--font-pixel);font-weight:600;background:var(--stone-dark);color:#fff;white-space:nowrap}
+tbody th{background:#f6f0e2;white-space:nowrap}
+td{font-variant-numeric:tabular-nums}
+.cell-ok{background:var(--ok-bg);text-align:center;font-weight:800}.cell-bad{background:var(--bad-bg);text-align:center;font-weight:800}
+.clsgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.clsgrid textarea{min-height:220px;font-size:16px}
+details summary{cursor:pointer;font-weight:700}
+
+.codeform{display:grid;gap:10px;width:100%;max-width:360px}
+.codein{font-family:var(--font-pixel);font-size:32px!important;text-align:center;letter-spacing:4px;text-transform:uppercase}
+.codebox{display:grid;justify-items:center;background:var(--ink);color:var(--gold);padding:6px 16px;border:3px solid #000}
+.codebox .eyebrow{color:#cfc8b8}
+.codebox b{font-family:var(--font-pixel);font-size:30px;letter-spacing:3px}
+.hintsm{font-size:13px;color:var(--ink-soft);margin:0}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:520px){h1{font-size:24px}.brand{font-size:18px}.stage .q{font-size:19px}.hotbar{gap:4px}.slot span{font-size:10px}.slot .ic{width:30px;height:30px}}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand">Dijital Kale Macerası</div>
+  <div class="who" id="who"></div>
+  <div class="xp" id="xp">XP 0</div>
+</div></header>
+<main id="app"></main>
+<div id="layer"></div>
+
+<script>
+document.documentElement.lang='tr';
+/* ---------- Doku üretici (özgün 16x16 piksel blok desenleri) ---------- */
+function rng(seed){let s=seed;return()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296}}
+const TEX={};
+function makeTex(kind,seed){
+  const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');const r=rng(seed||7);
+  const P=(x,y,col)=>{g.fillStyle=col;g.fillRect(x,y,1,1)};
+  const pick=a=>a[Math.floor(r()*a.length)];
+  for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+    let col;
+    switch(kind){
+      case'grass':{const edge=3+Math.floor(r()*2.2);col=y<edge?pick(['#5f9f37','#6bb03f','#4f8a2c','#73b847']):pick(['#86573a','#7a4f33','#946243','#6e472e']);break}
+      case'dirt':col=pick(['#86573a','#7a4f33','#946243','#6e472e','#86573a']);break;
+      case'stone':col=pick(['#82868c','#8e9298','#767a80','#82868c','#6c7076']);break;
+      case'brick':{const row=Math.floor(y/4),off=row%2?4:0;col=(y%4===3||((x+off)%8===7))?'#4c4f53':pick(['#8a8e94','#7d8187','#969aa0']);break}
+      case'plank':{col=(y%4===3)?'#7c5a2e':pick(['#b48a52','#a87f48','#bf955c','#b48a52']);if(y%4!==3&&x===((Math.floor(y/4)*5+3)%16))col='#7c5a2e';break}
+      case'gold':col=(x===0||y===0)?'#fff3a0':(x===15||y===15)?'#b8860b':pick(['#f2c230','#f7d34a','#e3b020','#f2c230']);break;
+      case'water':col=((x+y*2)%7===0)?'#7fb2f0':pick(['#3d7bd6','#356fc4','#4686e0']);break;
+      case'leaves':col=pick(['#3f7a26','#356a1f','#4a8c2e','#2c5a18']);break;
+      case'wood':col=(x%5===0)?'#4a321c':pick(['#6b4a2b','#5e4126','#73502f']);break;
+      case'wool':col=pick(['#c8342b','#b82e26','#d23c32']);break;
+      case'glass':col=(x===0||y===0||x===15||y===15)?'#d9f0ff':(x===y+3||x===y+4)?'#ffffff':'#a8d4f0';break;
+    }
+    P(x,y,col);
+  }
+  return c;
+}
+['grass','dirt','stone','brick','plank','gold','water','leaves','wood','wool','glass'].forEach((k,i)=>TEX[k]=makeTex(k,11+i*97));
+const texURL=k=>TEX[k].toDataURL();
+document.documentElement.style.setProperty('--tex-stone',`url(${texURL('brick')})`);
+(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const g=c.getContext('2d');g.drawImage(TEX.grass,0,0);
+  document.documentElement.style.setProperty('--tex-grass-strip',`url(${c.toDataURL()})`)})();
+
+/* ---------- Maskot: Bilge Baykuş ---------- */
+const OWL=["..b......b..",".bb......bb.",".bbbbbbbbbb.","bbwwwbbwwwbb","bbwkwbbwkwbb","bbwwwoowwwbb","bblllooolllb","bbllllllllbb","bbllllllllbb",".bllllllllb.","..bbbbbbbb..","...oo..oo..."];
+function owlURL(){const c=document.createElement('canvas');c.width=c.height=12;const g=c.getContext('2d');
+  const C={b:'#7a4a2a',l:'#d9b48a',w:'#ffffff',k:'#22201c',o:'#f0a030'};
+  OWL.forEach((row,y)=>[...row].forEach((ch,x)=>{if(C[ch]){g.fillStyle=C[ch];g.fillRect(x,y,1,1)}}));return c.toDataURL()}
+const OWL_URL=owlURL();
+
+/* ---------- Ders içerikleri (öğretmenin Drive dokümanlarından) ---------- */
+const LESSONS=[
+{id:1,part:'Kalenin Kapısı',title:'Paylaşırken Düşün',sub:'Gizlilik senaryoları — 1. bölüm',tex:'plank',badge:'Sır Kalkanı',
+ plan:[[5,'Hedefler ekranda gösterilir ve konuşulur.'],[7,'Isınma sorusu: Gizli kalmasını istediğin bir bilgi paylaşılsa ne hissederdin? Yanıtlar üzerine sohbet.'],[20,'Örnek 1 (Ahmet’in şifresi) ve Örnek 2 (günlük) üzerinde çalışma; her biri için yaklaşık 3’er dakika, ardından sınıf tartışması.'],[8,'Çıkış kartı ve tabletlerin kurallara uygun teslimi.']],
+ steps:[
+  {type:'goals',title:'Bugünkü görevimiz',goals:[['Analiz edelim','Herkesin gizlilik tercihleri farklı olabilir. Biri her şeyini internette paylaşırken, bir başkası bunu istemeyebilir.'],['Anlayalım','Çevrimiçi ortamda farklı durumlar, farklı gizlilik seviyeleri gerektirir.']]},
+  {type:'open',key:'isinma',tag:'Isınma',q:'Birisi senin gizli kalmasını istediğin bir bilgiyi paylaşsa ne düşünürdün, ne hissederdin?',hint:'Birkaç cümle yaz. Doğru ya da yanlış cevap yok.'},
+  {type:'choice',tag:'Örnek 1',story:'Bir gün biri Ahmet’e “Telefonundaki şifreyi ara sıra değiştirmek iyi olur” demiş. Ahmet de yeni şifre olarak en sevdiği oyunun adını seçmiş. En yakın arkadaşı Mete de bu oyunu çok seviyor ama kendi hesabı yokmuş, bu yüzden oyunu Ahmet’in hesabıyla oynuyormuş. Ahmet yeni şifresini öğrenince hemen Mete’ye de söylemiş.',
+   q:'Ahmet’in şifresini değiştirmesi iyi bir fikir miydi?',options:[{t:'EVET',ok:true},{t:'HAYIR'}],
+   fb:'Evet! Şifreleri ara sıra (en az yılda bir kez) değiştirmek ve farklı hesaplar için farklı şifreler kullanmak temel bir gizlilik kuralıdır. Ama dikkat: En sevdiği oyunun adı kolay tahmin edilir. Bunu 5. derste konuşacağız!'},
+  {type:'choice',tag:'Örnek 1',q:'Ahmet’in şifresini Mete ile paylaşması iyi bir fikir miydi?',options:[{t:'EVET'},{t:'HAYIR',ok:true}],
+   fb:'Hayır. En yakın arkadaşımız bile olsa şifremizi paylaşmamalıyız. Arkadaşlıklar bazen bozulur, insanlar birbirine kızar. Şifreni bilen biri senin adına giriş yapıp başkaları hakkında kötü şeyler yazabilir ve herkes bunu senin yazdığını sanır. Şifreni yalnızca annen, baban ya da yasal vasinle paylaşabilirsin.'},
+  {type:'discuss',title:'Sınıfça konuşalım',prompts:['Arkadaşın sana kızsa ve şifreni bilse ne olabilir?','Bir oyunda başka bir oyuncu senin adınla oynamak için şifreni isterse verir misin?','Şifreni öğrenen biri taşınsa bile hesabına sonsuza kadar girebilsin ister misin?']},
+  {type:'choice',tag:'Örnek 2',story:'Bir arkadaşın günlük tutuyor. Başka bir arkadaşının bu günlüğü bulduğunu ve kendince komik bir şaka yaparak bazı bölümlerini internette yayınladığını duyuyorsun.',
+   q:'Günlüğü bulan arkadaşın, bu bilgileri internette paylaşmakla hata yaptı mı?',options:[{t:'EVET',ok:true},{t:'HAYIR'}],
+   fb:'Evet, hata yaptı. Paylaşılan bölüm komik bile olsa günlük başkasına ait ve gizli kalması isteniyor. Başkasının özel bilgisini izinsiz paylaşmak onu çok üzebilir.'},
+  {type:'choice',tag:'Örnek 2',opinion:true,q:'Biri senin gizli tutulmasını istediğin bir şeyini herkesle paylaşsa kendini nasıl hissederdin?',options:[{t:'HARİKA'},{t:'KORKUNÇ'},{t:'GARİP'},{t:'DİĞER'}],
+   fb:'Duyguların değerli! Çoğu kişi böyle bir durumda kendini kötü, utanmış ya da kırgın hisseder. Bu yüzden başkalarının gizliliğine de kendi gizliliğimiz kadar özen gösteririz.'},
+  {type:'exit',q:'Bu derste öğrendiğin en önemli şey nedir?'}
+ ]},
+{id:2,part:'Kale Duvarları',title:'Kime, Ne Kadar?',sub:'Gizlilik senaryoları — 2. bölüm',tex:'brick',badge:'Gizlilik Haritası',
+ plan:[[3,'Geçen haftanın kısa tekrarı: Şifre ve günlük örnekleri.'],[10,'Örnek 3 (tatil mesajı) ve tartışma.'],[17,'Örnek 4 (sahte hesap) ve “Gizlilik Seviyeleri” sıralama etkinliği.'],[5,'Çıkış kartı ve tabletlerin teslimi.']],
+ steps:[
+  {type:'info',title:'Hatırlayalım',list:['Şifremizi en yakın arkadaşımızla bile paylaşmayız; yalnızca annemiz, babamız ya da yasal vasimiz bilebilir.','Başkasına ait özel bilgileri (günlük gibi) izinsiz paylaşmayız.','Bugün, farklı bilgilerin farklı gizlilik seviyelerine ihtiyaç duyduğunu keşfedeceğiz.']},
+  {type:'choice',tag:'Örnek 3',story:'Biri, arkadaşının herkese açık sosyal medya sayfasına “İyi tatiller!” yazıyor.',
+   q:'Tatile giden arkadaş, dünyadaki herkesin onun tatilde olduğunu bilmesini ister miydi?',options:[{t:'EVET'},{t:'HAYIR',ok:true}],
+   fb:'Büyük ihtimalle hayır. Ailesi nerede olduklarının gizli kalmasını isteyebilir. Ayrıca evde kimse yokken bunun herkese duyurulması evin güvenliği için risk olabilir.'},
+  {type:'choice',tag:'Örnek 3',multi:true,q:'“İyi tatiller” dileğini iletmenin daha özel yolları hangileri? (Birden fazla seçebilirsin.)',
+   options:[{t:'Özel mesaj göndermek',ok:true},{t:'Telefonla aramak',ok:true},{t:'Herkese açık sayfaya yazmak'},{t:'Tatilden önce yüz yüze söylemek',ok:true}],
+   fb:'Özel mesaj, telefon ya da yüz yüze söylemek iyi dileklerini iletir ama arkadaşının tatil bilgisini herkese duyurmaz.'},
+  {type:'story',tag:'Örnek 4',text:'Bir arkadaşının, başka bir öğrencinin kimliğini kullanan ve onu kötü gösteren sahte bir sosyal medya hesabı açtığını biliyorsun. Bu hesapta o öğrencinin fotoğrafları gibi özel bilgileri de var.'},
+  {type:'choice',tag:'Örnek 4',q:'Bir öğretmene ya da güvendiğin bir yetişkine söylemeli misin?',options:[{t:'EVET',ok:true},{t:'HAYIR'}],
+   fb:'Evet. Bu “ispiyonlamak” değildir. Amaç birinin başını belaya sokmak değil, zarar gören kişiyi utanç, dışlanma ve zorbalıktan korumaktır.'},
+  {type:'choice',tag:'Örnek 4',q:'Kimse hiçbir şey yapmasa ne olur?',options:[{t:'Sorun kendiliğinden düzelir'},{t:'O kişiye verilen zarar devam eder',ok:true},{t:'Hiç kimse fark etmez'}],
+   fb:'Zarar devam eder. Başkalarını önemsemek, gerektiğinde güvendiğimiz bir yetişkinden yardım istemek demektir.'},
+  {type:'discuss',title:'Sınıfça konuşalım',prompts:['Kimliği taklit edilen öğrencinin bunu bilmeye hakkı var mı? Ona söyler miydin, ne derdin?','Hesabı açan kişiye kapatmasını söylemek kolay mı? Kendini rahat hissetmezsen ne yapabilirsin?','Ailede herkesin aynı şifreyi kullanması ne gibi riskler taşır? Arkadaşlar eve geldiğinde aile şifrelerini nasıl koruruz?']},
+  {type:'sort',tag:'Etkinlik',q:'Gizlilik seviyeleri: Her bilgiyi kime söyleyebileceğine göre yerleştir. Önce bir karta, sonra bir kutuya dokun.',
+   buckets:['Herkes bilebilir','Yakın arkadaşlarım bilebilir','Sadece ben ve ailem'],
+   items:[{t:'En sevdiğim hayvan',ok:[0,1]},{t:'Ev adresim',ok:[2]},{t:'Şifrelerim',ok:[2]},{t:'Telefon numaram',ok:[1,2]},{t:'Tatildeyken evimizin boş olduğu',ok:[2]},{t:'Adımın olmadığı bir resim çizimim',ok:[0,1]},{t:'Doğum günü partime kimleri çağırdığım',ok:[1,2]}],
+   fb:'Bazı bilgiler herkesle paylaşılabilir, bazıları sadece yakınlarla, bazıları ise yalnızca ailemizle. Bazı kartlarda birden fazla doğru cevap var. Önemli olan paylaşmadan önce düşünmek!'},
+  {type:'exit',q:'Bu derste öğrendiğin en önemli şey nedir?'}
+ ]},
+{id:3,part:'Gözcü Kulesi',title:'Oltaya Gelme',sub:'Kimlik avı ve dolandırıcılık işaretleri',tex:'stone',badge:'İz Sürücü',
+ plan:[[3,'Ders hedefleri gösterilir.'],[10,'Sahtekârlık belirtileri ve günlük hayattan örnekler; kandırılırsan neler yapmalısın.'],[17,'İpucu soruları ve “Hangi adres gerçek?” etkinliği (ikili gruplar).'],[5,'Cevaplar açıklanır, çıkış kartı, tabletlerin teslimi.']],
+ steps:[
+  {type:'goals',title:'Bugünkü görevimiz',goals:[['Öğrenmek','İnsanların internette ve cihazlarda başkalarını kandırmak için kullandığı yöntemleri öğrenmek.'],['Tanımak','Dolandırıcılık denemelerinin işaretlerini tanımak.'],['Dikkatli olmak','Kişisel bilgilerimizi nasıl ve kimlerle paylaştığımıza dikkat etmek.'],['Bilmek','Kandırıldığını düşünürsen güvendiğin bir yetişkinle konuşmak.']]},
+  {type:'info',title:'Gözcünün ipuçları',list:['Profesyonel görünüyor mu? Logo doğru mu, yazım hatası var mı?','Adres (URL) aradığın şirketin adıyla birebir eşleşiyor mu?','Sinir bozucu açılır pencereler (pop-up) var mı?','Adres, yanında küçük bir kilit olan https:// ile mi başlıyor?','Küçük yazıda (dipnotta) ne yazıyor?','Gerçek olamayacak kadar iyi bir şey mi sunuyor?','Mesaj biraz garip mi geliyor? “Seni tanıyorum” diyor ama emin olamıyor musun?']},
+  {type:'choice',tag:'Gözcü sorusu',q:'Bu üç adresten hangisi gerçek arama sitesine aittir?',options:[{t:'http://www.google.com',ok:true},{t:'http://www.google.net'},{t:'http://www.g00gle.co'}],
+   fb:'Gerçek adres google.com. Sahte siteler adresin sonunu (.net, .co) değiştirir ya da harflerin yerine benzer rakamlar koyar (o yerine 0). Adresleri harf harf oku!'},
+  {type:'choice',tag:'Gözcü sorusu',q:'Adres çubuğundaki küçük kilit ve “https://” bize ne anlatır?',options:[{t:'Bağlantının şifreli ve daha güvenli olduğunu',ok:true},{t:'Sitenin kesinlikle iyi niyetli olduğunu'},{t:'Sitenin ücretsiz olduğunu'}],
+   fb:'Kilit, bağlantının şifreli olduğunu gösterir. Bu iyi bir işarettir ama tek başına yetmez: Diğer ipuçlarına da bakmalıyız.'},
+  {type:'choice',tag:'Gözcü sorusu',q:'Peki kandırılırsan ne yapmalısın?',options:[{t:'A) Annene, babana, öğretmenine ya da güvendiğin bir yetişkine hemen söylemek'},{t:'B) İnternet hesaplarının şifrelerini değiştirmek'},{t:'C) Mesaj onlara da gidebileceği için arkadaşlarına haber vermek'},{t:'D) Mümkünse mesajı spam olarak bildirmek'},{t:'E) Yukarıdakilerin hepsi',ok:true}],
+   fb:'Hepsi! Önce paniğe kapılma. Hemen güvendiğin bir yetişkine söyle; ne kadar beklersen işler o kadar zorlaşır. Sonra şifreni değiştir, arkadaşlarını uyar ve mesajı bildir.'},
+  {type:'choice',tag:'Özetle',multi:true,q:'Bir mesajı ya da siteyi değerlendirirken kendine hangi soruları sormalısın? Emin olduklarını işaretle.',
+   options:[{t:'Küçük yazıda ne var?',ok:true},{t:'Gerçek olamayacak kadar iyi bir şey mi sunuyor?',ok:true},{t:'Renkleri güzel mi?'},{t:'Adres, aradığım adla eşleşiyor mu?',ok:true},{t:'Benden kişisel bilgi istiyor mu?',ok:true},{t:'Çok fazla emoji var mı?'}],
+   fb:'Renkler ya da emojiler bir sitenin güvenilir olup olmadığını söylemez. Küçük yazılar, fazla iyi teklifler, adres ve kişisel bilgi istekleri ise önemli ipuçlarıdır.'},
+  {type:'exit',q:'Bugün öğrendiğin en önemli şey nedir?'}
+ ]},
+{id:4,part:'Kale Hendeği',title:'Gerçek mi, Sahte mi?',sub:'Oltaya Gelme etkinliği',tex:'water',badge:'Olta Avcısı',
+ plan:[[3,'Hedefler ve ipuçlarının kısa tekrarı.'],[5,'İpucu soruları kartı birlikte okunur. Not: İnternot Posta’nın gerçek, güvenilir bir hizmet olduğunu varsayın.'],[25,'Öğrenciler yanındaki arkadaşıyla grup olur; her mesaj için sahtekârlık izlerini arar ve tartışarak karar verir.'],[7,'Öğretmen cevapları ve nedenlerini açıklar; çıkış kartı, tabletlerin teslimi.']],
+ steps:[
+  {type:'info',title:'Yanındaki arkadaşınla grup ol!',list:['Her ekranda bir mesaj, açılır pencere ya da uygulama göreceksiniz.','Birlikte inceleyin ve tartışın: Gerçek mi, sahte mi?','İpuçları: Doğru görünüyor mu? Bedava bir şey mi sunuyor? Kişisel bilgi istiyor mu? Zincir mesaj mı? Küçük yazı var mı?','Not: Bu etkinlikte “İnternot Posta” gerçek ve güvenilir bir hizmettir.']},
+  {type:'rf',kind:'mail',from:'İnternot Posta <guvenlik@internotposta.com>',subject:'Şifreniz değiştirildi',body:'Merhaba,<br>Hesabınızın şifresi bugün değiştirildi. Bu değişikliği siz yaptıysanız bir şey yapmanıza gerek yok. Siz yapmadıysanız, internotposta.com adresine kendiniz girerek hesap ayarlarınızdan şifrenizi yenileyin.',fake:false,
+   why:['Gönderen adres gerçek hizmetin adıyla eşleşiyor.','Senden şifre ya da kişisel bilgi istemiyor.','Bir bağlantıya tıklatmak yerine siteye kendin girmeni söylüyor.']},
+  {type:'rf',kind:'mail',from:'Oyun Dünyası Ödül <odul@oyun-dunyasi-bedava.biz>',subject:'TEBRİKLER!!! 10.000 ELMAS KAZANDIN',body:'Sevgili oyuncu, sen seçildin!!! 10.000 elmas seni bekliyor. Hemen <b>kullanıcı adını, şifreni ve doğum tarihini</b> yaz, elmaslar 5 dakikada hesabına gelsin!',cta:'ELMASLARI AL',fake:true,
+   why:['Gerçek olamayacak kadar iyi bir teklif: bedava elmas.','Şifreni ve doğum tarihini istiyor. Gerçek şirketler bunu mesajla istemez.','Gönderen adres garip ve aşırı ünlem kullanılmış.']},
+  {type:'rf',kind:'popup',title:'⚠ UYARI! TABLETİNİZ TEHLİKEDE',body:'Cihazınızda 37 virüs bulundu!!! Tüm fotoğraflarınız silinecek. Temizlemek için hemen tıklayın.',cta:'ŞİMDİ TEMİZLE',fake:true,
+   why:['Bilmediğin bir sorunu “tamir etmeyi” teklif ediyor.','Seni korkutup acele ettirmeye çalışan bir açılır pencere.','Böyle bir uyarı görürsen hiçbir yere tıklama, bir yetişkine göster.']},
+  {type:'rf',kind:'app',name:'Süpr Blok Yapıcı PRO',dev:'Blok Studyo Ofical',rating:'★★★★★',reviews:'12 yorum',body:'En iyi blok oyunu!!! Ücretsz indir, sınırsız altın kazan. Telfon rehberine erişim gerekir.',cta:'YÜKLE',fake:true,
+   why:['Adda ve açıklamada yazım hataları var (Süpr, Ücretsz, Ofical, Telfon).','Çok az yorum var.','Bir oyun için rehberine erişmek istemesi şüpheli.']},
+  {type:'rf',kind:'mail',from:'Selin <selin.k1987@internotposta.com>',subject:'İLET!!! Yoksa hesabın silinecek',body:'Bu mesajı 10 kişiye iletmezsen hesabın yarın silinecek! Bunu gerçekten yaşadım. Hemen ilet!!!',fake:true,
+   why:['Zincir mesaj: Herkese iletmeni istiyor.','Seni korkutuyor ve acele ettiriyor.','Gerçek hizmetler hesapları böyle mesajlarla silmez.']},
+  {type:'rf',kind:'mail',from:'Mega Fırsat <kampanya@megafirsat-tr.info>',subject:'Bedava telefon senin!',body:'Yeni akıllı telefonu <b>ÜCRETSİZ</b> kazandın! Adresini yaz, kargoya verelim.',fine:'*Kampanyaya katılan kullanıcı 24 ay boyunca aylık 200 TL ödemeyi kabul etmiş sayılır. İptal edilemez.',cta:'ADRESİMİ GÖNDER',fake:true,
+   why:['Küçük yazıyı oku: “Bedava” telefon için her ay 200 TL ödeme var!','Ev adresini istiyor.','Gerçek olamayacak kadar iyi bir teklif.']},
+  {type:'rf',kind:'browser',url:'https://www.internotposta.com/giris',lock:true,body:'İnternot Posta — Giriş<br><span style="color:#666;font-size:14px">Adresi tarayıcına kendin yazdın ve bu sayfa açıldı.</span>',cta:'Giriş yap',ctaBlue:true,fake:false,
+   why:['Adres gerçek hizmetin adıyla birebir eşleşiyor.','Kilit ve https:// var.','Siteye bir mesajdaki bağlantıdan değil, adresi kendin yazarak girdin.']},
+  {type:'exit',q:'Bugün öğrendiğin en önemli şey nedir? Bir dahaki sefere hangi ipucuna ilk bakacaksın?'}
+ ]},
+{id:5,part:'Hazine Kilidi',title:'Sırlarını Koru',sub:'Güçlü bir şifre nasıl oluşturulur?',tex:'gold',badge:'Şifre Ustası',
+ plan:[[3,'Ders hedefleri gösterilir.'],[10,'Isınma: Kötü bir şifreyi nasıl tanımlarsın? Neden güçlü şifre belirlemeliyiz?'],[10,'En çok kullanılan şifreler tahmini ve güçlü şifre tarifi.'],[12,'İkili gruplar: Öğretmen için şifre oluşturma ve arkadaşın şifresinde zayıf nokta arama.'],[5,'Doğru/yanlış etkinliği, çıkış kartı, tabletlerin teslimi.']],
+ steps:[
+  {type:'goals',title:'Bugünkü görevimiz',goals:[['Anlamak','Şifrelerimizi anne, baba veya yasal vasimiz dışında kimseyle paylaşmamanın önemini anlamak.'],['Bilmek','Güçlü bir şifre oluşturmanın kurallarını bilmek.'],['Öğrenmek','Tahmin edilmesi zor, hatırlanması kolay şifre oluşturmayı öğrenmek.']]},
+  {type:'open',key:'kotu',tag:'Isınma',q:'Kullanıcı adı: internaut — Şifre: 123456. Kötü bir şifreyi nasıl tanımlarsın?',hint:'Bu şifrede neyin yanlış olduğunu düşün.'},
+  {type:'choice',tag:'Tahmin et',multi:true,q:'Sence hangileri en çok kullanılan (yani kolay tahmin edilen) şifreler arasındadır?',
+   options:[{t:'2nd%^&sielnvsei@gj128(0'},{t:'password',ok:true},{t:'123456',ok:true},{t:'Kişinin kendi ismi',ok:true},{t:'bilgisayar',ok:true}],
+   fb:'Karışık olan ilk şifre dışındakilerin hepsi çok sık kullanılır ve saniyeler içinde tahmin edilebilir. Çevrimiçi güvenliğimiz, şifrelerimizi güçlendirmekle başlar.'},
+  {type:'info',title:'Güçlü şifre tarifi',list:['Unutmayacağın, eğlenceli bir cümle düşün.','Kelimelerin ilk harflerini al. Örnek: “3. ve 4. sınıfı Atatürk İlköğretim Okulu’nda okudum” → 34sAIO','En az 8 karakter olsun; ne kadar uzunsa o kadar iyi.','Büyük ve küçük harf, sayı ve sembolü birlikte kullan.','Bazı harflerin yerine sembol koy (a yerine @ gibi).'],
+   levels:[['Güçlü','34sAIO! gibi: Senin kolayca hatırlayabileceğin, başkalarının tahmin edemeyeceği.'],['Orta','Ataturkilkogretim gibi: Bilgisayar zor tahmin eder ama seni tanıyan biri tahmin edebilir.'],['Zayıf','Aresiseverim, Cikolatayiseverim gibi: Evcil hayvan adı gibi kişisel bilgiler içerir.']]},
+  {type:'pwlab',tag:'Şifre laboratuvarı'},
+  {type:'sort',tag:'Doğru mu, yanlış mı?',q:'Her kartı doğru kutuya yerleştir.',buckets:['Doğru!','Yanlış!'],
+   items:[{t:'Önemli hesaplarının her biri için farklı şifre kullan.',ok:[0]},{t:'Kişisel bilgilerini (adın, adresin, telefonun) şifrende kullan.',ok:[1]},{t:'Takma adın ya da sevdiğin takım gibi tahmin edilmesi kolay bir şifre seç.',ok:[1]},{t:'En az 8 karakter kullan.',ok:[0]},{t:'Unutmamak için şifreni arkadaşlarınla paylaş.',ok:[1]},{t:'Büyük-küçük harf, sayı ve sembolü birlikte kullan.',ok:[0]}],
+   fb:'Şifreni bir başkasının bildiğini düşünüyorsan hemen değiştir. Şifreni bir yere yazma; hatırlanabilir bir cümleden oluştur.'},
+  {type:'exit',q:'Bugün öğrendiğin en önemli şey neydi?'}
+ ]}
+];
+
+/* ---------- Bu cihazın ayarları ---------- */
+const LKEY='dijital-kale-g1';
+let LOC={code:'',cls:null,students:[],student:null,teacher:false,pin:'',tClass:null,tLesson:1,tTab:'live',tStep:0};
+try{const r=localStorage.getItem(LKEY);if(r)Object.assign(LOC,JSON.parse(r))}catch(e){}
+function saveLoc(){try{localStorage.setItem(LKEY,JSON.stringify(LOC))}catch(e){}}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const app=document.getElementById('app'),layer=document.getElementById('layer');
+const LBY=id=>LESSONS.find(l=>l.id===id);
+const ANSWERABLE=['choice','sort','rf','open','exit'];
+const HAS_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
+const call=(fn,...a)=>new Promise((res,rej)=>{try{google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...a)}catch(e){rej(e)}});
+
+/* ---------- Durum ---------- */
+let LIVE=null,liveKnown=false,MINE={},mineLoaded=false,TANS={},TCLS=[],net='ok',SHEET_URL='';
+const STS={};
+const student=()=>LOC.student?{name:LOC.student}:null;
+const tcls=()=>TCLS.find(c=>c.name===LOC.tClass);
+
+/* ---------- Sunucuyu dinleme ---------- */
+let pollT=null,polling=false;
+async function poll(){
+  if(polling||!HAS_GAS)return;polling=true;
+  try{
+    if(LOC.teacher&&LOC.pin&&LOC.tClass){
+      const c=LOC.tClass,l=LOC.tLesson;
+      const [lv,ag]=await Promise.all([call('tGetLive',LOC.pin,c),LOC.tTab==='classes'?Promise.resolve(null):call('tAgg',LOC.pin,c,l)]);
+      if(c===LOC.tClass){LIVE=lv;liveKnown=true;if(ag&&l===LOC.tLesson)TANS=ag}
+    }else if(!LOC.teacher&&LOC.cls&&LOC.student){
+      LIVE=await call('getLive',LOC.cls);liveKnown=true;
+    }
+    setNet('ok');render();
+  }catch(e){setNet('err')}
+  polling=false;
+}
+function startPoll(){clearInterval(pollT);pollT=setInterval(poll,LOC.teacher?4000:3000);poll()}
+function setNet(s){net=s;const b=document.getElementById('netbar');if(b)b.hidden=s==='ok'}
+
+/* ---------- Ekran yönetimi ---------- */
+let lastKey='';
+const liveOpen=()=>!!(LIVE&&LIVE.open&&LBY(LIVE.lesson));
+function screenKey(){
+  if(!HAS_GAS)return 'nogas';
+  if(LOC.teacher){
+    const sig=JSON.stringify(TCLS.map(c=>[c.name,c.code,c.students.length]));
+    if(LOC.tTab==='classes')return 't:classes:'+sig;
+    if(LOC.tTab==='answers')return `t:answers:${LOC.tClass}:${LOC.tLesson}:${sig}`;
+    return `t:live:${LOC.tClass}:${LOC.tLesson}:${liveKnown}:${liveOpen()?LIVE.lesson+':'+LIVE.step:'off:'+LOC.tStep}:${sig}`;
+  }
+  if(!LOC.cls)return 's:code';
+  if(!LOC.student)return 's:name:'+LOC.cls+LOC.students.length;
+  if(!mineLoaded||!liveKnown)return 'loading';
+  if(liveOpen())return `s:les:${LIVE.lesson}:${LIVE.step}`;
+  return 's:wait';
+}
+function render(force){
+  const k=screenKey();
+  if(!force&&k===lastKey){soft();return}
+  lastKey=k;hdr();
+  if(k==='nogas')return noGasView();
+  if(k==='loading')return loadingView();
+  if(LOC.teacher)return teacherView();
+  if(!LOC.cls)return codeView();
+  if(!LOC.student)return pickName();
+  if(liveOpen())return studentLesson();
+  return waitView();
+}
+function soft(){hdr();
+  if(lastKey==='s:wait'){const c=document.getElementById('castle');if(c){drawCastle(c,doneSet());document.getElementById('hb').innerHTML=hotbar(doneSet())}}
+  if(lastKey.startsWith('t:live'))renderStats();
+  if(lastKey.startsWith('t:answers'))renderTable();
+}
+const doneSet=()=>new Set(Object.keys(MINE).filter(l=>MINE[l]&&MINE[l].done).map(Number));
+function xpOf(m){return Object.values(m).reduce((a,d)=>a+Object.values((d&&d.first)||{}).filter(Boolean).length*10+(d&&d.done?50:0),0)}
+function hdr(){const st=student();
+  document.getElementById('xp').hidden=LOC.teacher||!st;
+  document.getElementById('xp').textContent='XP '+xpOf(MINE);
+  document.getElementById('who').textContent=LOC.teacher?'Öğretmen portalı':(st?'⛏ '+st.name:'')}
+function bindFoot(){const b=document.getElementById('tlogin');if(b)b.onclick=teacherLogin}
+const foot=extra=>`<div class="foot">${extra||'<span>Kaynak: öğretmenin 2. Ünite dokümanları (Be Internet Awesome müfredatına dayalı).</span>'}<button class="linkish" id="tlogin">Öğretmen girişi</button></div>`;
+/* ---------- Kale çizimi ---------- */
+function drawCastle(cv,ds){
+  const B=16,W=28,H=16;cv.width=W*B;cv.height=H*B;const g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+  g.fillStyle='#8cc4ee';g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle='#ffffff';[[2,2,4],[16,1,5],[24,3,3]].forEach(([x,y,w])=>{g.fillRect(x*B,y*B,w*B,B);g.fillRect((x+1)*B,(y-1)*B,(w-2)*B,B)});
+  const done=id=>ds.has(id);
+  const put=(x,y,k,on)=>{if(on){g.globalAlpha=1;g.drawImage(TEX[k],x*B,y*B,B,B)}else{g.globalAlpha=.22;g.drawImage(TEX[k],x*B,y*B,B,B);g.globalAlpha=1;g.strokeStyle='rgba(255,255,255,.7)';g.setLineDash([3,3]);g.strokeRect(x*B+.5,y*B+.5,B-1,B-1);g.setLineDash([])}};
+  for(let x=0;x<W;x++){const moat=(x===2||x===3||x===24||x===25);put(x,14,moat?'water':'grass',moat?done(4):true);put(x,15,'dirt',true)}
+  [[0,13],[0,12]].forEach(([x,y])=>put(x,y,'wood',true));[[0,10],[1,10],[0,11],[1,11]].forEach(([x,y])=>put(x,y,'leaves',true));
+  for(let y=8;y<=13;y++)for(let x=8;x<=19;x++){if(x>=12&&x<=15&&y>=10)continue;put(x,y,'brick',done(2))}
+  for(let x=8;x<=19;x+=2)put(x,7,'brick',done(2));
+  for(let y=10;y<=13;y++)for(let x=12;x<=15;x++)put(x,y,'plank',done(1));
+  [[4,7],[20,23]].forEach(([a,b])=>{for(let y=4;y<=13;y++)for(let x=a;x<=b;x++){if((x===a+1||x===a+2)&&y===6){put(x,y,'glass',done(3));continue}put(x,y,'stone',done(3))}for(let x=a;x<=b;x+=3)put(x,3,'stone',done(3))});
+  put(13,6,'gold',done(5));put(14,6,'gold',done(5));put(13,5,'wood',done(5));put(13,4,'wood',done(5));put(14,4,'wool',done(5));put(15,4,'wool',done(5));put(14,3,'wool',done(5));
+}
+const hotbar=ds=>LESSONS.map(l=>`<div class="slot ${ds.has(l.id)?'got':''}"><div class="ic px" style="background-image:url(${texURL(l.tex)})"></div><span>${l.badge}</span></div>`).join('');
+
+
+/* ---------- Durum ekranları ---------- */
+function loadingView(){app.innerHTML=`<section class="panel wait"><img class="px" src="${OWL_URL}" alt="" style="width:72px"><h2>Kaleye bağlanılıyor…</h2><p>Birkaç saniye sürebilir.</p></section>`}
+function noGasView(){app.innerHTML=`<section class="panel wait"><img class="px" src="${OWL_URL}" alt="" style="width:72px"><h2>Bu sayfa Google üzerinden açılmalı</h2><p style="max-width:56ch">Öğretmeninin paylaştığı “script.google.com” bağlantısını kullan.</p></section>`}
+
+function codeView(){
+  app.innerHTML=`<section class="panel wait"><img class="px" src="${OWL_URL}" alt="Bilge Baykuş" style="width:80px">
+    <span class="eyebrow">4. Sınıf · 2. Ünite · Dijital Vatandaşlık</span><h1>Sınıf kodunu yaz</h1>
+    <p>Kodu öğretmenin tahtaya yazacak.</p>
+    <form id="cf" class="codeform"><label class="lb" for="code">Sınıf kodu</label>
+      <input type="text" id="code" class="codein" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" value="${esc(LOC.code)}" required>
+      <p id="cerr" class="warn" hidden></p>
+      <button class="btn go big" type="submit" id="cgo">Kaleye gir ▶</button></form>
+  </section>${foot()}`;
+  const f=document.getElementById('cf'),inp=document.getElementById('code');inp.focus();
+  f.onsubmit=async e=>{e.preventDefault();const v=inp.value.trim();if(!v)return;const b=document.getElementById('cgo'),er=document.getElementById('cerr');
+    b.disabled=true;b.textContent='Kontrol ediliyor…';er.hidden=true;
+    try{const r=await call('getClass',v);
+      if(!r){er.textContent='Bu kodla bir sınıf bulunamadı. Kodu kontrol et.';er.hidden=false}
+      else{LOC.code=v;LOC.cls=r.name;LOC.students=r.students;LOC.student=null;saveLoc();render()}}
+    catch(err){er.textContent='Bağlantı kurulamadı. İnterneti kontrol edip tekrar dene.';er.hidden=false}
+    b.disabled=false;b.textContent='Kaleye gir ▶'};
+  bindFoot();
+}
+function pickName(){
+  app.innerHTML=`<section class="panel" style="display:grid;gap:14px"><div class="row" style="align-items:center"><button class="btn ghost" id="bk">◀ Kod</button><div><span class="eyebrow">${esc(LOC.cls)}</span><h1>Adını seç</h1></div></div>
+    <div class="names">${LOC.students.map((s,k)=>`<button class="namebtn" data-k="${k}">${esc(s)}</button>`).join('')||'<p>Bu sınıfın listesi boş. Öğretmenine haber ver.</p>'}</div></section>${foot()}`;
+  document.getElementById('bk').onclick=()=>{LOC.cls=null;LOC.students=[];saveLoc();render()};
+  app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{LOC.student=LOC.students[+b.dataset.k];saveLoc();enterStudent()});bindFoot();
+}
+async function enterStudent(){
+  mineLoaded=false;liveKnown=false;MINE={};for(const k in STS)delete STS[k];render();
+  try{MINE=await call('getMine',LOC.cls,LOC.student)||{}}catch(e){MINE={}}
+  mineLoaded=true;startPoll();
+}
+function waitView(){
+  const st=student(),ds=doneSet(),all=ds.size===LESSONS.length;
+  app.innerHTML=`<div class="banner" id="netbar" ${net==='ok'?'hidden':''}>Bağlantı koptu. Tekrar bağlanmaya çalışılıyor…</div>
+  <section class="panel castle-wrap">
+    <div class="hub-head"><img class="mascot px" src="${OWL_URL}" alt="Bilge Baykuş">
+      <div><span class="eyebrow">${esc(LOC.cls)} · 2. Ünite · Dijital Vatandaşlık</span>
+      <h1>${all?'Kale tamamlandı, tebrikler!':'Merhaba '+esc(st.name)+'!'}</h1>
+      <p>${all?'Tüm görevleri bitirdin. Artık gizliliğini koruyan, sahte mesajları yakalayan ve güçlü şifreler oluşturan bir dijital vatandaşsın.':'Öğretmenin dersi başlattığında ekranın kendiliğinden açılacak. Her ders kalenin bir parçasını kurar.'}</p>
+      <p class="wait-line"><span class="dotw"></span> Öğretmenini bekliyorsun</p></div></div>
+    <canvas class="castle px" id="castle" aria-label="Kale: tamamladığın derslere göre inşa edilen bölümler"></canvas>
+    <div class="hotbar" id="hb">${hotbar(ds)}</div>
+  </section>${foot(`<button class="linkish" id="notme">Ben ${esc(st.name)} değilim</button>`)}`;
+  drawCastle(document.getElementById('castle'),ds);
+  document.getElementById('notme').onclick=()=>{LOC.student=null;saveLoc();clearInterval(pollT);render()};bindFoot();
+}
+
+/* ---------- Öğrenci ders ekranı (öğretmen ilerletir) ---------- */
+let CUR=null,saveState='';
+function stFor(l){if(!STS[l]){const m=MINE[l];STS[l]=m?{ans:JSON.parse(JSON.stringify(m.ans||{})),first:JSON.parse(JSON.stringify(m.first||{})),done:!!m.done}:{ans:{},first:{},done:false}}return STS[l]}
+let wTimer=null,writing=false,pendingW=false;
+function commit(delay){clearTimeout(wTimer);wTimer=setTimeout(flush,delay||0)}
+async function flush(retry){
+  if(!CUR)return;if(writing){pendingW=true;return}writing=true;
+  const L=CUR,st=stFor(L.id),snap=JSON.parse(JSON.stringify(st));setSave('…');
+  try{await call('saveState',LOC.cls,L.id,LOC.student,snap);MINE[L.id]=snap;setSave('ok')}
+  catch(e){setSave('err');if(!retry)setTimeout(()=>flush(true),3000)}
+  writing=false;if(pendingW){pendingW=false;flush()}
+}
+function setSave(s){saveState=s;const el=document.getElementById('sv');if(el){el.textContent=s==='ok'?'✓ Kaydedildi':s==='err'?'✗ Kaydedilemedi, tekrar deneniyor':s==='…'?'Kaydediliyor…':'';el.className='sv '+s}}
+
+function studentLesson(){
+  const L=LBY(LIVE.lesson),i=Math.min(LIVE.step|0,L.steps.length-1),step=L.steps[i];
+  if(CUR&&CUR.id!==L.id&&wTimer){clearTimeout(wTimer);flush()}
+  CUR=L;const st=stFor(L.id);
+  const pips=L.steps.map((_,k)=>`<span class="pip ${k<i?'done':k===i?'now':''}"></span>`).join('');
+  app.innerHTML=`<div class="banner" id="netbar" ${net==='ok'?'hidden':''}>Bağlantı koptu. Tekrar bağlanmaya çalışılıyor…</div>
+  <section class="panel lesson-bar"><div class="ttl"><span class="eyebrow">Ders ${L.id} · ${L.part} · <span class="dotw"></span> Canlı</span><h2>${L.title}</h2></div><span class="sv" id="sv"></span><div class="pips" aria-label="Adım ${i+1} / ${L.steps.length}">${pips}</div></section>
+  <section class="panel stage" id="stage"></section>
+  <div class="nav" id="nav"></div>`;
+  setSave(saveState==='ok'?'ok':saveState==='err'?'err':'');
+  const stage=document.getElementById('stage'),nav=document.getElementById('nav');
+  const refresh=()=>{
+    if(step.type==='exit'){
+      if(st.done){nav.innerHTML=`<p class="waitnote">✓ Çıkış kartın öğretmenine gönderildi.</p>`}
+      else{const ok=(st.ans[i]||'').trim().length>=3;nav.innerHTML=`<p class="waitnote">Yazınca gönderebilirsin.</p><button class="btn go" id="send" ${ok?'':'disabled'}>Gönder ✓</button>`;
+        const b=document.getElementById('send');if(b)b.onclick=()=>{if(b.disabled)return;st.done=true;commit();finish(L,st,i);refresh()}}
+    }else nav.innerHTML=`<p class="waitnote"><span class="dotw"></span> Öğretmenin bir sonraki sayfaya geçince ekranın değişecek.</p>`;
+  };
+  const ctx={L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh,commit,award:(ok)=>{if(st.first[i]===undefined)st.first[i]=!!ok;commit();const m=Object.assign({},MINE);m[L.id]=st;document.getElementById('xp').textContent='XP '+xpOf(m)}};
+  R[step.type](stage,step,st,i,ctx);refresh();window.scrollTo(0,0);
+}
+const R={
+ goals(el,s){el.insertAdjacentHTML('beforeend',`<span class="eyebrow">Ders hedeflerimiz</span><h2>${s.title}</h2><div class="goals">${s.goals.map(([a,b])=>`<div class="goal"><b>${a}</b><span>${b}</span></div>`).join('')}</div>`)},
+ info(el,s){el.insertAdjacentHTML('beforeend',`<h2>${s.title}</h2><ul class="clean">${s.list.map(x=>`<li><span>${x}</span></li>`).join('')}</ul>${s.levels?`<div class="goals">${s.levels.map(([a,b],k)=>`<div class="goal" style="border-color:${['var(--ok)','var(--gold-dark)','var(--bad)'][k]}"><b style="color:${['var(--ok)','var(--gold-dark)','var(--bad)'][k]}">${a}</b><span>${b}</span></div>`).join('')}</div>`:''}`)},
+ story(el,s,st,i,c){el.insertAdjacentHTML('beforeend',`${c.tag}<div class="story">${s.text}</div><p>Bu durumu düşün. Sonraki ekranlarda birlikte değerlendireceğiz.</p>`)},
+ discuss(el,s){el.insertAdjacentHTML('beforeend',`<span class="tag">Tartışma</span><h2>${s.title}</h2><ul class="clean">${s.prompts.map(x=>`<li><span>${x}</span></li>`).join('')}</ul><p style="color:var(--ink-soft)">Öğretmeninin işaretini bekle. Farklı düşünen arkadaşlarını da dinle.</p>`)},
+ open(el,s,st,i,c){el.insertAdjacentHTML('beforeend',`${c.tag}<p class="q">${s.q}</p><label class="lb" for="op${i}">Cevabın</label><textarea id="op${i}" maxlength="1000" placeholder="${esc(s.hint||'')}">${esc(st.ans[i]||'')}</textarea>`);
+   el.querySelector('textarea').oninput=e=>{st.ans[i]=e.target.value;c.commit(900);c.refresh()}},
+ exit(el,s,st,i,c){el.insertAdjacentHTML('beforeend',`<span class="tag">Çıkış kartı</span><p class="q">${s.q}</p><label class="lb" for="ex${i}">Cevabın</label><textarea id="ex${i}" maxlength="1000" placeholder="En az bir cümle yaz." ${st.done?'readonly':''}>${esc(st.ans[i]||'')}</textarea>`);
+   el.querySelector('textarea').oninput=e=>{st.ans[i]=e.target.value;c.commit(900);c.refresh()}},
+ choice(el,s,st,i,c){
+   const answered=st.ans[i]!==undefined;
+   el.insertAdjacentHTML('beforeend',`${c.tag}${s.story?`<div class="story">${s.story}</div>`:''}<p class="q">${s.q}</p><div class="opts">${s.options.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o.t)}<span class="mk"></span></button>`).join('')}</div>${s.multi?'<button class="btn" id="chk" style="justify-self:start">Kontrol et</button>':''}<div id="fb"></div>`);
+   const btns=[...el.querySelectorAll('.opt')];const sel=new Set();
+   const isOk=()=>{const ch=[].concat(st.ans[i]);const good=s.options.map((o,k)=>o.ok?k:-1).filter(k=>k>=0);return ch.length===good.length&&good.every(k=>ch.includes(k))};
+   const show=()=>{const ch=[].concat(st.ans[i]);
+     btns.forEach((b,k)=>{b.disabled=true;const o=s.options[k];b.classList.remove('sel');
+       if(s.opinion){if(ch.includes(k))b.classList.add('sel');return}
+       if(o.ok){b.classList.add('ok');b.querySelector('.mk').textContent='✓'}else if(ch.includes(k)){b.classList.add('bad');b.querySelector('.mk').textContent='✗'}});
+     const x=el.querySelector('#chk');if(x)x.remove();const ok=s.opinion||isOk();
+     el.querySelector('#fb').innerHTML=`<div class="fb ${s.opinion?'info':ok?'ok':'bad'}"><b>${s.opinion?'Teşekkürler!':ok?'Harika, doğru! +10 XP':'Neredeyse! Yeşil olanlara bak.'}</b><span>${s.fb}</span></div>`};
+   if(answered){show();return}
+   btns.forEach((b,k)=>b.onclick=()=>{if(s.multi){sel.has(k)?sel.delete(k):sel.add(k);b.classList.toggle('sel');return}
+     st.ans[i]=k;c.award(s.opinion?true:isOk());show()});
+   if(s.multi)el.querySelector('#chk').onclick=()=>{if(!sel.size)return;st.ans[i]=[...sel].sort();c.award(isOk());show()};
+ },
+ sort(el,s,st,i,c){
+   const a=st.ans[i]||(st.ans[i]={place:{},checked:false,firstDone:false});let pick=null;
+   const allOk=()=>s.items.every((it,k)=>it.ok.includes(a.place[k]));
+   const draw=()=>{
+     const pool=s.items.map((it,k)=>a.place[k]===undefined?k:-1).filter(k=>k>=0);
+     const cc=k=>{let x='item';if(pick===k)x+=' sel';if(a.checked&&a.place[k]!==undefined)x+=s.items[k].ok.includes(a.place[k])?' ok':' bad';return x};
+     el.innerHTML=`${c.tag}<p class="q">${s.q}</p><div class="pool">${pool.length?pool.map(k=>`<button class="${cc(k)}" data-k="${k}">${esc(s.items[k].t)}</button>`).join(''):'<span style="color:var(--ink-soft)">Tüm kartlar yerleşti.</span>'}</div>
+     <div class="buckets">${s.buckets.map((bn,bi)=>`<div class="bucket ${pick!==null?'target':''}" data-b="${bi}" role="button" tabindex="0"><span class="bh">${bn}</span><div class="in">${s.items.map((it,k)=>a.place[k]===bi?`<button class="${cc(k)}" data-k="${k}" data-placed="1">${esc(it.t)}</button>`:'').join('')}</div></div>`).join('')}</div>
+     <div class="row">${!a.checked&&!pool.length?'<button class="btn" id="chk">Kontrol et</button>':''}${a.checked&&!allOk()?'<button class="btn gold" id="fix">Yanlışları geri al</button>':''}</div><div>${a.checked?`<div class="fb ${allOk()?'ok':'bad'}"><b>${allOk()?'Hepsi doğru!':'Kırmızı kartları tekrar düşün.'}</b><span>${s.fb}</span></div>`:''}</div>`;
+     el.querySelectorAll('.item').forEach(b=>b.onclick=ev=>{ev.stopPropagation();const k=+b.dataset.k;
+       if(b.dataset.placed&&!a.checked){delete a.place[k];pick=null;draw();return}
+       if(a.checked)return;pick=pick===k?null:k;draw()});
+     el.querySelectorAll('.bucket').forEach(bk=>{const go=()=>{if(pick===null||a.checked)return;a.place[pick]=+bk.dataset.b;pick=null;draw()};bk.onclick=go;bk.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
+     const x=el.querySelector('#chk');if(x)x.onclick=()=>{a.checked=true;if(!a.firstDone){a.firstDone=true;c.award(allOk())}else c.commit();draw()};
+     const f=el.querySelector('#fix');if(f)f.onclick=()=>{s.items.forEach((it,k)=>{if(!it.ok.includes(a.place[k]))delete a.place[k]});a.checked=false;c.commit();draw()};
+   };
+   draw();
+ },
+ rf(el,s,st,i,c){
+   const list=c.L.steps.filter(x=>x.type==='rf'),n=list.indexOf(s)+1;
+   let mock='';
+   if(s.kind==='mail')mock=`<div class="mock"><div class="bar"><span><b>Kimden:</b> ${esc(s.from)}</span><span><b>Konu:</b> ${esc(s.subject)}</span></div><div class="bd"><div>${s.body}</div>${s.cta?`<span class="cta">${s.cta}</span>`:''}${s.fine?`<div class="fine">${s.fine}</div>`:''}</div></div>`;
+   if(s.kind==='popup')mock=`<div class="mock popup"><div class="bar">${esc(s.title)}</div><div class="bd"><div>${s.body}</div><span class="cta">${s.cta}</span></div></div>`;
+   if(s.kind==='app')mock=`<div class="mock"><div class="bar"><span><b>Uygulama Mağazası</b></span></div><div class="bd"><div style="display:flex;gap:12px;align-items:center"><div class="px" style="width:56px;height:56px;flex:none;border:2px solid #333;background:url(${texURL('grass')}) center/cover"></div><div><b>${esc(s.name)}</b><br><span style="font-size:14px;color:#555">${esc(s.dev)}</span><br><span class="stars">${s.rating}</span> <span style="font-size:13px;color:#777">${s.reviews}</span></div></div><div>${s.body}</div><span class="cta blue">${s.cta}</span></div></div>`;
+   if(s.kind==='browser')mock=`<div class="mock"><div class="bar"><div class="url">${s.lock?'🔒':''} ${esc(s.url)}</div></div><div class="bd"><div style="font-size:20px">${s.body}</div><div style="display:grid;gap:6px"><div style="border:1px solid #bbb;padding:8px;color:#888">Kullanıcı adı</div><div style="border:1px solid #bbb;padding:8px;color:#888">Şifre</div></div><span class="cta blue">${s.cta}</span></div></div>`;
+   el.insertAdjacentHTML('beforeend',`<span class="tag">Örnek ${n} / ${list.length}</span><p class="q">Grup arkadaşınla karar ver: Bu gerçek mi, sahte mi?</p>${mock}<div class="rf-btns"><button class="btn real" data-v="0">Gerçek!</button><button class="btn fake" data-v="1">Sahte!</button></div><div id="fb"></div>`);
+   const show=()=>{const ok=(st.ans[i]===1)===s.fake;el.querySelectorAll('.rf-btns .btn').forEach(b=>{b.disabled=true;if(+b.dataset.v===st.ans[i])b.style.outline='4px solid var(--ink)'});
+     el.querySelector('#fb').innerHTML=`<div class="fb ${ok?'ok':'bad'}"><b>${ok?'Doğru tespit! +10 XP':'Dikkat!'} Bu ${s.fake?'SAHTE':'GERÇEK'}.</b><ul class="clean">${s.why.map(w=>`<li><span>${w}</span></li>`).join('')}</ul></div>`};
+   if(st.ans[i]!==undefined){show();return}
+   el.querySelectorAll('.rf-btns .btn').forEach(b=>b.onclick=()=>{st.ans[i]=+b.dataset.v;c.award((st.ans[i]===1)===s.fake);show()});
+ },
+ pwlab(el,s,st,i,c){
+   el.insertAdjacentHTML('beforeend',`${c.tag}<h2>Öğretmenin için güçlü bir şifre oluştur</h2>
+   <p class="warn">Kendi gerçek şifreni buraya yazma! Bu sayfadaki şifreler hiçbir yere kaydedilmez.</p>
+   <div><label class="lb" for="pws">1. Hatırlaması kolay bir cümle yaz</label><input type="text" id="pws" autocomplete="off" placeholder="Örn: Her cumartesi 2 saat bisiklet sürerim"></div>
+   <p>Kelimelerin ilk harfleri: <span class="idea" id="idea">…</span></p>
+   <div><label class="lb" for="pw">2. Şimdi şifreyi oluştur (sembol ve büyük harf eklemeyi unutma)</label><input type="text" id="pw" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="Şifreni dene"></div>
+   <div class="meter" id="mt">${'<i></i>'.repeat(7)}</div><p><b id="lvl" style="font-family:var(--font-pixel);font-size:20px">Henüz yok</b></p>
+   <div class="checks" id="cks"></div>
+   <div class="fb info"><b>Grup arkadaşınla</b><span>Tabletleri değiştirin. Arkadaşının şifresinde zayıf bir nokta var mı? Kişisel bilgi, kolay tahmin edilen bir kelime ya da eksik bir kural bulursanız birlikte düzeltin.</span></div>`);
+   const sent=el.querySelector('#pws'),pw=el.querySelector('#pw');
+   sent.oninput=()=>{const w=sent.value.trim().split(/\s+/).filter(Boolean);el.querySelector('#idea').textContent=w.length?w.map(x=>/^\d/.test(x)?x.replace(/\D/g,''):x[0]).join(''):'…'};
+   const nm=(student()||{}).name||'';
+   const check=()=>{
+     const v=pw.value,lo=v.toLocaleLowerCase('tr');
+     const common=['123456','12345678','password','şifre','sifre','qwerty','bilgisayar','111111','abc123','123123'];
+     const parts=nm.toLocaleLowerCase('tr').split(/\s+/).filter(x=>x.length>=3);
+     const C=[['En az 8 karakter',v.length>=8],['Küçük harf',/[a-zçğıöşü]/.test(v)],['Büyük harf',/[A-ZÇĞİÖŞÜ]/.test(v)],['Sayı',/\d/.test(v)],['Sembol (! @ # ? gibi)',/[^A-Za-z0-9çğıöşüÇĞİÖŞÜ\s]/.test(v)],
+       ['Sık kullanılan şifre değil',v.length>0&&!common.some(x=>lo.includes(x))&&!/(0123|1234|2345|3456|abcd)/.test(lo)],['Adını içermiyor',v.length>0&&!parts.some(n=>lo.includes(n))]];
+     const sc=C.filter(x=>x[1]).length;
+     el.querySelector('#cks').innerHTML=C.map(([t,on])=>`<span class="chk ${on?'on':''}">${t}</span>`).join('');
+     el.querySelector('#mt').className='meter '+(!v?'':sc<=3?'l1':sc<=5?'l2':'l3');
+     const lv=el.querySelector('#lvl');lv.textContent=!v?'Henüz yok':sc<=3?'Zayıf':sc<=5?'Orta':'Güçlü!';lv.style.color=!v?'':sc<=3?'var(--bad)':sc<=5?'var(--gold-dark)':'var(--ok)';
+   };
+   pw.oninput=check;check();
+ }
+};
+
+function finish(L,st,exitIdx){
+  const scored=Object.keys(st.first).length,right=Object.values(st.first).filter(Boolean).length;
+  layer.innerHTML=`<div class="overlay"><div class="panel" role="dialog" aria-label="Görev tamamlandı">
+    <span class="eyebrow" style="text-align:center">${L.part} inşa edildi!</span>
+    <div class="badge-big px" style="background-image:url(${texURL(L.tex)})"></div>
+    <h2 style="text-align:center">Rozet: ${L.badge}</h2>
+    <div class="card-sum"><b>Ders ${L.id}: ${L.title}</b>${scored?`<span>İlk denemede doğru: ${right} / ${scored}</span>`:''}<span>Cevapların öğretmenine gönderildi.</span></div>
+    <p style="text-align:center">Tableti kurallara uygun teslim etmeyi unutma!</p>
+    <button class="btn go" id="ok">Tamam</button></div></div>`;
+  document.getElementById('ok').onclick=()=>{layer.innerHTML=''};
+}
+
+
+/* ---------- Öğretmen girişi ---------- */
+function teacherLogin(){
+  layer.innerHTML=`<div class="overlay"><form class="panel" id="pf"><h2>Öğretmen girişi</h2>
+    <p>E-Tablodaki <b>Ayarlar</b> sayfasında B1 hücresine yazdığın PIN'i gir.</p>
+    <label class="lb" for="pin">PIN</label><input type="text" id="pin" inputmode="numeric" autocomplete="off" maxlength="20" required style="-webkit-text-security:disc">
+    <p id="perr" class="warn" hidden></p>
+    <div class="row"><button class="btn ghost" type="button" id="x">Vazgeç</button><button class="btn go" type="submit" id="pgo">Giriş</button></div></form></div>`;
+  document.getElementById('x').onclick=()=>layer.innerHTML='';document.getElementById('pin').focus();
+  document.getElementById('pf').onsubmit=async e=>{e.preventDefault();const p=document.getElementById('pin').value.trim(),er=document.getElementById('perr'),b=document.getElementById('pgo');if(!p)return;
+    b.disabled=true;er.hidden=true;
+    try{const r=await call('tLogin',p);
+      if(!r||!r.ok){er.textContent='PIN yanlış ya da E-Tabloda PIN yazılmamış (Ayarlar sayfası, B1 hücresi, en az 4 karakter).';er.hidden=false;b.disabled=false;return}
+      LOC.teacher=true;LOC.pin=p;TCLS=r.classes||[];SHEET_URL=r.sheetUrl||'';
+      if(!tcls())LOC.tClass=(TCLS[0]||{}).name||null;if(!TCLS.length)LOC.tTab='classes';
+      saveLoc();layer.innerHTML='';LIVE=null;liveKnown=false;TANS={};render(true);startPoll()}
+    catch(err){er.textContent='Bağlantı kurulamadı. Tekrar dene.';er.hidden=false;b.disabled=false}};
+}
+
+/* ---------- Öğretmen portalı ---------- */
+let liveChain=Promise.resolve();
+function setLive(data){
+  const c=LOC.tClass;if(!c)return;
+  LIVE=Object.assign({},data);liveKnown=true;render();
+  liveChain=liveChain.then(()=>call('tSetLive',LOC.pin,c,data)).then(()=>{const e=document.getElementById('lerr');if(e)e.hidden=true}).catch(()=>{const e=document.getElementById('lerr');if(e)e.hidden=false});
+}
+function switchT(fn){fn();LIVE=null;liveKnown=false;TANS={};saveLoc();render();poll()}
+function teacherView(){
+  const cs=TCLS;if(LOC.tClass&&!tcls())LOC.tClass=null;if(!LOC.tClass&&cs[0])LOC.tClass=cs[0].name;
+  const tab=(k,t)=>`<button class="btn ${LOC.tTab===k?'go':'ghost'}" data-tab="${k}">${t}</button>`;
+  const pickers=`<div class="row" style="align-items:center"><span class="eyebrow">Sınıf</span>${cs.map((c,k)=>`<button class="btn ${c.name===LOC.tClass?'gold':'ghost'} sm" data-cls="${k}">${esc(c.name)}</button>`).join('')}</div>
+    <div class="row" style="align-items:center"><span class="eyebrow">Ders</span>${LESSONS.map(l=>`<button class="btn ${l.id===LOC.tLesson?'gold':'ghost'} sm" data-les="${l.id}" title="${esc(l.title)}">${l.id}. ${esc(l.part)}</button>`).join('')}</div>`;
+  app.innerHTML=`<div class="banner" id="netbar" ${net==='ok'?'hidden':''}>Bağlantı koptu. Tekrar bağlanmaya çalışılıyor…</div>
+  <section class="panel" style="display:grid;gap:12px"><div class="row" style="align-items:center;justify-content:space-between"><h1>Öğretmen portalı</h1>
+      <div class="row">${SHEET_URL?`<a class="btn ghost sm" href="${esc(SHEET_URL)}" target="_blank" rel="noopener">E-Tabloyu aç</a>`:''}<button class="btn ghost sm" id="out">Çıkış</button></div></div>
+    <div class="row">${tab('live','Canlı ders')}${tab('answers','Cevaplar')}${tab('classes','Sınıf listeleri')}</div>
+    ${LOC.tTab!=='classes'?(cs.length?pickers:'<p>Önce “Sınıf listeleri” sekmesinden sınıflarını ekle.</p>'):''}</section><div id="tbody" style="display:grid;gap:20px"></div>`;
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{LOC.tTab=b.dataset.tab;saveLoc();render();poll()});
+  app.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>switchT(()=>{LOC.tClass=cs[+b.dataset.cls].name;LOC.tStep=0}));
+  app.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>switchT(()=>{LOC.tLesson=+b.dataset.les;LOC.tStep=0}));
+  document.getElementById('out').onclick=()=>{LOC.teacher=false;LOC.pin='';saveLoc();clearInterval(pollT);LIVE=null;liveKnown=false;render();if(LOC.cls&&LOC.student)enterStudent()};
+  if(LOC.tTab==='classes')return classesTab();
+  if(!cs.length)return;
+  if(LOC.tTab==='answers')return answersTab();
+  liveTab();
+}
+
+function liveTab(){
+  const L=LBY(LOC.tLesson),c=tcls(),tb=document.getElementById('tbody');
+  if(!liveKnown){tb.innerHTML=`<section class="panel"><p>Ders durumu yükleniyor…</p></section>`;return}
+  const on=liveOpen()&&LIVE.lesson===L.id,otherOn=liveOpen()&&LIVE.lesson!==L.id;
+  const i=on?Math.min(LIVE.step|0,L.steps.length-1):Math.min(LOC.tStep|0,L.steps.length-1),step=L.steps[i];
+  const pips=L.steps.map((s,k)=>`<button class="pip ${k<i?'done':k===i?'now':''} clickable" data-step="${k}" title="Adım ${k+1}" aria-label="Adım ${k+1}"></button>`).join('');
+  tb.innerHTML=`<section class="panel" style="display:grid;gap:12px">
+    <div class="row" style="align-items:center;justify-content:space-between"><div><span class="eyebrow">${esc(c.name)} · Ders ${L.id}</span><h2>${L.title}</h2></div>
+      <div class="codebox"><span class="eyebrow">Sınıf kodu</span><b>${esc(c.code||'—')}</b></div></div>
+    <div class="row" style="align-items:center">${on?'<span class="livechip"><span class="dotw"></span> CANLI</span>':otherOn?`<span class="chip prog">Bu sınıfta Ders ${LIVE.lesson} açık</span>`:'<span class="chip">Kapalı</span>'}<div class="pips">${pips}</div></div>
+    <div class="row">${on?`<button class="btn ghost" id="prev" ${i===0?'disabled':''}>◀ Önceki</button><button class="btn go big" id="next" ${i===L.steps.length-1?'disabled':''}>Sonraki ▶</button><button class="btn" style="background:var(--bad)" id="end">Dersi bitir</button>`
+      :`<button class="btn go big" id="start">${otherOn?'Bu dersi başlat (açık dersi kapatır)':'Dersi başlat'}</button>`}
+      <span style="align-self:center">Adım ${i+1} / ${L.steps.length}</span></div>
+    <p id="lerr" class="warn" hidden>Ders durumu kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.</p>
+  </section>
+  <div class="split">
+    <section class="panel stage preview" id="pv" aria-label="Öğrencilerin gördüğü ekran"></section>
+    <section class="panel" style="display:grid;gap:14px;align-content:start"><h3>Sınıfın cevapları</h3><div id="stats"></div>
+      <details class="teacher"><summary>Öğretmen planı (40 dk)</summary><ol>${L.plan.map(([m,t])=>`<li><b>${m}′</b><span>${t}</span></li>`).join('')}</ol></details></section>
+  </div>`;
+  const goStep=k=>{k=Math.max(0,Math.min(L.steps.length-1,k));if(on)setLive({open:true,lesson:L.id,step:k});else{LOC.tStep=k;saveLoc();render()}};
+  tb.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>goStep(+b.dataset.step));
+  const g=id=>document.getElementById(id);
+  if(g('prev'))g('prev').onclick=()=>goStep(i-1);
+  if(g('next'))g('next').onclick=()=>goStep(i+1);
+  if(g('end'))g('end').onclick=()=>setLive({open:false,lesson:L.id,step:i});
+  if(g('start'))g('start').onclick=()=>setLive({open:true,lesson:L.id,step:i});
+  const pv=g('pv');pv.insertAdjacentHTML('beforeend',`<span class="eyebrow">Öğrenci ekranı önizlemesi</span>`);
+  R[step.type](pv,step,{ans:{},first:{},done:false},i,{L,i,tag:step.tag?`<span class="tag">${step.tag}</span>`:'',refresh(){},commit(){},award(){}});
+  renderStats();
+}
+
+const rosterOf=()=>(tcls()||{}).students||[];
+const ansOf=n=>TANS[n];
+function renderStats(){
+  const box=document.getElementById('stats');if(!box)return;
+  const L=LBY(LOC.tLesson),on=liveOpen()&&LIVE.lesson===L.id,i=on?Math.min(LIVE.step|0,L.steps.length-1):Math.min(LOC.tStep|0,L.steps.length-1),s=L.steps[i];
+  const ros=rosterOf(),got=ros.filter(n=>{const d=ansOf(n);return d&&d.ans&&d.ans[i]!==undefined&&d.ans[i]!==''}),missing=ros.filter(n=>!got.includes(n));
+  if(!ANSWERABLE.includes(s.type)){box.innerHTML=`<p>Bu adımda cevap toplanmıyor. Bu derste kaydı olan öğrenci: <b>${ros.filter(n=>ansOf(n)).length} / ${ros.length}</b></p>`;return}
+  const bar=(label,n,ok)=>`<div class="bar-row ${ok?'ok':''}"><span>${label}</span><span class="bar-t"><i style="width:${got.length?Math.round(n/got.length*100):0}%"></i></span><b>${n}</b></div>`;
+  let body='';
+  if(s.type==='choice')body=`<div class="bars">${s.options.map((o,k)=>bar(esc(o.t)+(o.ok&&!s.opinion?' ✓':''),got.filter(n=>[].concat(ansOf(n).ans[i]).includes(k)).length,o.ok&&!s.opinion)).join('')}</div>`;
+  else if(s.type==='rf')body=`<div class="bars">${bar('Gerçek'+(!s.fake?' ✓':''),got.filter(n=>ansOf(n).ans[i]===0).length,!s.fake)}${bar('Sahte'+(s.fake?' ✓':''),got.filter(n=>ansOf(n).ans[i]===1).length,s.fake)}</div>`;
+  else if(s.type==='sort')body=`<p>İlk denemede hepsi doğru: <b>${got.filter(n=>(ansOf(n).first||{})[i]===true).length}</b> öğrenci</p>`;
+  else body=`<div class="texts">${got.map(n=>`<div class="tx"><b>${esc(n)}</b><span>${esc(ansOf(n).ans[i])}</span></div>`).join('')||'<p>Henüz yazan yok.</p>'}</div>`;
+  box.innerHTML=`<p class="count"><b>${got.length}</b> / ${ros.length} öğrenci cevapladı</p>${body}${missing.length?`<details><summary>Henüz cevaplamayanlar (${missing.length})</summary><div class="row" style="margin-top:8px">${missing.map(m=>`<span class="chip">${esc(m)}</span>`).join('')}</div></details>`:''}<p class="hintsm">Her birkaç saniyede güncellenir.</p>`;
+}
+
+/* ---------- Cevaplar tablosu ---------- */
+function answersTab(){
+  const tb=document.getElementById('tbody');
+  tb.innerHTML=`<section class="panel" style="display:grid;gap:12px"><div class="row" style="align-items:center;justify-content:space-between"><h2>${esc(LOC.tClass)} · Ders ${LOC.tLesson} cevapları</h2>
+      <div class="row" style="align-items:center"><button class="btn ghost sm" id="exp">E-Tabloya aktar</button><span id="emsg"></span></div></div>
+    <p style="color:var(--ink-soft)">✓ ilk denemede doğru · ✗ ilk denemede yanlış · — cevap yok. Yazılı cevapları görmek için bir öğrencinin adına dokun.</p>
+    <div class="tbl-wrap" id="tbl"></div><div id="detail"></div></section>`;
+  renderTable();
+  document.getElementById('exp').onclick=async()=>{const m=document.getElementById('emsg'),b=document.getElementById('exp');b.disabled=true;m.textContent='Aktarılıyor…';
+    const {header,rows}=tableData();
+    try{const url=await call('tExport',LOC.pin,LOC.tClass,LOC.tLesson,header,rows);m.innerHTML=`✓ Aktarıldı · <a href="${esc(url)}" target="_blank" rel="noopener">E-Tabloda aç</a>`}catch(e){m.textContent='✗ Aktarılamadı'}b.disabled=false};
+}
+function colsOf(L){return L.steps.map((s,i)=>({s,i})).filter(x=>ANSWERABLE.includes(x.s.type))}
+function cellOf(s,d,i){
+  if(!d||!d.ans||d.ans[i]===undefined||d.ans[i]==='')return{t:'—',c:''};
+  if(s.type==='open'||s.type==='exit')return{t:String(d.ans[i]),c:'txt'};
+  if(s.type==='choice'&&s.opinion)return{t:s.options[d.ans[i]]?s.options[d.ans[i]].t:'?',c:''};
+  const f=(d.first||{})[i];return f===true?{t:'✓',c:'cell-ok'}:f===false?{t:'✗',c:'cell-bad'}:{t:'…',c:''};
+}
+function labelOf(s,k){return s.type==='exit'?'Çıkış kartı':s.type==='open'?'Yazılı '+k:s.type==='rf'?'Örnek '+k:s.type==='sort'?'Sıralama':'Soru '+k}
+function tableData(){
+  const L=LBY(LOC.tLesson),cols=colsOf(L);let n=0;
+  const header=['Öğrenci',...cols.map(x=>labelOf(x.s,++n)),'Doğru','Toplam','Bitirdi'];
+  const rows=rosterOf().map(name=>{const d=ansOf(name);return [name,...cols.map(x=>{const c=cellOf(x.s,d,x.i);return c.t==='✓'?'Doğru':c.t==='✗'?'Yanlış':c.t==='—'?'':c.t}),d?String(Object.values(d.first||{}).filter(Boolean).length):'',d?String(Object.keys(d.first||{}).length):'',d&&d.done?'Evet':'Hayır']});
+  return {header,rows};
+}
+function renderTable(){
+  const box=document.getElementById('tbl');if(!box)return;
+  const L=LBY(LOC.tLesson),cols=colsOf(L),ros=rosterOf();let n=0;
+  box.innerHTML=`<table><thead><tr><th>Öğrenci</th>${cols.map(x=>`<th>${labelOf(x.s,++n)}</th>`).join('')}<th>Doğru</th><th>Bitirdi</th></tr></thead><tbody>${ros.map((name,ri)=>{const d=ansOf(name);
+    const sc=d?Object.values(d.first||{}).filter(Boolean).length:0,tot=d?Object.keys(d.first||{}).length:0;
+    return `<tr><th scope="row"><button class="linkish" data-ri="${ri}">${esc(name)}</button></th>${cols.map(x=>{const c=cellOf(x.s,d,x.i);return `<td class="${c.c}">${esc(c.c==='txt'&&c.t.length>40?c.t.slice(0,40)+'…':c.t)}</td>`}).join('')}<td>${d?sc+' / '+tot:'—'}</td><td>${d&&d.done?'✓':'—'}</td></tr>`}).join('')}</tbody></table>`;
+  box.querySelectorAll('[data-ri]').forEach(b=>b.onclick=()=>{const name=ros[+b.dataset.ri],d=ansOf(name);
+    document.getElementById('detail').innerHTML=`<div class="card-sum"><b>${esc(name)} · Ders ${L.id}</b>${d?cols.filter(x=>x.s.type==='open'||x.s.type==='exit').map(x=>`<span><b>${esc(x.s.q)}</b><br>${esc((d.ans||{})[x.i]||'—')}</span>`).join(''):'<span>Bu derste henüz cevabı yok.</span>'}</div>`});
+}
+
+/* ---------- Sınıf listeleri ---------- */
+function classesTab(){
+  const slots=[0,1,2,3].map(k=>TCLS[k]||{name:'',code:'',students:[]});
+  const tb=document.getElementById('tbody');
+  tb.innerHTML=`<section class="panel" style="display:grid;gap:14px"><h2>Sınıf listeleri</h2>
+    <p>Her sınıfın adını yaz ve öğrencileri her satıra bir isim gelecek şekilde ekle. Sınıf kodunu boş bırakırsan kaydederken otomatik oluşur. Öğrenciler ders başında bu kodu girer ve adlarını listeden seçer.</p>
+    <div class="clsgrid">${slots.map((c,k)=>`<div class="goal"><label class="lb" for="cn${k}">Sınıf ${k+1} adı</label><input type="text" id="cn${k}" value="${esc(c.name)}" placeholder="Örn: 4-${'ABCD'[k]}">
+      <label class="lb" for="cd${k}">Sınıf kodu</label><input type="text" id="cd${k}" value="${esc(c.code)}" placeholder="Otomatik" autocapitalize="characters" maxlength="12">
+      <label class="lb" for="cs${k}">Öğrenciler (her satıra bir isim)</label><textarea id="cs${k}" rows="10">${esc(c.students.join('\n'))}</textarea><span class="count" id="cc${k}">${c.students.length} öğrenci</span></div>`).join('')}</div>
+    <div class="row" style="align-items:center"><button class="btn go big" id="savecls">Listeleri kaydet</button><span id="cmsg"></span></div>
+    <p class="hintsm">Listeler E-Tablodaki “Sınıflar” sayfasına kaydedilir; oradan da düzenleyebilirsin. Bir öğrencinin adını değiştirirsen eski cevapları eski adıyla kalır.</p></section>`;
+  slots.forEach((c,k)=>{document.getElementById('cs'+k).oninput=e=>{document.getElementById('cc'+k).textContent=e.target.value.split('\n').map(x=>x.trim()).filter(Boolean).length+' öğrenci'}});
+  document.getElementById('savecls').onclick=async()=>{
+    const msg=document.getElementById('cmsg'),b=document.getElementById('savecls');msg.textContent='Kaydediliyor…';b.disabled=true;
+    const names=new Set();let dup=false;
+    const out=slots.map((c,k)=>{const name=document.getElementById('cn'+k).value.trim();if(name){if(names.has(name))dup=true;names.add(name)}
+      return{name,code:document.getElementById('cd'+k).value.trim(),students:[...new Set(document.getElementById('cs'+k).value.split('\n').map(x=>x.trim()).filter(Boolean))]}});
+    if(dup){msg.textContent='İki sınıfa aynı adı veremezsin.';b.disabled=false;return}
+    try{TCLS=await call('tSaveClasses',LOC.pin,out)||[];if(!tcls())LOC.tClass=(TCLS[0]||{}).name||null;saveLoc();render(true);const m=document.getElementById('cmsg');if(m)m.textContent='✓ Kaydedildi. Sınıf kodları yukarıda.'}
+    catch(e){msg.textContent='✗ Kaydedilemedi. Tekrar dene.';b.disabled=false}
+  };
+}
+
+/* ---------- Açılış ---------- */
+(async function boot(){
+  if(!HAS_GAS){render(true);return}
+  if(LOC.teacher&&LOC.pin){
+    render(true);
+    try{const r=await call('tLogin',LOC.pin);if(r&&r.ok){TCLS=r.classes||[];SHEET_URL=r.sheetUrl||'';render(true);startPoll();return}}catch(e){}
+    LOC.teacher=false;LOC.pin='';saveLoc();
+  }
+  if(LOC.cls&&LOC.student){
+    try{const r=await call('getClass',LOC.code);if(r){LOC.cls=r.name;LOC.students=r.students;if(!r.students.includes(LOC.student))LOC.student=null}else{LOC.cls=null;LOC.student=null}saveLoc()}catch(e){}
+    if(LOC.cls&&LOC.student)return enterStudent();
+  }
+  render(true);
+})();
+</script>
+
+</body>
+</html>
