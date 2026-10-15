@@ -535,3 +535,35 @@ function kontrol() {
   const s = onbellektenSayfa_();
   Logger.log('Sitedeki sayfa: ' + (s ? (s.indexOf('ROBOT FABR') >= 0 ? 'YENİ (robotlu)' : 'ESKİ') : 'önbellek boş'));
 }
+
+/* ---------- öğrencinin kendi çalışmaları ----------
+   Öğrenci, sınıfını ve adını seçtikten sonra yalnızca kendi gönderdiklerini görür ve açar. */
+function calismalarim(sinif, ogrenci) {
+  sinif = String(sinif || '').trim(); ogrenci = String(ogrenci || '').trim();
+  const g = depo_().tablo.getSheetByName('Gönderimler');
+  const son = g.getLastRow();
+  if (son < 2) return [];
+  const v = g.getRange(2, 1, son - 1, 10).getValues();
+  const sonuc = [];
+  for (let i = v.length - 1; i >= 0 && sonuc.length < 40; i--) {
+    const r = v[i];
+    if (String(r[2]).trim() !== sinif || String(r[3]).trim() !== ogrenci) continue;
+    sonuc.push({ id: String(r[6]), tarih: metinTarih_(r[0]), saat: metinSaat_(r[1]), kucuk: String(r[7] || ''), puan: parseInt(r[9], 10) || 0 });
+  }
+  return sonuc;
+}
+
+function calismamiAc(sinif, ogrenci, id) {
+  sinif = String(sinif || '').trim(); ogrenci = String(ogrenci || '').trim(); id = String(id || '');
+  const g = depo_().tablo.getSheetByName('Gönderimler');
+  const son = g.getLastRow();
+  if (son < 2) throw new Error('Çalışma bulunamadı.');
+  const v = g.getRange(2, 1, son - 1, 7).getValues();
+  for (let i = v.length - 1; i >= 0; i--) {
+    if (String(v[i][6]) === id) {
+      if (String(v[i][2]).trim() !== sinif || String(v[i][3]).trim() !== ogrenci) throw new Error('Bu çalışma senin değil.');
+      return DriveApp.getFileById(id).getBlob().getDataAsString();
+    }
+  }
+  throw new Error('Çalışma bulunamadı.');
+}

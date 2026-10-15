@@ -378,10 +378,11 @@ button.chip{cursor:pointer}
 .is .sira{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 14px}
 .cb.k{padding:7px 12px;font-size:14px;border-radius:13px}
 .siniflar{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
-.skutu{display:grid;gap:8px}
-.skutu textarea{min-height:210px;resize:vertical;width:100%}
+.skutu{display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
+.skutu textarea{min-height:210px;resize:vertical;width:100%;min-width:0;tab-size:2}
 .skutu .r{display:flex;gap:8px}
-.skutu .r input{flex:1;min-width:0;font-family:var(--f-d);font-size:18px}
+.skutu .r input{flex:1;min-width:0;width:100%;font-family:var(--f-d);font-size:18px}
+.skutu .r .cb{flex:none}
 .not{color:var(--muted);max-width:65ch;margin:0}
 
 /* ---------- yazdırma ---------- */
@@ -529,6 +530,16 @@ button.chip{cursor:pointer}
 .r-gonder-res{width:220px;border-radius:18px;overflow:hidden;box-shadow:0 4px 0 #dccfb9}
 .r-gonder-res svg{display:block;width:100%;height:auto}
 .resyok svg{display:block;width:100%;height:100%}
+.etk-bas .etk-cal{margin-left:auto;flex-direction:column;gap:2px;padding:10px 18px 8px;font-size:17px;border-radius:22px}
+.etk-cal-ic{font-size:44px;color:#35a85b;display:grid}
+.cal-izgara{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.cal-kart{position:relative}
+.cal-kart .kare{width:100%;height:auto;aspect-ratio:4/3;background:#f6f1e8;position:relative}
+.cal-kart .kare img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}
+.cal-yukle{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.7);color:var(--mor)}
+.cal-bos{display:grid;justify-items:center;gap:8px;font-family:var(--f-d);font-size:20px}
+.cal-bos-res{width:140px;display:block}.cal-bos-res svg{width:100%;height:auto;display:block}
+.calismalarim h2{display:flex;align-items:center;gap:10px}.calismalarim h2 svg{color:#35a85b}
 .r-sec-bas{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ciz-btn{--b:var(--turuncu);--bd:#c86a10;--fg:#fff}
 .ciz-btn svg{font-size:20px}
@@ -626,7 +637,7 @@ button.chip{cursor:pointer}
       <span class="ay ogr-ozel"></span>
       <button class="ab yeni ogr-ozel" id="yeniBtn" aria-label="Yeni boş proje" title="Yeni boş proje"></button>
       <button class="ab kaydet ogr-ozel" id="kaydetBtn" aria-label="Kaydet" title="Kaydet"></button>
-      <button class="ab ac ogr-ozel" id="sonAc" aria-label="Son gönderdiğimi aç" title="Son gönderdiğimi aç"></button>
+      <button class="ab ac ogr-ozel" id="sonAc" aria-label="Çalışmalarım" title="Çalışmalarım"></button>
     </div>
     <div class="sag">
       <button class="ben" id="benBtn" aria-label="Profilim"><span id="kimAv"></span><span class="ben-yazi"><b id="kimAd"></b><small id="kimAlt"></small></span><span class="etiket" id="kimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="benKalem"></span></button>
@@ -665,7 +676,7 @@ button.chip{cursor:pointer}
 
 <!-- ETKİNLİK SEÇİMİ -->
 <section id="etkinlik" hidden>
-  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div></div>
+  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div><button class="cb beyaz etk-cal" id="eCalismalarim" aria-label="Çalışmalarım"></button></div>
   <div class="etk-liste" id="etkListe"></div>
   <div class="ayak"><button class="cb beyaz hap" id="eCikis"></button><span></span></div>
 </section>
@@ -680,6 +691,7 @@ button.chip{cursor:pointer}
       <button class="ab zar" id="rZar" aria-label="Karıştır" title="Karıştır"></button>
       <button class="ab" id="rGeri" aria-label="Geri al" title="Geri al"></button>
       <button class="ab yeni r-ogr-ozel" id="rYeni" aria-label="Yeni robot" title="Yeni robot"></button>
+      <button class="ab ac r-ogr-ozel" id="rCalismalarim" aria-label="Çalışmalarım" title="Çalışmalarım"></button>
     </div>
     <div class="sag">
       <button class="ben" id="rBen" aria-label="Profilim"><span id="rkimAv"></span><span class="ben-yazi"><b id="rkimAd"></b><small id="rkimAlt"></small></span><span class="etiket" id="rkimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="rbenKalem"></span></button>
@@ -1028,6 +1040,8 @@ const DEMO=(function(){
     siniflariKaydet:function(sf,l){ if(sf!=='1234') throw new Error('Şifre yanlış.'); siniflar=l.filter(function(c){ return c.ad; }); kaydet(); return kopya(siniflar); },
     gorselAra:function(){ throw new Error('İnternetten arama bu önizlemede çalışmaz. Site Google\'a kurulunca çalışır.'); },
     gorselGetir:function(){ throw new Error('Önizlemede çalışmaz.'); },
+    calismalarim:function(s,o){ ornekler(); return kayit.filter(function(k){ return k.sinif===s&&k.ogrenci===o; }).slice().reverse().slice(0,40).map(function(k){ return {id:k.id,tarih:k.tarih,saat:k.saat,kucuk:k.kucuk||'',puan:k.puan||0,ornek:k.ornek}; }); },
+    calismamiAc:function(s,o,id){ const k=bul(id); if(!k) throw new Error('Çalışma bulunamadı.'); if(k.sinif!==s||k.ogrenci!==o) throw new Error('Bu çalışma senin değil.'); return k.proje; },
     etkinlikDurumu:function(s){ return (ls('kat3:demo:etk')||{})[s]||{}; },
     etkinlikleriGetir:function(sf){ if(sf!=='1234') throw new Error('Şifre yanlış.'); return ls('kat3:demo:etk')||{}; },
     etkinlikKaydet:function(sf,s,d){ if(sf!=='1234') throw new Error('Şifre yanlış.'); const h=ls('kat3:demo:etk')||{}; h[s]=Object.assign(h[s]||{},d); ls('kat3:demo:etk',h); return h; }
@@ -1920,14 +1934,52 @@ async function gonderGercek(puan,d,paket){
     const t=icBtn('cb mor yuvarlak','check','Tamam'); t.onclick=kapat; dd.appendChild(t); o.appendChild(dd); katman(o);
   }
 }
-$('sonAc').onclick=async function(){
-  try{ const c=calismaCoz(await sunucu('sonCalismam',S.sinif,S.ogrenci));
-    if(!c){ bildir('Daha önce gönderdiğin bir çalışma yok.'); return; }
-    if(c.tur==='robot'&&!etkinlikAcikMi('robot',ls('kat3:etk:'+S.sinif))){ bildir('Robot Yarat şu an kapalı.'); return; }
-    if(c.tur==='robot'){ onayla({e:'🤖'},'Son gönderdiğin robot açılsın mı?',function(){ taslakKaydet(true); durdur(); robotAc(c.veri); robotTaslak(); }); return; }
-    onayla({e:'📂'},'Son gönderdiğin açılsın mı?',function(){ projeYukle(c.veri); taslakKaydet(true); });
-  }catch(e){ bildir(hataMetni(e)); }
-};
+/* ---- Çalışmalarım: öğrenci kendi gönderdiklerini görür, açar, değiştirip yeniden gönderir ---- */
+function calismalarimAc(){
+  if(S.inceleme||!S.ogrenci) return;
+  const o=el('div','ortu'), d=el('div','secici calismalarim'); d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
+  const bas=el('div','secici-bas'), bb=el('div'); const h=el('h2'); h.innerHTML=ic('folder')+' Çalışmalarım';
+  bb.append(h,el('p',null,'Birine dokun, açılsın. Değiştirip yeniden gönderebilirsin.'));
+  const kp=icBtn('kapat','x','Kapat'); kp.onclick=kapat; bas.append(bb,kp);
+  const izg=el('div','izgara cal-izgara'); izg.innerHTML='<div class="not-satir"><span class="spin"></span></div>';
+  d.append(bas,izg); o.appendChild(d); o.onclick=function(e){ if(e.target===o) kapat(); }; katman(o);
+  sunucu('calismalarim',S.sinif,S.ogrenci).then(function(l){
+    izg.innerHTML='';
+    if(!l||!l.length){ const b=el('div','not-satir cal-bos'); b.innerHTML='<span class="cal-bos-res">'+parcaSVG(Object.assign({},VITRIN,{goz:6,agiz:0,kol:0,panel:0,ana:8}),'20 -10 360 480',{anim:false})+'</span>Henüz gönderdiğin bir çalışma yok.'; izg.appendChild(b); return; }
+    const kilit=ls('kat3:etk:'+S.sinif)||{};
+    l.forEach(function(k){
+      const b=el('button','gkart cal-kart'); b.setAttribute('aria-label',tarihYazi(k.tarih)+' '+k.saat);
+      const kare=el('div','kare');
+      if(k.kucuk){ const im=el('img'); im.src=k.kucuk; im.alt=''; kare.appendChild(im); } else kare.appendChild(el('span',null,'🖼️'));
+      const gun=k.tarih===S.bugun?'Bugün':tarihYazi(k.tarih).replace(/ [^ ]+$/,'');
+      b.append(kare,el('b',null,gun+' · '+k.saat),yildizEl(k.puan||0));
+      b.onclick=async function(){
+        if(b.disabled) return; b.disabled=true; kare.insertAdjacentHTML('beforeend','<span class="cal-yukle"><span class="spin"></span></span>');
+        try{
+          const c=calismaCoz(k.ornek?DEMO.calismaAc('1234',k.id):await sunucu('calismamiAc',S.sinif,S.ogrenci,k.id));
+          if(!c) throw new Error('Bu çalışma açılamadı.');
+          if(!etkinlikAcikMi(c.tur,kilit)){ bildir((c.tur==='robot'?'Robot Yarat':'Kodlama')+' şu an kapalı.'); return; }
+          onayla({e:c.tur==='robot'?'🤖':'📂'},'Bu çalışma açılsın mı? Ekrandaki çalışmanın yerine geçer.',function(){ eskiyiAc(c); });
+        }catch(e){ bildir(hataMetni(e)); }
+        finally{ b.disabled=false; const y=kare.querySelector('.cal-yukle'); if(y) y.remove(); }
+      };
+      izg.appendChild(b);
+    });
+  }).catch(function(e){
+    const m=hataMetni(e); izg.innerHTML='';
+    izg.appendChild(el('div','not-satir',/calismalarim/.test(m)?'Bu bölüm için öğretmenin Apps Script\'i güncellemeli.':m));
+  });
+}
+function eskiyiAc(c){
+  if(S.ekran==='editor'){ taslakKaydet(true); durdur(); }
+  if(S.ekran==='robot') robotTaslak();
+  if(c.tur==='robot'){ robotAc(c.veri); robotTaslak(); }
+  else { editorAc(c.veri); taslakKaydet(true); }
+  ton(523,100); setTimeout(function(){ ton(784,140); },100);
+}
+$('sonAc').onclick=calismalarimAc;
+$('rCalismalarim').onclick=calismalarimAc;
+$('eCalismalarim').onclick=calismalarimAc;
 $('benBtn').onclick=profilAc;
 $('yeniBtn').onclick=function(){ onayla({e:'✨'},'Yeni boş proje açılsın mı? Ekrandaki çalışma silinir. Göndermediysen önce gönder.',function(){ projeYukle(yeniProje()); taslakKaydet(true); bildir('Yeni proje hazır'); }); };
 function tamEkranMi(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
@@ -2682,7 +2734,7 @@ function calismaAcTur(c){ if(c.tur==='robot') robotAc(c.veri); else editorAc(c.v
 /* ================= açılış ================= */
 function simgeler(){
   setIc('geriSinif','back'); setIc('basla','flag'); setIc('dur','stop'); setIc('izgaraBtn','grid'); setIc('basaAl','reset'); setIc('sunumBtn','full'); setIc('arkaBtn','image');
-  setIc('yeniBtn','newp'); setIc('etkBtn','apps'); setIc('rEtk','apps'); setIc('rZar','zar'); setIc('rGeri','undo'); setIc('rYeni','newp'); setIc('rGonderIc','mail'); setIc('rCikis','exit'); setIc('rbenKalem','pencil'); $('eCikis').innerHTML=ic('exit')+'Çıkış'; setIc('kaydetBtn','save'); setIc('sonAc','folder'); setIc('gonderIc','mail'); setIc('cikis','exit'); tamEkranGuncelle(); setIc('benKalem','pencil'); setIc('sBasla','flag'); setIc('sDur','stop'); setIc('sKapat','x');
+  setIc('yeniBtn','newp'); setIc('etkBtn','apps'); setIc('rEtk','apps'); setIc('rZar','zar'); setIc('rGeri','undo'); setIc('rYeni','newp'); setIc('rCalismalarim','folder'); $('eCalismalarim').innerHTML='<span class="etk-cal-ic">'+ic('folder')+'</span><span>Çalışmalarım</span>'; setIc('rGonderIc','mail'); setIc('rCikis','exit'); setIc('rbenKalem','pencil'); $('eCikis').innerHTML=ic('exit')+'Çıkış'; setIc('kaydetBtn','save'); setIc('sonAc','folder'); setIc('gonderIc','mail'); setIc('cikis','exit'); tamEkranGuncelle(); setIc('benKalem','pencil'); setIc('sBasla','flag'); setIc('sDur','stop'); setIc('sKapat','x');
   $('geriAl').innerHTML=ic('undo')+'GERİ AL'; $('yinele').innerHTML=ic('redo')+'YİNELE'; $('temizle').innerHTML=ic('trash')+'TEMİZLE';
 }
 function parametreler(){ return new Promise(function(res){ if(GAS&&google.script.url){ google.script.url.getLocation(function(l){ res((l&&l.parameter)||{}); }); } else res({}); }); }
