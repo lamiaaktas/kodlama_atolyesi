@@ -237,6 +237,44 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .stage.locked .opt,.stage.locked .item,.stage.locked .bucket,.stage.locked textarea,.stage.locked input,.stage.locked .rf-btns{opacity:.6}
 .lockmsg{border-color:var(--bad)!important;background:var(--bad-bg)!important}
 .timerrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;border:3px solid var(--ink);padding:10px 12px}
+
+.karne{background:#fff;border:4px solid var(--ink);padding:20px;display:grid;gap:16px;box-shadow:6px 6px 0 rgba(0,0,0,.28)}
+.k-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.k-head h2{font-size:28px}
+.k-stats{display:flex;gap:8px;flex-wrap:wrap}
+.k-stat{border:3px solid var(--ink);padding:6px 12px;display:grid;justify-items:center;background:var(--panel)}
+.k-stat b{font-family:var(--font-pixel);font-size:24px;font-variant-numeric:tabular-nums}
+.k-stat span{font-size:12px;letter-spacing:1px;text-transform:uppercase}
+.k-top{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:center}
+@media (max-width:700px){.k-top{grid-template-columns:1fr}}
+.k-top .castle{border-width:3px}
+.k-badges{display:grid;gap:6px}
+.k-badge{display:flex;gap:8px;align-items:center;font-weight:700;font-size:15px}
+.k-badge i{width:28px;height:28px;border:2px solid #000;background-size:cover;flex:none}
+.k-badge.off{opacity:.35;filter:grayscale(1)}
+.k-les{display:grid;gap:8px;border-top:3px dashed var(--panel-lo);padding-top:12px}
+.k-les-h{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.k-les-h h3{flex:1;min-width:220px}
+.k-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.k-tbl th,.k-tbl td{border:2px solid var(--ink);padding:6px 8px;text-align:left;vertical-align:top}
+.k-tbl thead th{background:var(--stone-dark);color:#fff;font-family:var(--font-pixel);font-weight:600}
+.k-tbl td.mk{text-align:center;font-weight:800;width:34px}
+.k-tbl td.ok{background:var(--ok-bg)}.k-tbl td.bad{background:var(--bad-bg)}
+.k-tbl .qt{font-weight:700}
+.k-foot{font-size:13px;color:var(--ink-soft)}
+.k-list{display:flex;flex-wrap:wrap;gap:8px}
+.k-list .on{outline:3px solid var(--gold-dark)}
+@media print{
+  @page{size:A4;margin:12mm}
+  html,body{background:#fff!important}
+  .top,.noprint,#netbar,.foot,#layer{display:none!important}
+  main{padding:0!important;max-width:none!important;display:block!important}
+  #tbody{display:block!important}
+  .karne{box-shadow:none;border:2px solid #000;break-after:page;page-break-after:always;margin:0}
+  .karne:last-child{break-after:auto;page-break-after:auto}
+  .k-les{break-inside:avoid;page-break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:520px){h1{font-size:24px}.brand{font-size:18px}.stage .q{font-size:19px}.hotbar{gap:4px}.slot span{font-size:10px}.slot .ic{width:30px;height:30px}}
 </style>
@@ -403,6 +441,7 @@ const call=(fn,...a)=>new Promise((res,rej)=>{try{google.script.run.withSuccessH
 /* ---------- Durum ---------- */
 let LIVE=null,liveKnown=false,MINE={},mineLoaded=false,TANS={},TCLS=[],net='ok',SHEET_URL='';
 const STS={};
+let KAR=null,KFOR=null,KERR=false,KSEL=null;
 let OFFSET=0,LOCKED=false,TWARN=false;
 const srvNow=()=>Date.now()+OFFSET;
 function gotLive(v){if(v&&typeof v.now==='number')OFFSET=v.now-Date.now();return v}
@@ -418,7 +457,7 @@ async function poll(){
   try{
     if(LOC.teacher&&LOC.pin&&LOC.tClass){
       const c=LOC.tClass,l=LOC.tLesson;
-      const [lv,ag]=await Promise.all([call('tGetLive',LOC.pin,c),LOC.tTab==='classes'?Promise.resolve(null):call('tAgg',LOC.pin,c,l)]);
+      const [lv,ag]=await Promise.all([call('tGetLive',LOC.pin,c),(LOC.tTab==='classes'||LOC.tTab==='karne')?Promise.resolve(null):call('tAgg',LOC.pin,c,l)]);
       if(c===LOC.tClass){LIVE=gotLive(lv);liveKnown=true;if(ag&&l===LOC.tLesson)TANS=ag}
     }else if(!LOC.teacher&&LOC.cls&&LOC.student){
       LIVE=gotLive(await call('getLive',LOC.cls));liveKnown=true;
@@ -438,6 +477,7 @@ function screenKey(){
   if(LOC.teacher){
     const sig=JSON.stringify(TCLS.map(c=>[c.name,c.code,c.students.length]));
     if(LOC.tTab==='classes')return 't:classes:'+sig;
+    if(LOC.tTab==='karne')return `t:karne:${LOC.tClass}:${KAR&&KFOR===LOC.tClass?1:0}:${KERR}:${KSEL}:${sig}`;
     if(LOC.tTab==='answers')return `t:answers:${LOC.tClass}:${LOC.tLesson}:${sig}`;
     return `t:live:${LOC.tClass}:${LOC.tLesson}:${liveKnown}:${liveOpen()?LIVE.lesson+':'+LIVE.step+':'+(LIVE.timer?LIVE.timer.endsAt:0):'off:'+LOC.tStep}:${TWARN}:${sig}`;
   }
@@ -724,19 +764,20 @@ function teacherView(){
   const cs=TCLS;if(LOC.tClass&&!tcls())LOC.tClass=null;if(!LOC.tClass&&cs[0])LOC.tClass=cs[0].name;
   const tab=(k,t)=>`<button class="btn ${LOC.tTab===k?'go':'ghost'}" data-tab="${k}">${t}</button>`;
   const pickers=`<div class="row" style="align-items:center"><span class="eyebrow">Sınıf</span>${cs.map((c,k)=>`<button class="btn ${c.name===LOC.tClass?'gold':'ghost'} sm" data-cls="${k}">${esc(c.name)}</button>`).join('')}</div>
-    <div class="row" style="align-items:center"><span class="eyebrow">Ders</span>${LESSONS.map(l=>`<button class="btn ${l.id===LOC.tLesson?'gold':'ghost'} sm" data-les="${l.id}" title="${esc(l.title)}">${l.id}. ${esc(l.part)}</button>`).join('')}</div>`;
+    ${LOC.tTab==='karne'?'':`<div class="row" style="align-items:center"><span class="eyebrow">Ders</span>`}${LOC.tTab==='karne'?'':LESSONS.map(l=>`<button class="btn ${l.id===LOC.tLesson?'gold':'ghost'} sm" data-les="${l.id}" title="${esc(l.title)}">${l.id}. ${esc(l.part)}</button>`).join('')+'</div>'}`;
   app.innerHTML=`<div class="banner" id="netbar" ${net==='ok'?'hidden':''}>Bağlantı koptu. Tekrar bağlanmaya çalışılıyor…</div>
-  <section class="panel" style="display:grid;gap:12px"><div class="row" style="align-items:center;justify-content:space-between"><h1>Öğretmen portalı</h1>
+  <section class="panel noprint" style="display:grid;gap:12px"><div class="row" style="align-items:center;justify-content:space-between"><h1>Öğretmen portalı</h1>
       <div class="row">${SHEET_URL?`<a class="btn ghost sm" href="${esc(SHEET_URL)}" target="_blank" rel="noopener">E-Tabloyu aç</a>`:''}<button class="btn ghost sm" id="out">Çıkış</button></div></div>
-    <div class="row">${tab('live','Canlı ders')}${tab('answers','Cevaplar')}${tab('classes','Sınıf listeleri')}</div>
+    <div class="row">${tab('live','Canlı ders')}${tab('answers','Cevaplar')}${tab('karne','Karneler')}${tab('classes','Sınıf listeleri')}</div>
     ${LOC.tTab!=='classes'?(cs.length?pickers:'<p>Önce “Sınıf listeleri” sekmesinden sınıflarını ekle.</p>'):''}</section><div id="tbody" style="display:grid;gap:20px"></div>`;
   app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{LOC.tTab=b.dataset.tab;saveLoc();render();poll()});
-  app.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>switchT(()=>{LOC.tClass=cs[+b.dataset.cls].name;LOC.tStep=0}));
+  app.querySelectorAll('[data-cls]').forEach(b=>b.onclick=()=>switchT(()=>{LOC.tClass=cs[+b.dataset.cls].name;LOC.tStep=0;KSEL=null}));
   app.querySelectorAll('[data-les]').forEach(b=>b.onclick=()=>switchT(()=>{LOC.tLesson=+b.dataset.les;LOC.tStep=0}));
   document.getElementById('out').onclick=()=>{LOC.teacher=false;LOC.pin='';saveLoc();clearInterval(pollT);LIVE=null;liveKnown=false;render();if(LOC.cls&&LOC.student)enterStudent()};
   if(LOC.tTab==='classes')return classesTab();
   if(!cs.length)return;
   if(LOC.tTab==='answers')return answersTab();
+  if(LOC.tTab==='karne')return karneTab();
   liveTab();
 }
 
@@ -828,7 +869,8 @@ function renderTable(){
     const sc=d?Object.values(d.first||{}).filter(Boolean).length:0,tot=d?Object.keys(d.first||{}).length:0;
     return `<tr><th scope="row"><button class="linkish" data-ri="${ri}">${esc(name)}</button></th>${cols.map(x=>{const c=cellOf(x.s,d,x.i);return `<td class="${c.c}">${esc(c.c==='txt'&&c.t.length>40?c.t.slice(0,40)+'…':c.t)}</td>`}).join('')}<td>${d?sc+' / '+tot:'—'}</td><td>${d&&d.done?'✓':'—'}</td></tr>`}).join('')}</tbody></table>`;
   box.querySelectorAll('[data-ri]').forEach(b=>b.onclick=()=>{const name=ros[+b.dataset.ri],d=ansOf(name);
-    document.getElementById('detail').innerHTML=`<div class="card-sum"><b>${esc(name)} · Ders ${L.id}</b>${d?cols.filter(x=>x.s.type==='open'||x.s.type==='exit').map(x=>`<span><b>${esc(x.s.q)}</b><br>${esc((d.ans||{})[x.i]||'—')}</span>`).join(''):'<span>Bu derste henüz cevabı yok.</span>'}</div>`});
+    document.getElementById('detail').innerHTML=`<div class="card-sum"><b>${esc(name)} · Ders ${L.id}</b>${d?cols.filter(x=>x.s.type==='open'||x.s.type==='exit').map(x=>`<span><b>${esc(x.s.q)}</b><br>${esc((d.ans||{})[x.i]||'—')}</span>`).join(''):'<span>Bu derste henüz cevabı yok.</span>'}<button class="btn gold sm" id="tokarne" style="justify-self:start">${esc(name)} karnesini aç</button></div>`;
+    document.getElementById('tokarne').onclick=()=>{KSEL=name;LOC.tTab='karne';saveLoc();render()}});
 }
 
 /* ---------- Sınıf listeleri ---------- */
@@ -852,6 +894,68 @@ function classesTab(){
     try{TCLS=await call('tSaveClasses',LOC.pin,out)||[];if(!tcls())LOC.tClass=(TCLS[0]||{}).name||null;saveLoc();render(true);const m=document.getElementById('cmsg');if(m)m.textContent='✓ Kaydedildi. Sınıf kodları yukarıda.'}
     catch(e){msg.textContent='✗ Kaydedilemedi. Tekrar dene.';b.disabled=false}
   };
+}
+
+
+/* ---------- Karneler (velilere) ---------- */
+async function loadKarne(){
+  const c=LOC.tClass;if(!c)return;KFOR=c;KAR=null;KERR=false;
+  try{const arr=await Promise.all(LESSONS.map(l=>call('tAgg',LOC.pin,c,l.id)));if(KFOR===c){KAR={};LESSONS.forEach((l,k)=>KAR[l.id]=arr[k]||{})}}
+  catch(e){if(KFOR===c)KERR=true}
+  render();
+}
+function karneTab(){
+  const tb=document.getElementById('tbody'),ros=rosterOf();
+  if(KFOR!==LOC.tClass||(!KAR&&!KERR)){tb.innerHTML=`<section class="panel"><p>Karneler hazırlanıyor…</p></section>`;if(KFOR!==LOC.tClass||!KAR)loadKarne();return}
+  if(KERR){tb.innerHTML=`<section class="panel"><p class="warn">Cevaplar yüklenemedi.</p><button class="btn" id="kre">Tekrar dene</button></section>`;document.getElementById('kre').onclick=()=>{KFOR=null;KERR=false;render(true)};return}
+  if(KSEL&&KSEL!=='*'&&!ros.includes(KSEL))KSEL=null;
+  const who=KSEL==='*'?ros:(KSEL?[KSEL]:[]);
+  tb.innerHTML=`<section class="panel noprint" style="display:grid;gap:12px">
+    <h2>${esc(LOC.tClass)} · Öğrenci karneleri</h2>
+    <p>Bir öğrenci seç. Karnede 5 dersteki cevapları, doğru cevaplar ve kazandığı rozetler yer alır. <b>Yazdır / PDF</b> ile yazdırabilir ya da yazdırma penceresinde “PDF olarak kaydet”i seçip velilere gönderebilirsin.</p>
+    <div class="k-list">${ros.map((n,k)=>`<button class="btn ${KSEL===n?'gold on':'ghost'} sm" data-ks="${k}">${esc(n)}</button>`).join('')}</div>
+    <div class="row" style="align-items:center"><button class="btn ${KSEL==='*'?'gold':'ghost'}" id="kall">Tüm sınıfın karneleri</button>${who.length?`<button class="btn go big" id="kprint">Yazdır / PDF</button>`:''}<button class="btn ghost sm" id="kref">Cevapları yenile</button>
+    ${KSEL==='*'?`<span class="hintsm">${who.length} karne, her biri ayrı sayfaya basılır.</span>`:''}</div>
+  </section>${who.map(karneHTML).join('')}`;
+  tb.querySelectorAll('[data-ks]').forEach(b=>b.onclick=()=>{KSEL=ros[+b.dataset.ks];render()});
+  document.getElementById('kall').onclick=()=>{KSEL='*';render()};
+  document.getElementById('kref').onclick=()=>{KFOR=null;render(true)};
+  const pb=document.getElementById('kprint');if(pb)pb.onclick=()=>{try{window.print()}catch(e){}};
+  tb.querySelectorAll('canvas[data-kc]').forEach(cv=>drawCastle(cv,kDone(who[+cv.dataset.kc])));
+}
+const kDone=name=>new Set(LESSONS.filter(l=>((KAR[l.id]||{})[name]||{}).done).map(l=>l.id));
+function kRow(L,s,i,d,qn){
+  const has=d&&d.ans&&d.ans[i]!==undefined&&d.ans[i]!=='';const f=d&&d.first?d.first[i]:undefined;
+  let q='',you='—',right='',ok=null;
+  if(s.type==='choice'){q=(s.tag?s.tag+': ':'')+s.q;right=s.opinion?'(Görüş sorusu)':s.options.filter(o=>o.ok).map(o=>o.t).join(', ');
+    if(has){you=[].concat(d.ans[i]).map(k=>(s.options[k]||{}).t).filter(Boolean).join(', ');ok=s.opinion?null:f}}
+  else if(s.type==='rf'){const subj=s.subject||s.title||s.name||s.url||'';q=`Örnek ${qn}: “${subj}” gerçek mi, sahte mi?`;right=s.fake?'Sahte':'Gerçek';if(has){you=d.ans[i]===1?'Sahte':'Gerçek';ok=f}}
+  else if(s.type==='sort'){q=s.q.split('.')[0]+'.';right='Tüm kartlar doğru kutuda';
+    if(has&&d.ans[i].place){const pl=d.ans[i].place,okN=s.items.filter((it,k)=>it.ok.includes(pl[k])).length;const bad=s.items.map((it,k)=>pl[k]!==undefined&&!it.ok.includes(pl[k])?`“${it.t}” → ${s.buckets[pl[k]]}`:'').filter(Boolean);
+      you=`${okN} / ${s.items.length} kart doğru yerde`+(bad.length?' · Hatalı: '+bad.join('; '):'');ok=f}}
+  else{q=s.q;right='';if(has){you=String(d.ans[i])}}
+  const cls=ok===true?'ok':ok===false?'bad':'';
+  return `<tr><td class="qt">${esc(q)}</td><td>${esc(you)}</td><td>${esc(right)}</td><td class="mk ${cls}">${ok===true?'✓':ok===false?'✗':''}</td></tr>`;
+}
+function karneHTML(name,idx){
+  const ds=kDone(name);let xp=0,totR=0,totQ=0;
+  const les=LESSONS.map(L=>{const d=(KAR[L.id]||{})[name];
+    if(d){const r=Object.values(d.first||{}).filter(Boolean).length,q=Object.keys(d.first||{}).length;totR+=r;totQ+=q;xp+=r*10+(d.done?50:0)}
+    let rn=0;const rows=L.steps.map((s,i)=>({s,i})).filter(x=>ANSWERABLE.includes(x.s.type)).map(x=>kRow(L,x.s,x.i,d,x.s.type==='rf'?++rn:0)).join('');
+    const st=d?(d.done?'<span class="chip done">Tamamladı ✓</span>':'<span class="chip prog">Katıldı, bitirmedi</span>'):'<span class="chip">Katılmadı</span>';
+    const sc=d?`<span>İlk denemede doğru: <b>${Object.values(d.first||{}).filter(Boolean).length} / ${Object.keys(d.first||{}).length}</b></span>`:'';
+    return `<section class="k-les"><div class="k-les-h"><h3>Ders ${L.id} · ${esc(L.title)}</h3>${st}${sc}</div>
+      ${d?`<div class="tbl-wrap"><table class="k-tbl"><thead><tr><th>Soru</th><th>Öğrencinin cevabı</th><th>Doğru cevap</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="k-foot">Bu derse ait kayıt yok.</p>'}</section>`}).join('');
+  const date=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  return `<article class="karne">
+    <div class="k-head"><div><span class="eyebrow">Dijital Kale Macerası · 4. Sınıf Dijital Vatandaşlık · 2. Ünite</span><h2>${esc(name)}</h2><p>${esc(LOC.tClass)} · ${date}</p></div>
+      <div class="k-stats"><div class="k-stat"><b>${ds.size}/${LESSONS.length}</b><span>Ders</span></div><div class="k-stat"><b>${totR}/${totQ}</b><span>Doğru</span></div><div class="k-stat"><b>${xp}</b><span>XP</span></div></div></div>
+    <div class="k-top"><canvas class="castle px" data-kc="${idx}" aria-label="Kale: tamamlanan derslere göre"></canvas>
+      <div class="k-badges"><span class="eyebrow">Rozetler</span>${LESSONS.map(l=>`<div class="k-badge ${ds.has(l.id)?'':'off'}"><i class="px" style="background-image:url(${texURL(l.tex)})"></i>${l.badge} <span class="hintsm">(${esc(l.part)})</span></div>`).join('')}</div></div>
+    <p class="k-foot">Konular: gizlilik ve paylaşırken düşünmek, internette dolandırıcılık ve kimlik avı işaretlerini tanımak, güçlü şifre oluşturmak.</p>
+    ${les}
+    <p class="k-foot">Bu karne, öğrencinin derslerde uygulamada verdiği cevaplardan oluşturuldu. ✓ ilk denemede doğru, ✗ ilk denemede yanlış (öğrenci doğru cevabı ders sırasında öğrendi). Görüş ve yazılı sorularda doğru ya da yanlış yoktur.</p>
+  </article>`;
 }
 
 /* ---------- Açılış ---------- */
