@@ -9,6 +9,9 @@
  *       Yürütme: Ben   |   Erişim: Herkes  (okul hesabı ile: "alan adınızdaki herkes")
  *  5. Verilen /exec bağlantısını öğrencilerle paylaşın.
  *
+ * Hız için: Code.gs'i yapıştırdıktan sonra üstteki işlev listesinden "kurulum"u seçip
+ * bir kez Çalıştır'a basın (izin isterse onaylayın).
+ *
  * Güncellemeler: Sitenin ekranı (Index.html) GitHub'daki
  * lamiaaktas/kodlama_atolyesi deposundan okunur. Ekran güncellemeleri için
  * bu dosyaya ya da Index'e dokunmanız gerekmez. Projedeki Index dosyası
@@ -46,18 +49,28 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-/* GitHub'daki sayfayı getirir; 5 dk önbellekte tutar; GitHub'a ulaşılamazsa Drive'daki son yedeği kullanır. */
+/* Sayfa önbellekten verilir (6 saat). Arka plandaki zamanlayıcı her 5 dakikada GitHub'dan
+   yeni sürümü çeker, böylece hiçbir çocuk GitHub'ı beklemez. */
 function sayfaGetir_() {
+  const s = onbellektenSayfa_();
+  if (s) return s;
+  return sayfaTazele() || yedekOku_();
+}
+
+function onbellektenSayfa_() {
   const c = CacheService.getScriptCache();
   const n = parseInt(c.get('sayfa:n') || '0', 10);
-  if (n) {
-    const anahtar = [];
-    for (let i = 0; i < n; i++) anahtar.push('sayfa:' + i);
-    const p = c.getAll(anahtar);
-    let s = '';
-    for (let i = 0; i < n; i++) { if (p['sayfa:' + i] == null) { s = ''; break; } s += p['sayfa:' + i]; }
-    if (s) return s;
-  }
+  if (!n) return null;
+  const anahtar = [];
+  for (let i = 0; i < n; i++) anahtar.push('sayfa:' + i);
+  const p = c.getAll(anahtar);
+  let s = '';
+  for (let i = 0; i < n; i++) { if (p['sayfa:' + i] == null) return null; s += p['sayfa:' + i]; }
+  return s;
+}
+
+/* GitHub'dan en yeni sayfayı çekip önbelleğe koyar. Zamanlayıcı bunu her 5 dakikada çalıştırır. */
+function sayfaTazele() {
   let html = null;
   try {
     const r = UrlFetchApp.fetch(SAYFA_URL + '?t=' + Date.now(), { muteHttpExceptions: true });
@@ -66,13 +79,26 @@ function sayfaGetir_() {
       if (html.indexOf('Kodlama Atölyesi') < 0) html = null;
     }
   } catch (e) { html = null; }
-  if (html) yedekYaz_(html); else html = yedekOku_();
   if (!html) return null;
+  const c = CacheService.getScriptCache();
   const obj = {}, parca = 40000, k = Math.ceil(html.length / parca);
   for (let i = 0; i < k; i++) obj['sayfa:' + i] = html.substr(i * parca, parca);
   obj['sayfa:n'] = String(k);
-  try { c.putAll(obj, 300); } catch (e) {}
+  try { c.putAll(obj, 21600); } catch (e) {}
+  yedekYaz_(html);
   return html;
+}
+
+/* Bir kez çalıştırın: arka plan zamanlayıcısını kurar ve sayfayı önbelleğe alır. */
+function kurulum() {
+  ScriptApp.getProjectTriggers().forEach(function (t) {
+    if (t.getHandlerFunction() === 'sayfaTazele') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('sayfaTazele').timeBased().everyMinutes(5).create();
+  depo_();
+  sayfaTazele();
+  CacheService.getScriptCache().remove('siniflar');
+  siniflariGetir();
 }
 
 function yedekYaz_(html) {
@@ -80,7 +106,7 @@ function yedekYaz_(html) {
     const p = PropertiesService.getScriptProperties();
     const ozet = Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, html, Utilities.Charset.UTF_8));
     if (p.getProperty('SAYFA_OZET') === ozet) return;
-    const klasor = depo_().klasor;
+    const klasor = DriveApp.getFolderById(p.getProperty('KLASOR'));
     const it = klasor.getFilesByName('site-yedek.html');
     if (it.hasNext()) it.next().setContent(html); else klasor.createFile('site-yedek.html', html, 'text/html');
     p.setProperty('SAYFA_OZET', ozet);
@@ -96,12 +122,14 @@ function yedekOku_() {
 
 /* Yeni sürümü 5 dakika beklemeden görmek isterseniz bu işlevi bir kez çalıştırın. */
 function siteyiYenile() {
-  CacheService.getScriptCache().remove('sayfa:n');
+  sayfaTazele();
 }
 
 /* ---------- depolama ---------- */
 
+let DEPO_ = null;
 function depo_() {
+  if (DEPO_) return DEPO_;
   const p = PropertiesService.getScriptProperties();
   let klasor = null, tablo = null;
   try { klasor = DriveApp.getFolderById(p.getProperty('KLASOR')); } catch (e) { klasor = null; }
@@ -124,15 +152,19 @@ function depo_() {
     s.setFrozenRows(1);
     g.hideColumns(8);
   }
-  const g2 = tablo.getSheetByName('Gönderimler');
-  if (g2 && !g2.getRange(1, 9).getValue()) g2.getRange(1, 9).setValue('Uygulamada aç');
-  if (g2 && !g2.getRange(1, 10).getValue()) g2.getRange(1, 10).setValue('Yıldız');
-  if (!tablo.getSheetByName('Profiller')) {
-    const pr = tablo.insertSheet('Profiller');
-    pr.appendRow(['Sınıf', 'Öğrenci', 'Takma ad', 'Yüz']);
-    pr.setFrozenRows(1);
+  if (p.getProperty('KURULUM') !== '3:' + tablo.getId()) {
+    const g2 = tablo.getSheetByName('Gönderimler');
+    if (g2 && !g2.getRange(1, 9).getValue()) g2.getRange(1, 9).setValue('Uygulamada aç');
+    if (g2 && !g2.getRange(1, 10).getValue()) g2.getRange(1, 10).setValue('Yıldız');
+    if (!tablo.getSheetByName('Profiller')) {
+      const pr = tablo.insertSheet('Profiller');
+      pr.appendRow(['Sınıf', 'Öğrenci', 'Takma ad', 'Yüz']);
+      pr.setFrozenRows(1);
+    }
+    p.setProperty('KURULUM', '3:' + tablo.getId());
   }
-  return { klasor: klasor, tablo: tablo };
+  DEPO_ = { klasor: klasor, tablo: tablo };
+  return DEPO_;
 }
 
 function altKlasor_(ust, ad) {
@@ -163,7 +195,20 @@ function bugun() {
   return Utilities.formatDate(new Date(), SAAT_DILIMI, 'yyyy-MM-dd');
 }
 
+function baslangic() {
+  return { bugun: bugun(), ayarlar: ayarlar(), siniflar: siniflariGetir() };
+}
+
 function siniflariGetir() {
+  const cache = CacheService.getScriptCache();
+  const c = cache.get('siniflar');
+  if (c) { try { return JSON.parse(c); } catch (e) {} }
+  const sonuc = siniflariOku_();
+  try { cache.put('siniflar', JSON.stringify(sonuc), 600); } catch (e) {}
+  return sonuc;
+}
+
+function siniflariOku_() {
   const s = depo_().tablo.getSheetByName('Sınıflar');
   const son = s.getLastRow();
   if (son < 2) return [];
@@ -215,6 +260,7 @@ function profilKaydet(sinif, ogrenci, lakap, yuz) {
   } finally {
     kilit.releaseLock();
   }
+  CacheService.getScriptCache().remove('siniflar');
   return { lakap: lakap, yuz: JSON.parse(yuzMetin) };
 }
 
@@ -432,5 +478,6 @@ function siniflariKaydet(sifre, liste) {
     ogr.forEach(function (o) { satirlar.push([ad, o]); });
   });
   if (satirlar.length) s.getRange(2, 1, satirlar.length, 2).setValues(satirlar);
+  CacheService.getScriptCache().remove('siniflar');
   return siniflariGetir();
 }

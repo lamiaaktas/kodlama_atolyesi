@@ -718,7 +718,7 @@ function profilAc(){
   iptal.onclick=kapat;
   ok.onclick=function(){ ok.disabled=true; ok.innerHTML='<span class="spin"></span>';
     sunucu('profilKaydet',S.sinif,S.ogrenci,ad.value.trim()||S.ogrenci,Y).then(function(r){
-      const c=S.siniflar.find(function(x){ return x.ad===S.sinif; }); if(c){ c.profiller=c.profiller||{}; c.profiller[S.ogrenci]={lakap:r.lakap,yuz:r.yuz}; }
+      const c=S.siniflar.find(function(x){ return x.ad===S.sinif; }); if(c){ c.profiller=c.profiller||{}; c.profiller[S.ogrenci]={lakap:r.lakap,yuz:r.yuz}; } ls('kat3:siniflar',S.siniflar);
       kapat(); benCiz(); bildir('Profilin kaydedildi ✓');
     }).catch(function(e){ ok.disabled=false; ok.innerHTML=ic('check'); bildir(hataMetni(e)); }); };
   alt.append(iptal,ok);
@@ -763,6 +763,7 @@ const DEMO=(function(){
   function bul(id){ ornekler(); return kayit.find(function(x){ return x.id===id; }); }
   return {
     bugun:function(){ return yerelTarih(); },
+    baslangic:function(){ return {bugun:yerelTarih(),ayarlar:{internet:true},siniflar:DEMO.siniflariGetir()}; },
     ayarlar:function(){ return {internet:true}; },
     siniflariGetir:function(){ return kopya(siniflar).map(function(c){ c.profiller={}; c.ogrenciler.forEach(function(o){ if(profil[c.ad+'|'+o]) c.profiller[o]=profil[c.ad+'|'+o]; }); return c; }); },
     profilKaydet:function(s,o,l,y){ profil[s+'|'+o]={lakap:String(l||'').slice(0,20),yuz:y}; ls('kat3:demo:profil',profil); return kopya(profil[s+'|'+o]); },
@@ -1701,13 +1702,22 @@ function sahneBoyut(){ const k=document.querySelector('.sahne-kutu'), c=document
   if(!document.body.classList.contains('duzen')||document.body.classList.contains('sunum')||getComputedStyle(k).overflow!=='hidden'){ c.style.width=''; return; }
   const w=k.clientWidth, h=k.clientHeight; c.style.width=Math.max(240,Math.min(w,(h-34)*4/3+28))+'px'; }
 window.addEventListener('resize',sahneBoyut); if(window.ResizeObserver) new ResizeObserver(sahneBoyut).observe(document.querySelector('.sahne-kutu'));
-async function girisAc(){
-  goster('giris'); $('adim1').hidden=false; $('adim2').hidden=true; $('gunYazi').textContent=tarihYazi(S.bugun);
-  const k=$('sinifListe'); k.innerHTML='<div class="bos"><span class="spin"></span></div>';
-  try{ S.siniflar=await sunucu('siniflariGetir'); }catch(e){ k.innerHTML=''; k.appendChild(el('div','bos','Sınıflar yüklenemedi: '+hataMetni(e))); return; }
-  k.innerHTML='';
+function siniflariCiz(){
+  if(S.ekran!=='giris') return;
+  const k=$('sinifListe'); $('gunYazi').textContent=tarihYazi(S.bugun); k.innerHTML='';
   if(!S.siniflar.length){ k.appendChild(el('div','bos','Henüz sınıf listesi yok. Öğretmen panelinden sınıfları ve öğrenci adlarını ekleyin.')); return; }
   S.siniflar.forEach(function(c){ const b=el('button','cb sinif',c.ad); b.onclick=function(){ ogrenciSec(c); }; k.appendChild(b); });
+}
+async function girisAc(yenileme){
+  goster('giris'); $('adim1').hidden=false; $('adim2').hidden=true; $('gunYazi').textContent=tarihYazi(S.bugun);
+  const onb=ls('kat3:siniflar');
+  if(!S.siniflar.length&&onb) S.siniflar=onb;
+  if(S.siniflar.length) siniflariCiz(); else $('sinifListe').innerHTML='<div class="bos"><span class="spin"></span></div>';
+  if(yenileme===false) return;
+  try{ S.siniflar=await sunucu('siniflariGetir'); ls('kat3:siniflar',S.siniflar); }
+  catch(e){ if(!S.siniflar.length){ const k=$('sinifListe'); k.innerHTML=''; k.appendChild(el('div','bos','Sınıflar yüklenemedi: '+hataMetni(e))); } return; }
+  if(!$('adim2').hidden) return;
+  siniflariCiz();
 }
 function ogrenciSec(c){
   $('adim1').hidden=true; $('adim2').hidden=false; $('adim2Baslik').textContent=c.ad+' · Sen hangisisin?';
@@ -1855,18 +1865,18 @@ function simgeler(){
 function parametreler(){ return new Promise(function(res){ if(GAS&&google.script.url){ google.script.url.getLocation(function(l){ res((l&&l.parameter)||{}); }); } else res({}); }); }
 async function ac(){
   $('demoNot').hidden=GAS; simgeler();
-  try{ S.bugun=await sunucu('bugun'); }catch(e){}
-  sunucu('ayarlar').then(function(a){ S.ayar=a||S.ayar; }).catch(function(){});
-  ARKA_KOD.forEach(function(k){ kutResim(k); });
   requestAnimationFrame(ciz);
   const prm=await parametreler();
+  if(!prm.calisma){ S.siniflar=ls('kat3:siniflar')||[]; girisAc(false); }
+  try{ const v=await sunucu('baslangic'); S.bugun=v.bugun||S.bugun; S.ayar=v.ayarlar||S.ayar; S.siniflar=v.siniflar||[]; ls('kat3:siniflar',S.siniflar); }
+  catch(e){ try{ S.siniflar=await sunucu('siniflariGetir'); }catch(e2){} }
+  setTimeout(function(){ ARKA_KOD.forEach(function(k){ kutResim(k); }); },1500);
   if(prm.calisma){
     try{ const r=await sunucu('calismaGoruntule',prm.calisma); const p=gecerliProje(r.proje);
-      try{ S.siniflar=await sunucu('siniflariGetir'); }catch(e){}
       if(p){ S.inceleme={ogrenci:r.ogrenci,sinif:r.sinif,tarih:r.tarih,saat:r.saat,puan:r.puan}; S.linkten=true; editorAc(p); return; } }catch(e){ bildir(hataMetni(e)); }
   }
   ls('kat:oturum',null);
-  girisAc();
+  if(S.ekran==='giris'&&$('adim2').hidden) siniflariCiz(); else if(S.ekran!=='giris') girisAc(false);
 }
 ac();
 })();
