@@ -34,12 +34,14 @@ const BASLIKLAR = ['Tarih', 'Saat', 'Sınıf', 'Öğrenci', 'Proje dosyası', 'R
 // Sitenin ekranı bu adresten okunur. Güncellemeler GitHub'a gönderildiğinde
 // site en geç 5 dakika içinde kendiliğinden yenilenir.
 const SAYFA_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/Index.html';
+const IKON_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/ikon-192.png';
 
 function doGet() {
   const html = sayfaGetir_();
   const cikti = html ? HtmlService.createHtmlOutput(html) : HtmlService.createHtmlOutputFromFile('Index');
   return cikti
     .setTitle('Kodlama Atölyesi')
+    .setFaviconUrl(IKON_URL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
