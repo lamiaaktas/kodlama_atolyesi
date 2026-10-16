@@ -12,3 +12,4 @@ Karakter çizimleri: [Microsoft Fluent Emoji](https://github.com/microsoft/fluen
 ## Diğer uygulamalar
 
 - [`dijital-kale/`](dijital-kale/) – Dijital Kale Macerası: 4. sınıflar için dijital vatandaşlık dersleri (ayrı Apps Script projesi).
+- [`siber-adalar/`](siber-adalar/) – Siber Adalar: 3. sınıflar için dört adalı 3B dijital vatandaşlık platform oyunu (ayrı Apps Script projesi).
