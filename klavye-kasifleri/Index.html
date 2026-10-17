@@ -535,13 +535,42 @@ function sesleriBul() {
   } catch (e) { trSes = null; }
 }
 try { sesleriBul(); speechSynthesis.onvoiceschanged = sesleriBul; } catch (e) {}
-function konusmaDur() { try { speechSynthesis.cancel(); } catch (e) {} }
+/* Google ile üretilmiş ses dosyaları (klavye-kasifleri/ses). Listede olmayan cümlelerde cihazın sesi kullanılır. */
+const SES_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/klavye-kasifleri/ses/';
+const SES_DOSYA = new Set([]);
+function sesKimligi(s) { let h = 0x811c9dc5; for (const ch of String(s).trim()) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); }
+const sesOnbellek = {};
+function sesIdDosya(id) {
+  if (!SES_DOSYA.has(id)) return null;
+  if (!sesOnbellek[id]) { const a = new Audio(SES_URL + id + '.mp3'); a.preload = 'auto'; sesOnbellek[id] = a; }
+  return sesOnbellek[id];
+}
+const sesDosyasi = soz => sesIdDosya(sesKimligi(soz));
+function sesleriHazirla() { SES_DOSYA.forEach(sesIdDosya); }
+let calanSes = null;
+function konusmaDur() {
+  try { speechSynthesis.cancel(); } catch (e) {}
+  if (calanSes) { try { calanSes.pause(); calanSes.currentTime = 0; } catch (e) {} calanSes = null; }
+}
+/* Ses dosyasını çalar; bitince (ya da hata olursa) çözülür. */
+function dosyaCal(a) {
+  return new Promise(res => {
+    let bitti = false; const bit = () => { if (!bitti) { bitti = true; a.onended = a.onerror = null; res(); } };
+    a.onended = bit; a.onerror = bit;
+    try { a.currentTime = 0; } catch (e) {}
+    calanSes = a;
+    const p = a.play(); if (p && p.catch) p.catch(bit);
+  });
+}
 /* Metni okur; ses yoksa okuma süresi kadar bekler. Söz bitince çözülür. */
 function konus(metin, iptal) {
   const sure = 1400 + metin.length * 62;
   return new Promise(res => {
     let bitti = false; const bit = () => { if (!bitti) { bitti = true; res(); } };
-    if (!sesAcik || !trSes || !window.speechSynthesis) { setTimeout(bit, sure); return; }
+    if (!sesAcik) { setTimeout(bit, sure); return; }
+    const dosya = sesDosyasi(metin);
+    if (dosya) { konusmaDur(); dosyaCal(dosya).then(() => setTimeout(bit, 300)); setTimeout(bit, sure + 8000); return; }
+    if (!trSes || !window.speechSynthesis) { setTimeout(bit, sure); return; }
     try {
       konusmaDur();
       const u = new SpeechSynthesisUtterance(metin.replace(/[«»]/g, ''));
@@ -1359,26 +1388,35 @@ function ctxYap() {
     async soyle(yazi, soz) {
       kontrol();
       soz = soz || yazi;
-      const tahmin = 900 + soz.length * 72;
-      altyaziKur(yazi, tahmin);
-      $('#sinema').classList.add('konusuyor');
-      let bitti = false;
-      if (sesAcik && trSes && window.speechSynthesis) {
-        const son = new Promise(res => {
-          try {
-            konusmaDur();
-            const u = new SpeechSynthesisUtterance(soz);
-            u.voice = trSes; u.lang = trSes.lang; u.rate = .92; u.pitch = 1.05;
-            u.onend = () => { bitti = true; res(); }; u.onerror = () => { bitti = true; res(); };
-            speechSynthesis.speak(u);
-          } catch (e) { bitti = true; res(); }
-        });
-        await Promise.race([son, c.w(tahmin + 5000)]);
-      } else await c.w(tahmin);
+      let tahmin = 900 + soz.length * 72;
+      const dosya = sesAcik ? sesDosyasi(soz) : null;
+      if (dosya) {
+        if (!(dosya.duration > 0)) await Promise.race([new Promise(r => dosya.addEventListener('loadedmetadata', r, { once: true })), c.w(1500)]);
+        kontrol();
+        if (dosya.duration > 0) tahmin = dosya.duration * 1000;
+        altyaziKur(yazi, tahmin);
+        $('#sinema').classList.add('konusuyor');
+        konusmaDur();
+        await Promise.race([dosyaCal(dosya), c.w(tahmin + 4000)]);
+      } else {
+        altyaziKur(yazi, tahmin);
+        $('#sinema').classList.add('konusuyor');
+        if (sesAcik && trSes && window.speechSynthesis) {
+          const son = new Promise(res => {
+            try {
+              konusmaDur();
+              const u = new SpeechSynthesisUtterance(soz);
+              u.voice = trSes; u.lang = trSes.lang; u.rate = .92; u.pitch = 1.05;
+              u.onend = res; u.onerror = res;
+              speechSynthesis.speak(u);
+            } catch (e) { res(); }
+          });
+          await Promise.race([son, c.w(tahmin + 5000)]);
+        } else await c.w(tahmin);
+      }
       kontrol();
       $('#sinema').classList.remove('konusuyor');
       karaokeBitir();
-      void bitti;
       await c.w(250);
     },
     kamera(cx, cy, s, sure = 900) {
@@ -1901,7 +1939,7 @@ VIDEOLAR[47] = [
 
 /* ---------- oynatıcı ---------- */
 function anlatimBaslat(d) {
-  SN.d = d; SN.sahneler = VIDEOLAR[d.id]; SN.i = 0; SN.oynuyor = false; SN.durdurulan = [];
+  SN.d = d; SN.sahneler = VIDEOLAR[d.id]; SN.i = 0; if (SES_DOSYA.size) sesleriHazirla(); SN.oynuyor = false; SN.durdurulan = [];
   snIptal();
   $('#anlatimBaslik').textContent = `${d.id}. ${d.ad}`;
   $('#snCubuk').innerHTML = SN.sahneler.map((x, i) => `<button aria-label="${i + 1}. sahneye git"><i><b></b></i></button>`).join('');
@@ -1946,10 +1984,12 @@ function oynatAyarla(o) {
     SN.durdurulan = document.getAnimations().filter(a => a.playState === 'running');
     SN.durdurulan.forEach(a => a.pause());
     try { speechSynthesis.pause(); } catch (e) {}
+    if (calanSes) try { calanSes.pause(); } catch (e) {}
   } else {
     SN.durdurulan.forEach(a => { try { a.play(); } catch (e) {} });
     SN.durdurulan = [];
     try { speechSynthesis.resume(); } catch (e) {}
+    if (calanSes && !calanSes.ended) try { calanSes.play(); } catch (e) {}
   }
   oynatDugmesi();
 }

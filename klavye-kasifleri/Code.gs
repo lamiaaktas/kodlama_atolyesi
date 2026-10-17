@@ -247,3 +247,86 @@ function ogrenciSifirla(pin, kod, isim) {
     try { kilit.releaseLock(); } catch (e) {}
   }
 }
+
+/* =========================================================
+   SESLENDİRME (Google Cloud Text-to-Speech)
+   Kurulum: Proje Ayarları → Komut Dosyası Özellikleri'ne TTS_ANAHTAR adıyla API anahtarınızı ekleyin.
+   1. "sesleriDene" işlevini çalıştırın: Drive'ınızdaki "Klavye Kâşifleri Sesler" klasörüne
+      aynı cümleyi farklı seslerle okuyan deneme dosyaları gelir. Dinleyip beğendiğinizi seçin.
+   2. Aşağıdaki TTS_SES satırına beğendiğiniz sesin adını yazın (örnek: 'tr-TR-Chirp3-HD-Leda').
+   3. "seslendir" işlevini çalıştırın. Sitedeki bütün cümleler MP3 olarak klasöre yazılır ve
+      hepsi "sesler.zip" dosyasında toplanır. Süre yetmezse işlev durur; bir kez daha çalıştırın,
+      kaldığı yerden devam eder.
+   Sesi sonradan değiştirmek isterseniz TTS_SES'i değiştirip "seslendirBastan" işlevini çalıştırın.
+   ========================================================= */
+const TTS_SES = 'tr-TR-Chirp3-HD-Leda';
+const TTS_HIZ = 0.95;
+const SES_LISTE_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/klavye-kasifleri/ses/liste.json';
+const SES_KLASOR_ADI = 'Klavye Kâşifleri Sesler';
+const DENEME_SESLERI = ['Leda', 'Kore', 'Aoede', 'Achernar', 'Despina', 'Charon', 'Puck', 'Iapetus'];
+
+function sesKlasoru_() {
+  const it = DriveApp.getFoldersByName(SES_KLASOR_ADI);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(SES_KLASOR_ADI);
+}
+
+function ttsIstek_(metin, ses) {
+  const anahtar = PropertiesService.getScriptProperties().getProperty('TTS_ANAHTAR');
+  if (!anahtar) throw new Error('Proje Ayarları → Komut Dosyası Özellikleri bölümüne TTS_ANAHTAR adıyla API anahtarınızı ekleyin.');
+  const r = UrlFetchApp.fetch('https://texttospeech.googleapis.com/v1/text:synthesize?key=' + encodeURIComponent(anahtar), {
+    method: 'post', contentType: 'application/json', muteHttpExceptions: true,
+    payload: JSON.stringify({
+      input: { text: metin },
+      voice: { languageCode: 'tr-TR', name: ses },
+      audioConfig: { audioEncoding: 'MP3', speakingRate: TTS_HIZ }
+    })
+  });
+  if (r.getResponseCode() !== 200) throw new Error('Google seslendirme hatası (' + r.getResponseCode() + '): ' + r.getContentText().slice(0, 400));
+  return Utilities.base64Decode(JSON.parse(r.getContentText()).audioContent);
+}
+
+/* Aynı cümleyi birkaç farklı sesle okutur; dosyalar Drive klasörüne "deneme - <ses>.mp3" adıyla gelir. */
+function sesleriDene() {
+  const klasor = sesKlasoru_();
+  const metin = 'Merhaba! Ben Tuşi. Bugün birlikte klavyeyle tanışacağız. fe tuşuna sol işaret parmağınla bas.';
+  DENEME_SESLERI.forEach(function (ad) {
+    const ses = 'tr-TR-Chirp3-HD-' + ad;
+    try {
+      const blob = Utilities.newBlob(ttsIstek_(metin, ses), 'audio/mpeg', 'deneme - ' + ad + '.mp3');
+      const eski = klasor.getFilesByName(blob.getName()); while (eski.hasNext()) eski.next().setTrashed(true);
+      klasor.createFile(blob);
+      Logger.log('Hazır: ' + ses);
+    } catch (e) { Logger.log('Olmadı: ' + ses + ' → ' + e.message); }
+  });
+  Logger.log('Deneme dosyaları Drive\'daki "' + SES_KLASOR_ADI + '" klasöründe: ' + klasor.getUrl());
+}
+
+/* Sitedeki bütün cümleleri seçilen sesle MP3'e çevirir ve hepsini sesler.zip'te toplar. */
+function seslendir() {
+  const bas = Date.now();
+  const liste = JSON.parse(UrlFetchApp.fetch(SES_LISTE_URL + '?t=' + Date.now()).getContentText('UTF-8'));
+  const klasor = sesKlasoru_();
+  const var_ = {};
+  const it = klasor.getFiles();
+  while (it.hasNext()) { const f = it.next(); var_[f.getName()] = f; }
+  let yeni = 0, kalan = 0;
+  for (let i = 0; i < liste.length; i++) {
+    const ad = liste[i].id + '.mp3';
+    if (var_[ad]) continue;
+    if (Date.now() - bas > 4.5 * 60 * 1000) { kalan = liste.length - i; break; }
+    const blob = Utilities.newBlob(ttsIstek_(liste[i].metin, TTS_SES), 'audio/mpeg', ad);
+    var_[ad] = klasor.createFile(blob); yeni++;
+  }
+  if (kalan) { Logger.log(yeni + ' yeni ses yazıldı, ' + kalan + ' ses kaldı. Süre doldu: "seslendir"i bir kez daha çalıştırın.'); return; }
+  const blobs = liste.map(function (x) { return var_[x.id + '.mp3'].getBlob().setName(x.id + '.mp3'); });
+  const eski = klasor.getFilesByName('sesler.zip'); while (eski.hasNext()) eski.next().setTrashed(true);
+  const zip = klasor.createFile(Utilities.zip(blobs, 'sesler.zip'));
+  Logger.log('Tamam: ' + liste.length + ' ses hazır (' + yeni + ' yeni). Ses: ' + TTS_SES + '. Zip: ' + zip.getUrl());
+}
+
+/* Sesi değiştirdiyseniz: eski MP3'leri çöp kutusuna atar ve hepsini yeniden üretir. */
+function seslendirBastan() {
+  const klasor = sesKlasoru_(), it = klasor.getFiles();
+  while (it.hasNext()) { const f = it.next(); if (/^[0-9a-f]{8}\.mp3$/.test(f.getName()) || f.getName() === 'sesler.zip') f.setTrashed(true); }
+  seslendir();
+}
