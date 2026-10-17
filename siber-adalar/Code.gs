@@ -28,6 +28,7 @@
  */
 
 const SAYFA_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/siber-adalar/Index.html';
+const IKON_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/siber-adalar/ikon-192.png';
 const DUNYA_IDLER = ['sir', 'dost', 'arama', 'olta'];
 const DUNYA_ADLARI = ['Sır Vadisi', 'Dostluk Adası', 'Keşif Kulesi', 'Olta Koyu'];
 const BASLIK = ['Sınıf kodu', 'Öğrenci'].concat(DUNYA_ADLARI, ['Toplam puan', 'Sertifika'],
@@ -44,6 +45,7 @@ function doGet() {
   }
   return out
     .setTitle('Siber Adalar')
+    .setFaviconUrl(IKON_URL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
