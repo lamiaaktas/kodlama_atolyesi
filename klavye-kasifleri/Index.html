@@ -153,24 +153,51 @@ button.cip{box-shadow:0 3px 0 var(--line)}
 .el-dolgu .aktif{fill:var(--coral-soft)}
 .el-cizgi .aktif{stroke:var(--coral);stroke-width:4}
 
-/* ---- anlatım ---- */
-.sahne{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-top:10px;background:var(--paper);border:2px solid var(--line);border-radius:24px;padding:16px;overflow:hidden;position:relative}
-.sahne .gorsel{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
-.sahne .gorsel>svg{width:100%;height:100%;max-width:900px}
-.altyazi{display:flex;gap:14px;align-items:center;width:min(900px,100%);background:var(--bg);border-radius:18px;padding:12px 16px;flex:none}
-.altyazi .tusi{width:58px;height:58px;flex:none}
-.altyazi p{margin:0;font-size:clamp(17px,2.2vw,22px);font-weight:700;line-height:1.4}
-.oynat-buyuk{position:absolute;inset:0;display:grid;place-items:center;background:rgba(24,50,74,.35);border:0;border-radius:22px}
-.oynat-buyuk span{width:110px;height:110px;border-radius:50%;background:var(--coral);display:grid;place-items:center;box-shadow:0 6px 0 var(--coral-d)}
-.oynat-buyuk svg{width:50px;height:50px;margin-left:8px}
-.kontroller{display:flex;align-items:center;gap:12px;margin-top:10px;flex:none}
-.cubuk{flex:1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
-.cubuk i{display:block;height:100%;background:var(--coral);width:0;transition:width .3s}
-.liste-kart{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;width:min(860px,100%)}
-.liste-kart div{background:var(--bg);border-radius:18px;padding:16px;text-align:center;font-weight:800;font-size:18px;opacity:.25;transform:translateY(8px);transition:opacity .4s,transform .4s}
-.liste-kart div.gor{opacity:1;transform:none}
-.liste-kart svg{width:70px;height:70px;display:block;margin:0 auto 8px}
-
+/* ---- anlatım videosu ---- */
+.sinema-kap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin-top:10px}
+.sinema{position:relative;width:min(100%, calc((100vh - 110px) * 16 / 9));aspect-ratio:16/9;max-height:100%;border-radius:22px;overflow:hidden;background:#4f78c8;box-shadow:0 10px 0 rgba(24,50,74,.12)}
+.sinema>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.v-yazi{font-family:'Baloo 2','Trebuchet MS',sans-serif;font-weight:800;text-anchor:middle;dominant-baseline:central}
+.vk text{font:600 32px 'Nunito','Segoe UI',sans-serif;fill:#4d6577;text-anchor:middle;dominant-baseline:central}
+.vk text.vk-kucuk{font-size:18px;font-weight:700;fill:#8296a3}
+.vk-ic{transform-box:view-box}
+.vparmak .vp,.vparmak .vt{transition:none}
+.vparmak .vp{fill:#f6cfb2;stroke:#d9a07f;stroke-width:3;stroke-linejoin:round}
+.vparmak .vt{fill:#fde7da}
+.vparmak .vb{fill:none;stroke:#e2ae8d;stroke-width:3;stroke-linecap:round}
+.vparmak.vurgu .vp{stroke:#ff6b4a;stroke-width:6}
+.vavuc{fill:#f6cfb2}
+.vcizgi{fill:none;stroke:#d9a07f;stroke-width:3;stroke-linecap:round}
+.v-kol{transform-box:fill-box;transform-origin:0% 100%}
+.v-goz{transform-box:fill-box;transform-origin:center;animation:goz 4.2s infinite}
+@keyframes goz{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.v-agiz{opacity:0}
+.sinema.konusuyor #vSunucu .v-agiz,.sinema.konusuyor #vTusi .v-agiz{opacity:1;transform-box:fill-box;transform-origin:center;animation:agiz .16s infinite alternate}
+.sinema.konusuyor #vSunucu .v-gulus,.sinema.konusuyor #vTusi .v-gulus{opacity:0}
+@keyframes agiz{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.v-yuzer{animation:yuzer 14s ease-in-out infinite alternate}
+.v-yuzer.y2{animation-duration:18s}.v-yuzer.y3{animation-duration:11s}
+@keyframes yuzer{to{transform:translate(40px,30px)}}
+.sn-altyazi{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);width:max-content;max-width:86%;text-align:center;pointer-events:none}
+.sn-altyazi span{display:inline;background:rgba(11,31,51,.78);color:#fff;font:700 clamp(15px,2.3vw,26px)/1.5 var(--body);padding:.2em .6em;border-radius:10px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sn-altyazi i{font-style:normal;color:rgba(255,255,255,.62);transition:color .15s}
+.sn-altyazi i.gecti{color:#fff}
+.sn-altyazi i.simdi{color:#ffd166}
+.sn-kontrol{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(transparent,rgba(11,31,51,.75))}
+.sn-dugme{border:0;background:none;width:40px;height:40px;display:grid;place-items:center;padding:0;color:#fff}
+.sn-dugme svg{width:26px;height:26px}
+.sn-cc{font:900 15px var(--body);border:2px solid rgba(255,255,255,.8);border-radius:7px;width:44px;height:30px}
+.sn-cc[aria-pressed="false"]{opacity:.45}
+.sn-cubuk{flex:1;display:flex;gap:5px}
+.sn-cubuk button{flex:1;border:0;background:none;padding:10px 0;cursor:pointer}
+.sn-cubuk i{display:block;height:7px;border-radius:9px;background:rgba(255,255,255,.35);overflow:hidden}
+.sn-cubuk b{display:block;height:100%;width:0;background:#ffd166}
+.sn-sayac{color:#fff;font:800 16px var(--body);font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
+.sn-buyuk{position:absolute;inset:0;border:0;background:rgba(11,31,51,.25);display:grid;place-items:center}
+.sn-buyuk span{width:clamp(80px,12vw,124px);aspect-ratio:1;border-radius:50%;background:var(--coral);display:grid;place-items:center;box-shadow:0 6px 0 var(--coral-d)}
+.sn-buyuk svg{width:42%;height:42%;margin-left:8%}
+.sn-bitti{position:absolute;inset:0;background:rgba(11,31,51,.55);display:grid;place-content:center;gap:18px;text-align:center}
+.sn-bitti b{font:800 clamp(30px,5vw,56px) var(--display);color:#fff}
 /* ---- oyun ---- */
 .oyun-alani{flex:1;min-height:0;margin-top:10px;border-radius:24px;overflow:hidden;position:relative;border:2px solid var(--line);background:#9fd3f0}
 .oyun-alani canvas{width:100%;height:100%;display:block}
@@ -300,22 +327,28 @@ td.sayi,th.sayi{text-align:right}
   </div>
 </section>
 
-<!-- ANLATIM -->
+<!-- ANLATIM (video) -->
 <section id="anlatim" class="ekran" hidden>
   <div class="ders-ust">
     <button class="ikon-btn" id="anlatimGeri" title="Haritaya dön"><svg viewBox="0 0 24 24"><use href="#i-geri"/></svg></button>
     <h2 id="anlatimBaslik"></h2>
   </div>
-  <div class="sahne">
-    <div class="gorsel" id="sahneGorsel"></div>
-    <div class="altyazi"><div id="altyaziTusi"></div><p id="altyazi"></p></div>
-    <button class="oynat-buyuk" id="oynatBuyuk"><span><svg viewBox="0 0 24 24"><use href="#i-oynat-beyaz"/></svg></span></button>
-  </div>
-  <div class="kontroller">
-    <button class="btn ikincil kucuk" id="sahneOnceki">← Önceki</button>
-    <button class="ikon-btn" id="sahneDurdur" title="Durdur / oynat"><svg viewBox="0 0 24 24"><use href="#i-durdur"/></svg></button>
-    <div class="cubuk"><i id="sahneCubuk"></i></div>
-    <button class="btn ikincil kucuk" id="sahneSonraki">Atla →</button>
+  <div class="sinema-kap">
+    <div class="sinema" id="sinema">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g id="snSahne"></g></svg>
+      <div class="sn-altyazi" id="snAltyazi"></div>
+      <button class="sn-buyuk" id="snBuyuk" aria-label="Videoyu oynat"><span><svg viewBox="0 0 24 24"><use href="#i-oynat-beyaz"/></svg></span></button>
+      <div class="sn-bitti" id="snBitti" hidden>
+        <b>Video bitti!</b>
+        <div class="alt-dugmeler"><button class="btn ikincil" id="snTekrar">Tekrar izle</button><button class="btn" id="snDevam">Devam et →</button></div>
+      </div>
+      <div class="sn-kontrol">
+        <button class="sn-dugme" id="snOynat" title="Oynat"></button>
+        <div class="sn-cubuk" id="snCubuk"></div>
+        <span class="sn-sayac" id="snSayac"></span>
+        <button class="sn-dugme sn-cc" id="snCC" title="Altyazı">CC</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -401,6 +434,7 @@ td.sayi,th.sayi{text-align:right}
     <symbol id="i-geri" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="#18324a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-kapat" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="#18324a" stroke-width="2.6" stroke-linecap="round"/></symbol>
     <symbol id="i-el" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10.5V4a1.5 1.5 0 0 1 3 0v6.5M14 10.5V5.5a1.5 1.5 0 0 1 3 0V13c0 4.5-2.5 8-6.5 8-2.7 0-4-1.4-5.6-3.6L3.6 14.6a1.4 1.4 0 0 1 2.2-1.7L8 15" fill="none" stroke="#18324a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-durdur-beyaz" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="#fff"/><rect x="14" y="5" width="4" height="14" rx="1.2" fill="#fff"/></symbol>
     <symbol id="i-durdur" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="#18324a"/><rect x="14" y="5" width="4" height="14" rx="1.2" fill="#18324a"/></symbol>
     <symbol id="i-oynat" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="#18324a"/></symbol>
     <symbol id="i-oynat-beyaz" viewBox="0 0 24 24"><path d="M6 3.5v17l14.5-8.5z" fill="#fff"/></symbol>
@@ -493,8 +527,11 @@ function sesAyarla(acik) {
 let trSes = null;
 function sesleriBul() {
   try {
-    const v = speechSynthesis.getVoices();
-    trSes = v.find(x => /^tr/i.test(x.lang) && /yelda|female|kadın/i.test(x.name)) || v.find(x => /^tr/i.test(x.lang)) || null;
+    const v = speechSynthesis.getVoices().filter(x => /^tr/i.test(x.lang));
+    // En doğal ses önce: Gelişmiş/Premium (Mac), sonra Google/Microsoft çevrim içi sesler, sonra Yelda, sonra herhangi biri.
+    const puan = x => (/premium/i.test(x.name) ? 50 : 0) + (/gelişmiş|enhanced/i.test(x.name) ? 40 : 0) + (/natural|online|neural/i.test(x.name) ? 35 : 0)
+      + (/google/i.test(x.name) ? 20 : 0) + (/yelda|emel|seda/i.test(x.name) ? 10 : 0) + (x.localService === false ? 5 : 0);
+    trSes = v.sort((a, b) => puan(b) - puan(a))[0] || null;
   } catch (e) { trSes = null; }
 }
 try { sesleriBul(); speechSynthesis.onvoiceschanged = sesleriBul; } catch (e) {}
@@ -508,7 +545,7 @@ function konus(metin, iptal) {
     try {
       konusmaDur();
       const u = new SpeechSynthesisUtterance(metin.replace(/[«»]/g, ''));
-      u.voice = trSes; u.lang = trSes.lang; u.rate = .95; u.pitch = 1.08;
+      u.voice = trSes; u.lang = trSes.lang; u.rate = .92; u.pitch = 1.05;
       u.onend = () => setTimeout(bit, 450); u.onerror = () => setTimeout(bit, 300);
       speechSynthesis.speak(u);
       setTimeout(bit, sure + 4000); // Safari bazen "end" göndermez
@@ -1097,105 +1134,6 @@ function dersBaslat(d) {
 <script>
 'use strict';
 /* =========================================================
-   ANLATIMLAR (animasyonlu, Türkçe sesli ve altyazılı)
-   ========================================================= */
-const OTURUS = [
-  { y: 'Sırtın dik', s: `<svg viewBox="0 0 70 70"><rect x="16" y="40" width="30" height="5" rx="2" fill="#4d6577"/><path d="M20 45v18M42 45v18" stroke="#4d6577" stroke-width="4" stroke-linecap="round"/><circle cx="34" cy="12" r="7" fill="#ffc23c"/><path d="M34 20v20" stroke="#18324a" stroke-width="5" stroke-linecap="round"/><path d="M34 40h12v18" fill="none" stroke="#18324a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M34 26l14 6" stroke="#18324a" stroke-width="4" stroke-linecap="round"/></svg>` },
-  { y: 'Ayakların yere bassın', s: `<svg viewBox="0 0 70 70"><path d="M8 60h54" stroke="#2ea36a" stroke-width="4" stroke-linecap="round"/><path d="M22 20v32q0 6 6 6h10" fill="none" stroke="#18324a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 20v32q0 6 6 6h10" fill="none" stroke="#18324a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>` },
-  { y: 'Bileklerin havada, rahat', s: `<svg viewBox="0 0 70 70"><rect x="6" y="44" width="58" height="14" rx="4" fill="#fbfdfc" stroke="#8a9aa4" stroke-width="2.5"/><path d="M14 44v-8M22 44v-11M30 44v-12M38 44v-10" stroke="#18324a" stroke-width="5" stroke-linecap="round"/><path d="M12 36q14-14 30-4" fill="none" stroke="#18324a" stroke-width="5" stroke-linecap="round"/><path d="M8 26l6 4" stroke="#ff6b4a" stroke-width="3" stroke-linecap="round"/></svg>` },
-  { y: 'Gözlerin ekranda', s: `<svg viewBox="0 0 70 70"><rect x="10" y="10" width="50" height="32" rx="5" fill="#dde9fb" stroke="#3a78d4" stroke-width="3"/><path d="M26 56h18M35 42v14" stroke="#3a78d4" stroke-width="3" stroke-linecap="round"/><path d="M20 26q15-12 30 0-15 12-30 0z" fill="#fff" stroke="#18324a" stroke-width="2.5"/><circle cx="35" cy="26" r="4.5" fill="#18324a"/></svg>` }
-];
-const ANLATIMLAR = {
-  1: [
-    { g: 'tusi', soz: 'Merhaba! Ben Tuşi. Birlikte on parmakla klavye kullanmayı öğreneceğiz. On parmakla yazan biri, klavyeye bakmadan hem hızlı hem doğru yazar.' },
-    { g: 'oturus', soz: 'Önce oturuşumuz. Sırtın dik, ayakların yere bassın. Bileklerini masaya yaslama, rahat tut. Gözlerin hep ekranda olsun.' },
-    { g: 'klavye', soz: 'Bu bizim klavyemiz. En önemli sıra orta sıradır. Parmaklarımız her zaman bu sıraya geri döner.', kur: kb => kb.vurgula(['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ş', 'i']) },
-    { g: 'klavye', soz: 'F ve J tuşlarına dikkat et. Üzerlerinde küçük çıkıntılar var. Klavyeye bakmadan, işaret parmaklarınla bu çıkıntıları bulabilirsin.', kur: kb => { kb.vurgula(['f', 'j']); kb.aktif = null; },
-      canli: async (kb, iptal) => { for (let i = 0; i < 3 && !iptal.bitti; i++) { kb.parmak('L2', 'f'); kb.ikinci = 'R2'; kb.elCiz(); kb.bas('f'); kb.bas('j'); await bekle(900); } } },
-    { g: 'klavye', soz: 'Sol elin parmakları A, S, D ve F tuşlarında durur. Sağ elin parmakları J, K, L ve Ş tuşlarında durur.',
-      canli: async (kb, iptal) => { for (const k of ['a', 's', 'd', 'f', 'j', 'k', 'l', 'ş']) { if (iptal.bitti) return; kb.temizle(); kb.hedef(k); kb.bas(k); await bekle(700); } kb.hedef(null); } },
-    { g: 'klavye', soz: 'Başparmakların boşluk tuşunun üzerinde dinlenir. Kelimelerin arasına boşluk koymak için başparmağınla boşluk tuşuna basarsın.', kur: kb => kb.hedef(' '),
-      canli: async (kb, iptal) => { for (let i = 0; i < 4 && !iptal.bitti; i++) { kb.bas(' '); await bekle(800); } } },
-    { g: 'klavye', soz: 'Her tuşa hep aynı parmakla basarız. Renkler, hangi parmağın hangi tuşlardan sorumlu olduğunu gösterir.', kur: kb => kb.bolgeler(true) },
-    { g: 'tusi', soz: 'Yazarken klavyeye değil, ekrana bak. Hata yaparsan üzülme; doğru tuşa basıp devam et. Hazırsan ilk tuşlarımızla tanışalım!' }
-  ],
-  19: [
-    { g: 'tusi', soz: 'Orta sırayı bitirdin, tebrikler! Şimdi üst sıraya uzanacağız: q, w, e, r, t, y, u, ı, o, p, ğ ve ü.' },
-    { g: 'klavye', soz: 'Üst sıradaki her tuşa, hemen altındaki orta sıra tuşunun parmağıyla basarız.', kur: kb => { kb.vurgula(['q', 'w', 'e', 'r', 't', 'y', 'u', 'ı', 'o', 'p', 'ğ', 'ü']); kb.bolgeler(true); } },
-    { g: 'klavye', soz: 'Örneğin E tuşu için sol orta parmağın D tuşundan yukarı uzanır, E\'ye basar ve hemen D\'ye geri döner.',
-      canli: async (kb, iptal) => { for (let i = 0; i < 3 && !iptal.bitti; i++) { kb.hedef('e'); kb.bas('e'); await bekle(800); kb.hedef('d'); await bekle(700); } kb.hedef(null); } },
-    { g: 'klavye', soz: 'Sağ elde de aynısı: U tuşu için sağ işaret parmağın J\'den yukarı uzanır, sonra J\'ye döner.',
-      canli: async (kb, iptal) => { for (let i = 0; i < 3 && !iptal.bitti; i++) { kb.hedef('u'); kb.bas('u'); await bekle(800); kb.hedef('j'); await bekle(700); } kb.hedef(null); } },
-    { g: 'tusi', soz: 'Unutma: parmak uzanır, basar ve eve döner. Ev, orta sıradır. Haydi dağlara tırmanalım!' }
-  ],
-  34: [
-    { g: 'tusi', soz: 'Üst sıra da tamam! Şimdi alt sıraya iniyoruz: z, x, c, v, b, n, m, ö, ç ve nokta.' },
-    { g: 'klavye', soz: 'Bu kez parmaklarımız orta sıradan aşağı doğru kıvrılır.', kur: kb => { kb.vurgula(['z', 'x', 'c', 'v', 'b', 'n', 'm', 'ö', 'ç', '.']); kb.bolgeler(true); } },
-    { g: 'klavye', soz: 'N tuşu için sağ işaret parmağın J\'den aşağı iner. V tuşu için sol işaret parmağın F\'den aşağı iner.',
-      canli: async (kb, iptal) => { for (const k of ['n', 'j', 'v', 'f', 'n', 'j', 'v', 'f']) { if (iptal.bitti) return; kb.hedef(k); if (k === 'n' || k === 'v') kb.bas(k); await bekle(650); } kb.hedef(null); } },
-    { g: 'klavye', soz: 'Cümlenin sonundaki nokta, sağ serçe parmağının işidir.', kur: kb => kb.hedef('.') },
-    { g: 'tusi', soz: 'Bütün harfleri öğrenince gerçek kelimeler yazacağız. Kıyıya hoş geldin!' }
-  ],
-  47: [
-    { g: 'tusi', soz: 'Bütün harfleri biliyorsun! Son kalemizde büyük harf, virgül ve cümle yazmayı öğreneceğiz.' },
-    { g: 'klavye', soz: 'Büyük harf için Shift tuşunu basılı tutarız. İki Shift tuşu var: biri solda, biri sağda.', kur: kb => kb.vurgula(['shiftL', 'shiftR']) },
-    { g: 'klavye', soz: 'Kural şu: harf hangi eldeyse, öbür elin serçe parmağıyla Shift\'e bas. Büyük J için sol Shift\'i, sağ işaret parmağınla J\'yi kullan.', kur: kb => kb.hedef('J') },
-    { g: 'klavye', soz: 'Büyük F için de sağ serçe parmağınla sağ Shift\'i basılı tut, sol işaret parmağınla F\'ye bas.', kur: kb => kb.hedef('F') },
-    { g: 'tusi', soz: 'Cümleler büyük harfle başlar ve noktayla biter. Haydi kaleye!' }
-  ]
-};
-const an = { d: null, i: 0, oynuyor: false, jeton: 0, kb: null, iptal: null };
-function anlatimBaslat(d) {
-  an.d = d; an.i = 0; an.oynuyor = false; an.jeton++;
-  $('#anlatimBaslik').textContent = `${d.id}. ${d.ad}`;
-  $('#altyaziTusi').innerHTML = tusiSVG();
-  $('#oynatBuyuk').hidden = false;
-  goster('anlatim'); sahneKur(0);
-}
-function sahneKur(i) {
-  const sahneler = ANLATIMLAR[an.d.id], s = sahneler[i];
-  an.i = i; if (an.iptal) an.iptal.bitti = true;
-  $('#sahneCubuk').style.width = ((i + 1) / sahneler.length * 100) + '%';
-  $('#altyazi').textContent = s.soz;
-  $('#sahneOnceki').disabled = i === 0;
-  $('#sahneSonraki').textContent = i === sahneler.length - 1 ? 'Bitir ✓' : 'Atla →';
-  const g = $('#sahneGorsel');
-  if (s.g === 'klavye') { an.kb = new Klavye(g); an.kb.temizle(); s.kur && s.kur(an.kb); }
-  else if (s.g === 'oturus') g.innerHTML = `<div class="liste-kart">${OTURUS.map(o => `<div>${o.s}${o.y}</div>`).join('')}</div>`;
-  else g.innerHTML = `<div style="width:min(260px,60%)">${tusiSVG(i === 0 ? 'mutlu' : 'mutlu')}</div>`;
-}
-async function sahneOynat() {
-  const j = ++an.jeton, s = ANLATIMLAR[an.d.id][an.i], iptal = { bitti: false };
-  an.iptal = iptal;
-  if (s.g === 'oturus') $$('#sahneGorsel .liste-kart div').forEach((e, k) => setTimeout(() => j === an.jeton && e.classList.add('gor'), 400 + k * 1600));
-  await Promise.all([konus(s.soz), s.canli && an.kb ? s.canli(an.kb, iptal) : null]);
-  if (j !== an.jeton || !an.oynuyor) return;
-  await bekle(500);
-  if (j !== an.jeton || !an.oynuyor) return;
-  if (an.i < ANLATIMLAR[an.d.id].length - 1) { sahneKur(an.i + 1); sahneOynat(); }
-  else anlatimBitir();
-}
-function oynatAyarla(o) {
-  an.oynuyor = o;
-  $('#sahneDurdur').innerHTML = `<svg viewBox="0 0 24 24"><use href="#i-${o ? 'durdur' : 'oynat'}"/></svg>`;
-  if (!o) { an.jeton++; konusmaDur(); if (an.iptal) an.iptal.bitti = true; }
-}
-$('#oynatBuyuk').onclick = () => { $('#oynatBuyuk').hidden = true; oynatAyarla(true); sahneOynat(); };
-$('#sahneDurdur').onclick = () => { $('#oynatBuyuk').hidden = true; if (an.oynuyor) oynatAyarla(false); else { oynatAyarla(true); sahneKur(an.i); sahneOynat(); } };
-$('#sahneSonraki').onclick = () => {
-  konusmaDur(); an.jeton++;
-  if (an.i < ANLATIMLAR[an.d.id].length - 1) { sahneKur(an.i + 1); if (an.oynuyor) sahneOynat(); }
-  else anlatimBitir();
-};
-$('#sahneOnceki').onclick = () => { konusmaDur(); an.jeton++; if (an.i > 0) { sahneKur(an.i - 1); if (an.oynuyor) sahneOynat(); } };
-$('#anlatimGeri').onclick = () => { oynatAyarla(false); haritaCiz(); goster('harita'); };
-function anlatimBitir() {
-  oynatAyarla(false);
-  const yeni = sonucIsle(an.d, { ok: true, y: 0, h: 0, d: 0, sure: 0, hata: 0 });
-  sonucGoster(an.d, { ok: true, y: 0, anlatim: true }, yeni);
-}
-
-/* =========================================================
    YAZMA BÖLÜMLERİ
    ========================================================= */
 const TR_KOD = { 'ş': 'Semicolon', 'i': 'Quote', 'ğ': 'BracketLeft', 'ü': 'BracketRight', 'ö': 'Comma', 'ç': 'Period', 'ı': 'KeyI', '.': 'Slash', ',': 'Backslash' };
@@ -1226,9 +1164,9 @@ function tanitimKomutu(ch) {
   if (shift) {
     const sf = shift === 'shiftL' ? 'sol' : 'sağ';
     return { html: `${PARMAK_AD_ILE[PARMAK[shift]].replace(/^./, c => buyuk(c))} ${sf} Shift'i basılı tut, ${PARMAK_AD_ILE[f]} ${kutu} yaz.`,
-      soz: `${PARMAK_AD_ILE[PARMAK[shift]]} ${sf} Shift tuşunu basılı tut, ${PARMAK_AD_ILE[f]} büyük ${tus} yaz.` };
+      soz: `${PARMAK_AD_ILE[PARMAK[shift]]} ${sf} şift tuşunu basılı tut, ${PARMAK_AD_ILE[f]} büyük ${HARF_SES[tus] || tus} yaz.` };
   }
-  return { html: `${kutu} tuşuna ${PARMAK_AD_ILE[f]} bas.`, soz: `${tusAdi(tus)} tuşuna ${PARMAK_AD_ILE[f]} bas.` };
+  return { html: `${kutu} tuşuna ${PARMAK_AD_ILE[f]} bas.`, soz: `${HARF_SES[tus] || tus} tuşuna ${PARMAK_AD_ILE[f]} bas.` };
 }
 function tanitimGoster() {
   const ch = yz.tanit[yz.tanitI], k = tanitimKomutu(ch);
@@ -1376,6 +1314,668 @@ function sonucGoster(d, s, yeniRozet) {
   if ($('#snTekrar')) $('#snTekrar').onclick = () => { kapat(); dersBaslat(d); };
   if ($('#snSonraki')) $('#snSonraki').onclick = () => { kapat(); dersBaslat(sonraki); };
   $('#snHarita').onclick = () => { kapat(); haritaCiz(); goster('harita'); };
+}
+</script>
+<script>
+'use strict';
+/* =========================================================
+   ANLATIM VİDEOLARI
+   16:9 bir SVG sahnesinde çizilen, sesli ve altyazılı animasyonlar.
+   Her sahne: kur() → SVG çizimi, oyna(c) → zamanlı animasyon.
+   Saat durdurulabilir: durdurunca animasyonlar, konuşma ve beklemeler birlikte durur.
+   ========================================================= */
+const HARF_SES = { a: 'a', b: 'be', c: 'ce', 'ç': 'çe', d: 'de', e: 'e', f: 'fe', g: 'ge', 'ğ': 'yumuşak ge', h: 'he', 'ı': 'ı', i: 'i', j: 'je', k: 'ke', l: 'le', m: 'me', n: 'ne', o: 'o', 'ö': 'ö', p: 'pe', q: 'kü', r: 're', s: 'se', 'ş': 'şe', t: 'te', u: 'u', 'ü': 'ü', v: 've', w: 'dabılyu', x: 'iks', y: 'ye', z: 'ze', ',': 'virgül', '.': 'nokta', ' ': 'boşluk' };
+const IPTAL = { iptal: true };
+const SN = { d: null, sahneler: [], i: 0, oynuyor: false, t: 0, son: 0, bekleyen: [], jeton: 0, sahneBas: 0, raf: 0, durdurulan: [], kam: { cx: 800, cy: 450, s: 1 }, uc: {}, geo: null, K: null, U: 80, kar: null, cc: yerel.get('kk:cc') !== false };
+const VU = 80, VOX = 200, VOY = 210;
+
+/* ---------- saat ---------- */
+function snTik(now) {
+  if (SN.oynuyor) SN.t += now - SN.son;
+  SN.son = now;
+  if (SN.bekleyen.length) SN.bekleyen = SN.bekleyen.filter(b => { if (SN.t >= b.h) { b.r(); return false; } return true; });
+  karaokeGuncelle(); cubukGuncelle();
+  if (aktifEkran === 'anlatim') SN.raf = requestAnimationFrame(snTik); else SN.raf = 0;
+}
+function snIptal() {
+  SN.jeton++; konusmaDur(); $('#sinema').classList.remove('konusuyor');
+  const b = SN.bekleyen; SN.bekleyen = []; b.forEach(x => x.r());
+  SN.kar = null;
+}
+function ctxYap() {
+  const j = SN.jeton, root = $('#snSahne');
+  const kontrol = () => { if (j !== SN.jeton) throw IPTAL; };
+  const c = {
+    $: s => root.querySelector(s), $$: s => [...root.querySelectorAll(s)],
+    w: ms => new Promise((res, rej) => SN.bekleyen.push({ h: SN.t + ms, r: () => (j === SN.jeton ? res() : rej(IPTAL)) })),
+    a: (el, kf, sure, gec = 0, ease = 'cubic-bezier(.2,.8,.2,1)') => {
+      if (typeof el === 'string') el = root.querySelector(el);
+      if (!el) return null;
+      const an = el.animate(kf, { duration: sure, delay: gec, easing: ease, fill: 'both' });
+      if (!SN.oynuyor) { an.pause(); SN.durdurulan.push(an); }
+      return an;
+    },
+    kontrol,
+    async soyle(yazi, soz) {
+      kontrol();
+      soz = soz || yazi;
+      const tahmin = 900 + soz.length * 72;
+      altyaziKur(yazi, tahmin);
+      $('#sinema').classList.add('konusuyor');
+      let bitti = false;
+      if (sesAcik && trSes && window.speechSynthesis) {
+        const son = new Promise(res => {
+          try {
+            konusmaDur();
+            const u = new SpeechSynthesisUtterance(soz);
+            u.voice = trSes; u.lang = trSes.lang; u.rate = .92; u.pitch = 1.05;
+            u.onend = () => { bitti = true; res(); }; u.onerror = () => { bitti = true; res(); };
+            speechSynthesis.speak(u);
+          } catch (e) { bitti = true; res(); }
+        });
+        await Promise.race([son, c.w(tahmin + 5000)]);
+      } else await c.w(tahmin);
+      kontrol();
+      $('#sinema').classList.remove('konusuyor');
+      karaokeBitir();
+      void bitti;
+      await c.w(250);
+    },
+    kamera(cx, cy, s, sure = 900) {
+      const k = SN.kam, tf = o => `translate(${800 - o.s * o.cx}px, ${450 - o.s * o.cy}px) scale(${o.s})`;
+      c.a('#kamera', [{ transform: tf(k) }, { transform: tf({ cx, cy, s }) }], sure, 0, 'cubic-bezier(.6,0,.2,1)');
+      SN.kam = { cx, cy, s };
+    },
+    tusYak(k, renk = '#ffd166', sure = 250) { const r = root.querySelector(`.vk[data-k="${CSS.escape(k)}"] .vk-ust`); if (r) c.a(r, [{ fill: r.getAttribute('fill') }, { fill: renk }], sure); },
+    tusSondur(k, sure = 300) { const r = root.querySelector(`.vk[data-k="${CSS.escape(k)}"] .vk-ust`); if (r) c.a(r, [{ fill: getComputedStyle(r).fill }, { fill: '#ffffff' }], sure); },
+    tusBas(k) {
+      const g = root.querySelector(`.vk[data-k="${CSS.escape(k)}"] .vk-ic`);
+      if (g) c.a(g, [{ transform: 'translateY(0px)' }, { transform: 'translateY(5px)' }, { transform: 'translateY(0px)' }], 220, 0, 'ease-out');
+      if (sesAcik) bip(1500, .03, 'square', .025);
+    },
+    parmakBas(f, k) {
+      const g = root.querySelector('#vf-' + f);
+      if (g) c.a(g, [{ transform: 'translateY(0px)' }, { transform: 'translateY(8px)' }, { transform: 'translateY(0px)' }], 220, 0, 'ease-out');
+      c.tusBas(k);
+    },
+    async uzan(f, k, sure = 320) {
+      const bas = SN.uc[f], son = ucNoktasi(f, k), t0 = performance.now();
+      await new Promise(res => {
+        const adim = now => {
+          if (j !== SN.jeton) return res();
+          const p = Math.min(1, (now - t0) / sure), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          parmakCiz(f, { x: bas.x + (son.x - bas.x) * e, y: bas.y + (son.y - bas.y) * e });
+          if (p < 1) requestAnimationFrame(adim); else res();
+        };
+        requestAnimationFrame(adim);
+      });
+      kontrol();
+    },
+    parmakVurgu(f, acik) { const g = root.querySelector('#vf-' + f); if (g) g.classList.toggle('vurgu', acik); },
+    gir(sel, gec = 0, yon = 40) { return c.a(sel, [{ opacity: 0, transform: `translateY(${yon}px)` }, { opacity: 1, transform: 'translateY(0px)' }], 600, gec); },
+    pop(sel, gec = 0) { const el = typeof sel === 'string' ? root.querySelector(sel) : sel; if (el && !el.style.transformOrigin) { el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center'; } sel = el; if (sesAcik) setTimeout(() => SN.oynuyor && bip(700, .08, 'sine', .05, 300), gec); return c.a(sel, [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1.08)', offset: .7 }, { opacity: 1, transform: 'scale(1)' }], 500, gec); },
+    cik(sel, gec = 0) { return c.a(sel, [{ opacity: 1 }, { opacity: 0 }], 350, gec); }
+  };
+  return c;
+}
+
+/* ---------- altyazı (kelime kelime) ---------- */
+function altyaziKur(yazi, tahmin) {
+  const el = $('#snAltyazi');
+  const kel = yazi.split(' ');
+  el.innerHTML = `<span>${kel.map(w => `<i>${esc(w)}</i>`).join(' ')}</span>`;
+  el.hidden = !SN.cc;
+  const uz = kel.map(w => w.length + 1), top = uz.reduce((a, b) => a + b, 0);
+  let birikim = 0;
+  SN.kar = { bas: SN.t, sure: tahmin, sinir: uz.map(u => (birikim += u) / top), el: $$('i', el), son: -1 };
+}
+function karaokeGuncelle() {
+  const k = SN.kar; if (!k) return;
+  const p = Math.min(.97, (SN.t - k.bas) / k.sure);
+  let n = k.sinir.findIndex(s => s > p); if (n < 0) n = k.el.length - 1;
+  if (n !== k.son) { k.el.forEach((e, i) => e.className = i < n ? 'gecti' : i === n ? 'simdi' : ''); k.son = n; }
+}
+function karaokeBitir() { if (SN.kar) SN.kar.el.forEach(e => (e.className = 'gecti')); SN.kar = null; }
+function cubukGuncelle() {
+  if (!SN.sahneler.length) return;
+  const s = SN.sahneler[SN.i], p = clamp((SN.t - SN.sahneBas) / (s.tahmin || 12000), 0, .98);
+  const parca = $$('#snCubuk b');
+  parca.forEach((e, k) => (e.style.width = k < SN.i ? '100%' : k === SN.i ? (p * 100).toFixed(1) + '%' : '0%'));
+}
+
+/* ---------- çizim: klavye, eller, Tuşi, arka plan ---------- */
+function vKlavye(etiket = true) {
+  const U = VU, K = {}; let s = `<g id="vKlavye"><rect x="${VOX - 22}" y="${VOY - 22}" width="${15 * U + 44}" height="${5 * U + 44}" rx="30" fill="#dfe6f3"/>
+    <rect x="${VOX - 22}" y="${VOY - 26}" width="${15 * U + 44}" height="${5 * U + 44}" rx="30" fill="#f5f8fd"/>`;
+  let y = VOY;
+  SIRALAR.forEach((sira, r) => {
+    let x = VOX;
+    sira.forEach(t => {
+      const [et, w, id] = Array.isArray(t) ? [t[0], t[1], t[2] || t[0]] : [t, 1, t];
+      K[id] = { x: x + w * U / 2, y: y + U / 2 };
+      const genis = w > 1;
+      const yazi = !etiket ? '' : genis ? (et === 'shift' || et === 'caps lock' || et === 'tab' || et === 'enter' ? et : '') : et;
+      s += `<g class="vk" data-k="${esc(id)}"><rect x="${x + 4}" y="${y + 8}" width="${w * U - 8}" height="${U - 8}" rx="13" fill="#c5d0e4"/>
+        <g class="vk-ic"><rect class="vk-ust" x="${x + 4}" y="${y + 3}" width="${w * U - 8}" height="${U - 9}" rx="13" fill="#ffffff"/>
+        ${yazi ? `<text x="${x + w * U / 2}" y="${y + U / 2}" class="${genis || r === 0 ? 'vk-kucuk' : ''}">${esc(yazi)}</text>` : ''}
+        ${id === 'f' || id === 'j' ? `<rect class="vk-cikinti" x="${x + U / 2 - 11}" y="${y + U - 22}" width="22" height="4" rx="2" fill="#7d8ca6"/>` : ''}</g></g>`;
+      x += w * U;
+    });
+    y += U;
+  });
+  SN.K = K;
+  return s + '</g>';
+}
+function vGeo() {
+  const K = SN.K, U = VU, alt = VOY + 5 * U, G = {};
+  ['L', 'R'].forEach(t => {
+    const ev = t === 'L' ? ['a', 's', 'd', 'f'] : ['ş', 'l', 'k', 'j'];
+    const cx = t === 'L' ? (K.a.x + K.f.x) / 2 + .23 * U : (K.j.x + K['ş'].x) / 2 - .23 * U;
+    const by = { 5: 1.75, 4: 1.6, 3: 1.55, 2: 1.65 }, gw = { 5: .5, 4: .58, 3: .62, 2: .62 };
+    [5, 4, 3, 2].forEach((n, i) => { const hx = K[ev[i]].x; G[t + n] = { x: cx + (hx - cx) * .6, y: alt + by[n] * U, w: gw[n] * U }; });
+    const p2 = G[t + 2];
+    G[t + 'T'] = { x: p2.x + (t === 'L' ? 1 : -1) * .32 * U, y: alt + 2.45 * U, w: .66 * U };
+    G[t + 'cx'] = cx;
+  });
+  G.alt = alt + 3.9 * U;
+  SN.geo = G;
+}
+function ucNoktasi(f, k) {
+  const K = SN.K, U = VU;
+  if (k === ' ') return { x: K[' '].x + (f === 'LT' ? -1.15 : 1.15) * U, y: K[' '].y + .12 * U };
+  return { x: K[k].x, y: K[k].y + .18 * U };
+}
+function parmakYol(B, T, w) {
+  const dx = T.x - B.x, dy = T.y - B.y, L = Math.hypot(dx, dy) || 1, d = { x: dx / L, y: dy / L }, n = { x: -d.y, y: d.x }, h = w / 2;
+  const f = (x, y) => x.toFixed(1) + ' ' + y.toFixed(1);
+  return {
+    yol: `M${f(B.x + n.x * h, B.y + n.y * h)} L${f(T.x + n.x * h, T.y + n.y * h)} A${h} ${h} 0 0 0 ${f(T.x - n.x * h, T.y - n.y * h)} L${f(B.x - n.x * h, B.y - n.y * h)}`,
+    tirnak: { x: T.x - d.x * w * .38, y: T.y - d.y * w * .38, aci: Math.atan2(d.y, d.x) * 180 / Math.PI + 90 },
+    bogum: `M${f(B.x + (T.x - B.x) * .5 + n.x * h * .45, B.y + (T.y - B.y) * .5 + n.y * h * .45)} L${f(B.x + (T.x - B.x) * .5 - n.x * h * .45, B.y + (T.y - B.y) * .5 - n.y * h * .45)}`
+  };
+}
+function parmakCiz(f, T) {
+  SN.uc[f] = T;
+  const g = $('#vf-' + f); if (!g) return;
+  const B = SN.geo[f], p = parmakYol(B, T, B.w);
+  g.querySelector('.vp').setAttribute('d', p.yol);
+  g.querySelector('.vb').setAttribute('d', p.bogum);
+  const t = g.querySelector('.vt');
+  t.setAttribute('cx', p.tirnak.x.toFixed(1)); t.setAttribute('cy', p.tirnak.y.toFixed(1));
+  t.setAttribute('transform', `rotate(${p.tirnak.aci.toFixed(1)} ${p.tirnak.x.toFixed(1)} ${p.tirnak.y.toFixed(1)})`);
+  t.setAttribute('rx', (B.w * .27).toFixed(1)); t.setAttribute('ry', (B.w * .33).toFixed(1));
+}
+function vEller() {
+  vGeo();
+  const G = SN.geo, U = VU;
+  const parmak = f => `<g id="vf-${f}" class="vparmak"><path class="vp"/><path class="vb"/><ellipse class="vt"/></g>`;
+  let s = '<g id="vEller">';
+  ['L', 'R'].forEach(t => {
+    const sg = t === 'L' ? -1 : 1, p5 = G[t + 5], p2 = G[t + 2], B = G[t + 'T'];
+    const T = ucNoktasi(t + 'T', ' ');
+    const dx = T.x - B.x, dy = T.y - B.y, L = Math.hypot(dx, dy), n = { x: -dy / L, y: dx / L }, h = B.w / 2;
+    const A = { x: B.x + n.x * h, y: B.y + n.y * h }, C = { x: B.x - n.x * h, y: B.y - n.y * h };
+    const [tu, ta] = A.y < C.y ? [A, C] : [C, A];
+    const o1 = { x: p5.x + sg * p5.w / 2, y: p5.y }, o2 = { x: p5.x + sg * .1 * U, y: G.alt };
+    const i1 = { x: p2.x - sg * p2.w / 2, y: p2.y }, i2 = { x: p2.x - sg * .25 * U, y: G.alt };
+    const q1 = { x: p2.x - sg * (p2.w / 2 + .05 * U), y: p2.y + .45 * U }, q2 = { x: p2.x - sg * .45 * U, y: G.alt - .8 * U };
+    const ust = Math.min(...[2, 3, 4, 5].map(k => G[t + k].y)) - .35 * U;
+    const fx = v => v.x.toFixed(1) + ' ' + v.y.toFixed(1);
+    const dis = `C${p5.x + sg * (p5.w / 2 + .15 * U)} ${p5.y + .8 * U} ${p5.x + sg * (p5.w / 2 + .1 * U)} ${p5.y + 1.6 * U} ${fx(o2)}`;
+    s += `<g id="vEl${t}">${[5, 4, 3, 2].map(k => parmak(t + k)).join('')}
+      <path class="vavuc" d="M${fx(o1)} ${dis} L${fx(i2)} Q${fx(q2)} ${fx(ta)} L${fx(tu)} Q${fx(q1)} ${fx(i1)} Q${G[t + 'cx']} ${ust} ${fx(o1)} Z"/>
+      <path class="vcizgi" d="M${fx(o1)} ${dis}"/><path class="vcizgi" d="M${fx(i1)} Q${fx(q1)} ${fx(tu)}"/><path class="vcizgi" d="M${fx(ta)} Q${fx(q2)} ${fx(i2)}"/>
+      ${parmak(t + 'T')}</g>`;
+  });
+  return s + '</g>';
+}
+function elleriYerlestir() {
+  ['L5', 'L4', 'L3', 'L2', 'R2', 'R3', 'R4', 'R5'].forEach(f => parmakCiz(f, ucNoktasi(f, EV[f])));
+  parmakCiz('LT', ucNoktasi('LT', ' ')); parmakCiz('RT', ucNoktasi('RT', ' '));
+}
+function vTusi(x, y, s, id = 'vTusi', mod = 'mutlu') {
+  return `<g id="${id}" transform="translate(${x} ${y}) scale(${s / 100})"><g class="v-tusi-ic">
+    <ellipse cx="50" cy="97" rx="32" ry="5" fill="#0b1f33" opacity=".18"/>
+    <path d="M36 82v9M64 82v9M29 91h11M60 91h11" stroke="#18324a" stroke-width="5" stroke-linecap="round"/>
+    <rect x="12" y="18" width="76" height="68" rx="18" fill="#e9a400"/><rect x="12" y="12" width="76" height="66" rx="18" fill="#ffc23c"/>
+    <rect x="20" y="17" width="60" height="54" rx="13" fill="#ffd56b"/>
+    <g class="v-goz"><ellipse cx="38" cy="42" rx="6.5" ry="8" fill="#18324a"/><ellipse cx="62" cy="42" rx="6.5" ry="8" fill="#18324a"/>
+    <circle cx="40" cy="39" r="2.4" fill="#fff"/><circle cx="64" cy="39" r="2.4" fill="#fff"/></g>
+    <ellipse cx="28" cy="55" rx="5" ry="3" fill="#ff8a6b" opacity=".55"/><ellipse cx="72" cy="55" rx="5" ry="3" fill="#ff8a6b" opacity=".55"/>
+    ${mod === 'saskin' ? '<ellipse cx="50" cy="58" rx="5" ry="6" fill="#18324a"/>' : `<path class="v-gulus" d="M41 54q9 9 18 0" fill="none" stroke="#18324a" stroke-width="3.4" stroke-linecap="round"/>
+    <ellipse class="v-agiz" cx="50" cy="57" rx="7" ry="6" fill="#7a2a2a"/>`}
+    <path d="M12 46q-9 4-7 14" fill="none" stroke="#18324a" stroke-width="4" stroke-linecap="round"/>
+    <path class="v-kol" d="M88 46q9-6 8-16" fill="none" stroke="#18324a" stroke-width="4" stroke-linecap="round"/></g></g>`;
+}
+/* Sağ üstte, yuvarlak çerçevede sunucu Tuşi (videodaki anlatıcı) */
+function vSunucu() {
+  return `<g id="vSunucu"><circle cx="1440" cy="170" r="118" fill="#fff"/><circle cx="1440" cy="170" r="118" fill="none" stroke="#ffc23c" stroke-width="8"/>
+    <clipPath id="sunKes"><circle cx="1440" cy="170" r="112"/></clipPath><g clip-path="url(#sunKes)"><rect x="1320" y="50" width="240" height="240" fill="#e8f1ff"/>
+    ${vTusi(1360, 85, 160)}</g></g>`;
+}
+function vArka(renk, renk2) {
+  return `<rect width="1600" height="900" fill="${renk}"/>
+    <circle class="v-yuzer" cx="180" cy="120" r="260" fill="${renk2}" opacity=".45"/>
+    <circle class="v-yuzer y2" cx="1450" cy="820" r="320" fill="${renk2}" opacity=".35"/>
+    <circle class="v-yuzer y3" cx="1250" cy="90" r="120" fill="${renk2}" opacity=".3"/>`;
+}
+function vEtiket(id, x, y, yazi, renk = '#18324a', bg = '#fff', boy = 34) {
+  const w = yazi.length * boy * .56 + 52;
+  return `<g id="${id}" opacity="0" style="transform-origin:${x}px ${y}px"><rect x="${x - w / 2}" y="${y - boy * .95}" width="${w}" height="${boy * 1.9}" rx="${boy * .95}" fill="${bg}"/>
+    <text x="${x}" y="${y + 1}" class="v-yazi" font-size="${boy}" fill="${renk}">${esc(yazi)}</text></g>`;
+}
+function vKart(id, x, y, w, h, ikon, baslik, renk) {
+  return `<g id="${id}" opacity="0"><rect x="${x}" y="${y + 10}" width="${w}" height="${h}" rx="34" fill="rgba(11,31,51,.18)"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="34" fill="#fff"/>
+    <circle cx="${x + w / 2}" cy="${y + 120}" r="74" fill="${renk}" opacity=".16"/><g transform="translate(${x + w / 2 - 60} ${y + 60})">${ikon}</g>
+    <text x="${x + w / 2}" y="${y + h - 72}" class="v-yazi" font-size="38" fill="#18324a">${baslik.split('|')[0]}</text>
+    ${baslik.split('|')[1] ? `<text x="${x + w / 2}" y="${y + h - 28}" class="v-yazi" font-size="38" fill="#18324a">${baslik.split('|')[1]}</text>` : ''}</g>`;
+}
+const V_IKON = {
+  goz: `<svg width="120" height="120" viewBox="0 0 120 120"><path d="M10 60q50-46 100 0-50 46-100 0z" fill="#fff" stroke="#18324a" stroke-width="7"/><circle cx="60" cy="60" r="20" fill="#3a78d4"/><circle cx="60" cy="60" r="9" fill="#18324a"/><circle cx="66" cy="53" r="5" fill="#fff"/></svg>`,
+  el: `<svg width="120" height="120" viewBox="0 0 120 120"><g fill="#f6cfb2" stroke="#d9a07f" stroke-width="4"><rect x="22" y="30" width="16" height="50" rx="8"/><rect x="42" y="18" width="16" height="62" rx="8"/><rect x="62" y="22" width="16" height="58" rx="8"/><rect x="82" y="36" width="15" height="46" rx="7.5"/><path d="M20 70h80v20q0 22-28 22H48q-28 0-28-22z"/></g><circle cx="50" cy="26" r="12" fill="#ff6b4a"/></svg>`,
+  hedef: `<svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="48" fill="#fff" stroke="#ff6b4a" stroke-width="9"/><circle cx="60" cy="60" r="28" fill="#fff" stroke="#ff6b4a" stroke-width="9"/><circle cx="60" cy="60" r="10" fill="#ff6b4a"/><path d="M60 60l42-42M90 14l12 4 4 12" stroke="#18324a" stroke-width="7" stroke-linecap="round" fill="none"/></svg>`,
+  ev: `<svg width="120" height="120" viewBox="0 0 120 120"><path d="M14 58L60 18l46 40" fill="none" stroke="#18324a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 52v50h68V52" fill="#ffd166" stroke="#18324a" stroke-width="8" stroke-linejoin="round"/><rect x="50" y="70" width="20" height="32" rx="4" fill="#18324a"/></svg>`,
+  yukari: `<svg width="120" height="120" viewBox="0 0 120 120"><path d="M60 100V24M30 52l30-30 30 30" fill="none" stroke="#3a78d4" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  asagi: `<svg width="120" height="120" viewBox="0 0 120 120"><path d="M60 20v76M30 68l30 30 30-30" fill="none" stroke="#0f9aa6" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  bas: `<svg width="120" height="120" viewBox="0 0 120 120"><rect x="20" y="58" width="80" height="44" rx="12" fill="#c5d0e4"/><rect x="20" y="50" width="80" height="42" rx="12" fill="#ffd166" stroke="#d99812" stroke-width="4"/><path d="M60 10v28M46 26l14 14 14-14" fill="none" stroke="#ff6b4a" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  shift: `<svg width="120" height="120" viewBox="0 0 120 120"><path d="M60 14L16 62h24v42h40V62h24z" fill="#ffd166" stroke="#18324a" stroke-width="7" stroke-linejoin="round"/></svg>`,
+  nokta: `<svg width="120" height="120" viewBox="0 0 120 120"><text x="20" y="92" font-family="Andika,sans-serif" font-size="84" font-weight="700" fill="#18324a">A</text><circle cx="98" cy="86" r="11" fill="#ff6b4a"/></svg>`
+};
+/* Masada oturan çocuk (yandan) */
+function vCocuk() {
+  return `<g id="vCocuk"><g transform="translate(160 150)">
+    <path d="M0 640h900" stroke="#3a5f9e" stroke-width="6" stroke-linecap="round"/>
+    <rect x="96" y="226" width="24" height="230" rx="10" fill="#18324a"/><rect x="96" y="420" width="220" height="26" rx="10" fill="#18324a"/>
+    <path d="M118 446v194M296 446v194" stroke="#18324a" stroke-width="12" stroke-linecap="round"/>
+    <rect x="420" y="384" width="420" height="24" rx="8" fill="#c98b5a"/><path d="M442 408v232M818 408v232" stroke="#a46a3e" stroke-width="14" stroke-linecap="round"/>
+    <rect x="600" y="300" width="16" height="86" fill="#7d8ca6"/><rect x="560" y="376" width="96" height="10" rx="5" fill="#7d8ca6"/>
+    <rect x="510" y="150" width="200" height="156" rx="16" fill="#18324a"/><rect x="524" y="164" width="172" height="128" rx="8" fill="#e8f1ff"/>
+    <rect x="540" y="186" width="120" height="12" rx="6" fill="#3a78d4" opacity=".6"/><rect x="540" y="210" width="90" height="12" rx="6" fill="#3a78d4" opacity=".35"/><rect x="540" y="234" width="130" height="12" rx="6" fill="#3a78d4" opacity=".35"/>
+    <rect x="450" y="370" width="150" height="14" rx="5" fill="#fff" stroke="#9fb0c8" stroke-width="3"/>
+    <path d="M196 402H330" stroke="#2b4a7a" stroke-width="50" stroke-linecap="round"/>
+    <path d="M330 402V600" stroke="#2b4a7a" stroke-width="44" stroke-linecap="round"/>
+    <rect x="310" y="596" width="86" height="34" rx="16" fill="#18324a"/>
+    <rect x="146" y="214" width="104" height="210" rx="46" fill="#ff6b4a"/>
+    <rect x="186" y="186" width="30" height="36" fill="#f6cfb2"/>
+    <circle cx="206" cy="146" r="56" fill="#f6cfb2"/>
+    <path d="M150 150q-6-70 60-74 52-2 58 40-30-14-60-4-26 10-34 40z" fill="#4a3426"/>
+    <circle cx="178" cy="156" r="12" fill="#f0bd9b"/>
+    <ellipse cx="242" cy="146" rx="5" ry="7" fill="#18324a"/><path d="M234 176q12 6 22-2" fill="none" stroke="#18324a" stroke-width="4" stroke-linecap="round"/>
+    <path d="M202 250L228 360" stroke="#ff6b4a" stroke-width="34" stroke-linecap="round"/>
+    <path d="M228 360L428 348" stroke="#f6cfb2" stroke-width="28" stroke-linecap="round"/>
+    <ellipse cx="450" cy="350" rx="28" ry="15" fill="#f6cfb2"/>
+    <path id="vBakis" d="M250 146L520 210" stroke="#ffc23c" stroke-width="6" stroke-dasharray="14 12" stroke-linecap="round" opacity="0"/>
+  </g></g>`;
+}
+function vNot(id, x, y, yazi) {
+  const w = yazi.length * 19 + 110;
+  return `<g id="${id}" opacity="0" style="transform-origin:${x}px ${y}px"><rect x="${x}" y="${y - 36}" width="${w}" height="72" rx="36" fill="#fff"/>    <circle cx="${x + 36}" cy="${y}" r="24" fill="#2ea36a"/><path d="M${x + 24} ${y}l8 9 16-17" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="${x + 72}" y="${y + 2}" class="v-yazi" font-size="32" fill="#18324a" text-anchor="start">${esc(yazi)}</text></g>`;
+}
+function vEkran(id, x, y, w, h, baslik) {
+  return `<g id="${id}"><rect x="${x}" y="${y + 10}" width="${w}" height="${h}" rx="26" fill="rgba(11,31,51,.2)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="26" fill="#18324a"/>
+    <rect x="${x + 16}" y="${y + 16}" width="${w - 32}" height="${h - 32}" rx="14" fill="#ffffff"/>
+    ${baslik ? `<text x="${x + w / 2}" y="${y - 34}" class="v-yazi" font-size="34" fill="#fff">${esc(baslik)}</text>` : ''}
+    <text id="${id}-yazi" x="${x + 44}" y="${y + h / 2 + 4}" font-family="Andika,Verdana,sans-serif" font-size="44" fill="#18324a" dominant-baseline="middle"></text></g>`;
+}
+
+/* ---------- ortak sahne kalıpları ---------- */
+const MAVI = ['#4f78c8', '#6a8fd6'];
+function sBaslik(ust, baslik, renk, harfler) {
+  return {
+    tahmin: 7000,
+    kur: () => `${vArka(renk[0], renk[1])}
+      <g id="vHarfler">${[...harfler].map((h, i) => {
+        const x = 800 - (harfler.length * 132) / 2 + i * 132 + 6;
+        return `<g class="v-kapak" style="transform-origin:${x + 60}px 300px"><rect x="${x}" y="246" width="120" height="120" rx="26" fill="#c5d0e4"/><rect x="${x}" y="236" width="120" height="118" rx="26" fill="#fff"/><text x="${x + 60}" y="297" class="v-yazi" font-size="70" fill="#18324a">${esc(h)}</text></g>`;
+      }).join('')}</g>
+      <text id="vUst" x="800" y="470" class="v-yazi" font-size="40" fill="rgba(255,255,255,.85)" opacity="0">${esc(ust)}</text>
+      <text id="vBaslik" x="800" y="560" class="v-yazi" font-size="92" fill="#fff" opacity="0">${esc(baslik)}</text>
+      ${vTusi(1330, 610, 190)}`,
+    async oyna(c, soz) {
+      c.$$('.v-kapak').forEach((k, i) => { c.a(k, [{ transform: 'translateY(-700px) rotate(-12deg)' }, { transform: 'translateY(18px) rotate(3deg)', offset: .75 }, { transform: 'translateY(0) rotate(0)' }], 800, i * 110, 'cubic-bezier(.3,.7,.4,1)'); setTimeout(() => SN.oynuyor && bip(1300 - i * 60, .05, 'triangle', .05), i * 110 + 600); });
+      c.gir('#vUst', 700); c.gir('#vBaslik', 900);
+      c.a('#vTusi', [{ opacity: 0, transform: 'translate(1330px,900px) scale(1.9)' }, { opacity: 1, transform: 'translate(1330px,610px) scale(1.9)' }], 700, 1100, 'cubic-bezier(.3,1.5,.5,1)');
+      await c.w(1300);
+      c.a('#vTusi .v-kol', [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-25deg)' }, { transform: 'rotate(0deg)' }], 600, 0, 'ease-in-out');
+      await c.soyle(...soz);
+      await c.w(300);
+    }
+  };
+}
+const klavyeSahnesi = (eller = true, ek = '') => () => `${vArka(...MAVI)}<g id="kamera" style="transform-origin:0 0">${vKlavye()}${eller ? vEller() : ''}${ek}</g>${vSunucu()}`;
+function hazirla(c, eller = true) {
+  SN.kam = { cx: 800, cy: 450, s: 1 };
+  if (eller) elleriYerlestir();
+}
+function sKurallar(kartlar, soz, tahmin = 15000) {
+  return {
+    tahmin,
+    kur: () => `${vArka('#2ea36a', '#4cbd83')}${kartlar.map((k, i) => vKart('vKart' + i, 130 + i * 460, 200, 420, 470, V_IKON[k.ikon], k.yazi, k.renk)).join('')}${vTusi(1380, 690, 150)}`,
+    async oyna(c) {
+      for (let i = 0; i < kartlar.length; i++) {
+        c.gir('#vKart' + i, 0, 60);
+        await c.soyle(...kartlar[i].soz);
+      }
+      if (soz) await c.soyle(...soz);
+    }
+  };
+}
+
+/* ---------- ANLATIMLAR ---------- */
+const VIDEOLAR = {};
+VIDEOLAR[1] = [
+  (() => { const s = sBaslik('1. Ünite · Bölüm 1', 'Klavyeyle Tanışma', MAVI, 'KLAVYE'); const o = s.oyna; s.oyna = c => o(c, ['Merhaba! Ben Tuşi. Bugün birlikte klavyeyle tanışacağız.']); return s; })(),
+  {
+    tahmin: 14000,
+    kur: () => `${vArka('#ff8a6b', '#ffa98f')}${vEkran('vSol', 120, 300, 640, 220, 'Klavyeye bakarak, iki parmakla')}${vEkran('vSag', 840, 300, 640, 220, 'Ekrana bakarak, on parmakla')}
+      ${vTusi(365, 615, 150, 'vT1', 'saskin')}${vTusi(1085, 615, 150, 'vT2')}
+      ${vEtiket('vKazan', 1160, 572, 'Daha hızlı ve doğru!', '#fff', '#2ea36a', 30)}`,
+    async oyna(c) {
+      const hedef = 'on parmakla yazmak kolay';
+      const solY = c.$('#vSol-yazi'), sagY = c.$('#vSag-yazi');
+      let sol = 0, sag = 0, bitti = false;
+      const yaris = (async () => {
+        for (let t = 0; !bitti; t++) {
+          await c.w(70);
+          if (sag < hedef.length) { sag++; sagY.textContent = hedef.slice(0, sag) + '|'; if (sesAcik) bip(1500, .02, 'square', .015); }
+          if (t % 6 === 0 && sol < hedef.length) { sol++; solY.textContent = hedef.slice(0, sol) + '|'; }
+          if (sag >= hedef.length && t > hedef.length + 4) { sagY.textContent = hedef; c.pop('#vKazan'); bitti = true; }
+        }
+      })().catch(() => {});
+      c.a('#vT1 .v-tusi-ic', [{ transform: 'translateY(0)' }, { transform: 'translateY(10px) rotate(4deg)' }, { transform: 'translateY(0)' }], 900, 0);
+      await c.soyle('On parmakla yazan biri klavyeye bakmaz. Gözü hep ekrandadır.');
+      await yaris;
+      await c.soyle('Bu yüzden hem daha hızlı hem de daha doğru yazar.');
+    }
+  },
+  {
+    tahmin: 21000,
+    kur: () => `${vArka('#f2b84b', '#f7cd75')}${vCocuk()}
+      ${vNot('vN1', 40, 330, 'Sırtın dik')}${vNot('vN2', 560, 770, 'Ayakların yerde')}${vNot('vN3', 760, 470, 'Bileklerin havada')}${vNot('vN4', 960, 250, 'Gözlerin ekranda')}`,
+    async oyna(c) {
+      c.gir('#vCocuk', 0, 30);
+      await c.soyle('Önce doğru oturalım.');
+      c.pop('#vN1'); await c.soyle('Sırtın dik olsun.');
+      c.pop('#vN2'); await c.soyle('Ayakların yere bassın.');
+      c.pop('#vN3'); await c.soyle('Bileklerini masaya yaslama. Hafifçe havada, rahat tut.');
+      c.a('#vBakis', [{ opacity: 0, strokeDashoffset: 0 }, { opacity: 1, strokeDashoffset: -100 }], 1400, 0, 'linear');
+      c.pop('#vN4'); await c.soyle('Gözlerin de hep ekranda olsun.');
+    }
+  },
+  {
+    tahmin: 13000,
+    kur: klavyeSahnesi(false, vEtiket('vOrta', 800, 140, 'ORTA SIRA: parmakların evi', '#18324a', '#ffd166', 38)),
+    async oyna(c) {
+      hazirla(c, false);
+      c.a('#vKlavye', [{ opacity: 0, transform: 'translateY(120px)' }, { opacity: 1, transform: 'translateY(0)' }], 800);
+      c.pop('#vSunucu', 300);
+      await c.soyle('Bu bizim klavyemiz.');
+      const sira = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ş', 'i'];
+      sira.forEach((k, i) => setTimeout(() => { if (!SN.oynuyor) return; c.tusYak(k); c.tusBas(k); }, i * 120));
+      c.pop('#vOrta', 900);
+      await c.soyle('En önemli sıra orta sıradır. Burası parmaklarımızın evidir.');
+    }
+  },
+  {
+    tahmin: 15000,
+    kur: klavyeSahnesi(true, `<circle id="vH1" cx="0" cy="0" r="30" fill="none" stroke="#ffd166" stroke-width="6" opacity="0"/><circle id="vH2" r="30" fill="none" stroke="#ffd166" stroke-width="6" opacity="0"/>`),
+    async oyna(c) {
+      hazirla(c);
+      const K = SN.K;
+      c.$('#vH1').setAttribute('cx', K.f.x); c.$('#vH1').setAttribute('cy', K.f.y + 22);
+      c.$('#vH2').setAttribute('cx', K.j.x); c.$('#vH2').setAttribute('cy', K.j.y + 22);
+      c.a('#vEller', [{ transform: 'translateY(520px)' }, { transform: 'translateY(520px)' }], 10);
+      c.kamera((K.f.x + K.j.x) / 2, K.f.y + 40, 2.1, 1100);
+      c.tusYak('f', '#ffd166'); c.tusYak('j', '#ffd166');
+      await c.w(900);
+      const halka = sel => c.a(sel, [{ opacity: 1, transform: 'scale(.6)' }, { opacity: 0, transform: 'scale(2.2)' }], 1200, 0, 'ease-out');
+      ['#vH1', '#vH2'].forEach(s => { const e = c.$(s); e.style.transformBox = 'fill-box'; e.style.transformOrigin = 'center'; });
+      halka('#vH1'); halka('#vH2');
+      await c.soyle('Fe ve Je tuşlarına dikkat et. Üzerlerinde küçük çıkıntılar var.', 'fe ve je tuşlarına dikkat et. Üzerlerinde küçük çıkıntılar var.');
+      halka('#vH1'); halka('#vH2');
+      c.a('#vEller', [{ transform: 'translateY(520px)' }, { transform: 'translateY(0px)' }], 1100, 0, 'cubic-bezier(.2,.8,.2,1)');
+      c.parmakVurgu('L2', true); c.parmakVurgu('R2', true);
+      await c.soyle('Klavyeye bakmadan, işaret parmaklarınla bu çıkıntıları bulabilirsin.');
+      for (let i = 0; i < 2; i++) { c.parmakBas('L2', 'f'); c.parmakBas('R2', 'j'); halka('#vH1'); halka('#vH2'); await c.w(700); }
+    }
+  },
+  {
+    tahmin: 17000,
+    kur: klavyeSahnesi(true, `<g id="vHarfBalon"></g>`),
+    async oyna(c) {
+      hazirla(c);
+      c.kamera(800, 470, 1.25, 10);
+      const K = SN.K;
+      const balon = (k, gec) => {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.innerHTML = `<circle cx="${K[k].x}" cy="${K[k].y - 80}" r="34" fill="#ffd166" stroke="#d99812" stroke-width="4"/><text x="${K[k].x}" y="${K[k].y - 78}" class="v-yazi" font-size="40" fill="#18324a">${esc(k)}</text>`;
+        g.style.transformBox = 'fill-box'; g.style.transformOrigin = 'center bottom'; g.style.opacity = 0;
+        c.$('#vHarfBalon').appendChild(g); c.pop(g, gec);
+      };
+      const sirayla = async (liste) => { for (const [f, k] of liste) { c.parmakVurgu(f, true); c.parmakBas(f, k); c.tusYak(k); balon(k, 0); await c.w(420); c.parmakVurgu(f, false); } };
+      const p1 = sirayla([['L5', 'a'], ['L4', 's'], ['L3', 'd'], ['L2', 'f']]);
+      await c.soyle('Sol elin parmakları A, S, D ve F tuşlarında durur.', 'Sol elin parmakları a, se, de ve fe tuşlarında durur.');
+      await p1;
+      const p2 = sirayla([['R2', 'j'], ['R3', 'k'], ['R4', 'l'], ['R5', 'ş']]);
+      await c.soyle('Sağ elin parmakları J, K, L ve Ş tuşlarında durur.', 'Sağ elin parmakları je, ke, le ve şe tuşlarında durur.');
+      await p2;
+    }
+  },
+  {
+    tahmin: 11000,
+    kur: klavyeSahnesi(true, `<ellipse id="vDalga" rx="60" ry="20" fill="none" stroke="#ffd166" stroke-width="6" opacity="0"/>`),
+    async oyna(c) {
+      hazirla(c);
+      const K = SN.K, d = c.$('#vDalga'); d.setAttribute('cx', K[' '].x); d.setAttribute('cy', K[' '].y);
+      d.style.transformBox = 'fill-box'; d.style.transformOrigin = 'center';
+      c.kamera(800, 560, 1.5, 900);
+      c.parmakVurgu('RT', true); c.parmakVurgu('LT', true); c.tusYak(' ');
+      const tap = (async () => { for (let i = 0; i < 4; i++) { await c.w(900); c.parmakBas('RT', ' '); c.a(d, [{ opacity: 1, transform: 'scale(.5)' }, { opacity: 0, transform: 'scale(2.6)' }], 700, 0, 'ease-out'); } })().catch(() => {});
+      await c.soyle('Başparmakların boşluk tuşunun üzerinde dinlenir. Kelimelerin arasına boşluk koymak için başparmağınla boşluk tuşuna basarsın.');
+      await tap;
+    }
+  },
+  {
+    tahmin: 13000,
+    kur: klavyeSahnesi(false, `<g id="vLejant" opacity="0">${['L5', 'L4', 'L3', 'L2', 'R2', 'R3', 'R4', 'R5'].map((f, i) => `<rect x="${130 + i * 168}" y="96" width="150" height="58" rx="29" fill="${BOLGE_RENK[f]}"/><text x="${205 + i * 168}" y="126" class="v-yazi" font-size="22" fill="#18324a">${['sol serçe', 'sol yüzük', 'sol orta', 'sol işaret', 'sağ işaret', 'sağ orta', 'sağ yüzük', 'sağ serçe'][i]}</text>`).join('')}</g>`),
+    async oyna(c) {
+      hazirla(c, false);
+      c.kamera(800, 400, .92, 10);
+      const tuslar = Object.keys(SN.K).filter(k => PARMAK[k] && PARMAK[k] !== 'RT').sort((a, b) => SN.K[a].x - SN.K[b].x);
+      tuslar.forEach((k, i) => setTimeout(() => SN.oynuyor && c.tusYak(k, BOLGE_RENK[PARMAK[k]], 300), 200 + i * 28));
+      c.gir('#vLejant', 900, -30);
+      await c.soyle('Her tuşa hep aynı parmakla basarız. Renkler, hangi parmağın hangi tuşlardan sorumlu olduğunu gösterir.');
+    }
+  },
+  sKurallar([
+    { ikon: 'goz', yazi: 'Ekrana bak', renk: '#3a78d4', soz: ['Birinci kural: klavyeye değil, ekrana bak.'] },
+    { ikon: 'el', yazi: 'Her tuşa|kendi parmağı', renk: '#ff6b4a', soz: ['İkinci kural: her tuşa kendi parmağıyla bas.'] },
+    { ikon: 'hedef', yazi: 'Önce doğru,|sonra hızlı', renk: '#2ea36a', soz: ['Üçüncü kural: önce doğru yaz. Hız zamanla kendiliğinden gelir.'] }
+  ], ['Hazırsan ilk tuşlarımızla tanışalım!'], 17000)
+];
+
+function sUzanma(baslik, soz1, ornekler, kurallar, renk) {
+  return [
+    (() => { const s = sBaslik(baslik[0], baslik[1], renk, baslik[2]); const o = s.oyna; s.oyna = c => o(c, baslik[3]); return s; })(),
+    {
+      tahmin: 12000,
+      kur: klavyeSahnesi(true),
+      async oyna(c) {
+        hazirla(c);
+        c.pop('#vSunucu', 200);
+        ornekler.sira.forEach((k, i) => setTimeout(() => { if (!SN.oynuyor) return; c.tusYak(k, BOLGE_RENK[PARMAK[k]]); c.tusBas(k); }, 400 + i * 130));
+        await c.soyle(...soz1);
+      }
+    },
+    ...ornekler.adimlar.map(a => ({
+      tahmin: 15000,
+      kur: klavyeSahnesi(true, `<path id="vOk" fill="none" stroke="#ff6b4a" stroke-width="8" stroke-linecap="round" stroke-dasharray="16 14" opacity="0"/>`),
+      async oyna(c) {
+        hazirla(c);
+        const K = SN.K, ev = EV[a.f];
+        c.$('#vOk').setAttribute('d', `M${K[ev].x + 46} ${K[ev].y} Q${K[ev].x + 80} ${(K[ev].y + K[a.k].y) / 2} ${K[a.k].x + 46} ${K[a.k].y}`);
+        c.kamera((K[ev].x + K[a.k].x) / 2, (K[ev].y + K[a.k].y) / 2 + 60, 2, 1000);
+        c.parmakVurgu(a.f, true); c.tusYak(a.k, '#ffd166');
+        await c.w(900);
+        c.a('#vOk', [{ opacity: 0 }, { opacity: 1 }], 400);
+        const hareket = (async () => { for (let i = 0; i < 3; i++) { await c.uzan(a.f, a.k, 380); c.parmakBas(a.f, a.k); await c.w(450); await c.uzan(a.f, ev, 380); await c.w(600); } })().catch(() => {});
+        await c.soyle(...a.soz);
+        await hareket;
+      }
+    })),
+    sKurallar(kurallar, null, 14000)
+  ];
+}
+VIDEOLAR[19] = sUzanma(['2. Ünite · Bölüm 19', 'Üst Sıraya Uzanmak', 'ÜST', ['Orta sırayı bitirdin, tebrikler! Şimdi üst sıraya tırmanıyoruz.']],
+  ['Üst sıradaki her tuşa, hemen altındaki orta sıra tuşunun parmağıyla basarız.'],
+  { sira: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'ı', 'o', 'p', 'ğ', 'ü'], adimlar: [
+    { f: 'L3', k: 'e', soz: ['E tuşu için sol orta parmağın D tuşundan yukarı uzanır, basar ve hemen D tuşuna geri döner.', 'e tuşu için sol orta parmağın de tuşundan yukarı uzanır, basar ve hemen de tuşuna geri döner.'] },
+    { f: 'R2', k: 'u', soz: ['Sağ elde de aynısı: U tuşu için sağ işaret parmağın J tuşundan yukarı uzanır, sonra J tuşuna döner.', 'Sağ elde de aynısı: u tuşu için sağ işaret parmağın je tuşundan yukarı uzanır, sonra je tuşuna döner.'] }
+  ] },
+  [{ ikon: 'yukari', yazi: 'Uzan', renk: '#3a78d4', soz: ['Parmağın yukarı uzanır,'] },
+   { ikon: 'bas', yazi: 'Bas', renk: '#ff6b4a', soz: ['tuşa basar,'] },
+   { ikon: 'ev', yazi: 'Eve dön', renk: '#2ea36a', soz: ['ve hemen eve, orta sıraya döner. Haydi dağlara!'] }], ['#3a78d4', '#5a92e0']);
+VIDEOLAR[34] = sUzanma(['3. Ünite · Bölüm 34', 'Alt Sıraya İnmek', 'ALT', ['Üst sıra da tamam! Şimdi alt sıraya iniyoruz.']],
+  ['Bu kez parmaklarımız orta sıradan aşağı doğru kıvrılır.'],
+  { sira: ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'ö', 'ç', '.'], adimlar: [
+    { f: 'R2', k: 'n', soz: ['N tuşu için sağ işaret parmağın J tuşundan aşağı iner, basar ve geri döner.', 'ne tuşu için sağ işaret parmağın je tuşundan aşağı iner, basar ve geri döner.'] },
+    { f: 'L2', k: 'v', soz: ['V tuşu için sol işaret parmağın F tuşundan aşağı iner.', 've tuşu için sol işaret parmağın fe tuşundan aşağı iner.'] },
+    { f: 'R5', k: '.', soz: ['Cümlenin sonundaki nokta, sağ serçe parmağının işidir.'] }
+  ] },
+  [{ ikon: 'asagi', yazi: 'Aşağı in', renk: '#0f9aa6', soz: ['Parmağın aşağı iner,'] },
+   { ikon: 'bas', yazi: 'Bas', renk: '#ff6b4a', soz: ['tuşa basar,'] },
+   { ikon: 'ev', yazi: 'Eve dön', renk: '#2ea36a', soz: ['ve eve döner. Kıyıya hoş geldin!'] }], ['#0f9aa6', '#36b4bd']);
+VIDEOLAR[47] = [
+  (() => { const s = sBaslik('4. Ünite · Bölüm 47', 'Büyük Harf Nasıl Yazılır?', ['#8a5bd1', '#a37ce0'], 'ABC'); const o = s.oyna; s.oyna = c => o(c, ['Bütün harfleri biliyorsun! Son kalemizde büyük harf yazmayı öğreneceğiz.']); return s; })(),
+  {
+    tahmin: 11000,
+    kur: klavyeSahnesi(true),
+    async oyna(c) {
+      hazirla(c);
+      c.pop('#vSunucu', 200);
+      c.tusYak('shiftL'); c.tusYak('shiftR');
+      await c.soyle('Büyük harf için Shift tuşunu basılı tutarız. Klavyede iki Shift tuşu var: biri solda, biri sağda.', 'Büyük harf için şift tuşunu basılı tutarız. Klavyede iki şift tuşu var: biri solda, biri sağda.');
+    }
+  },
+  ...[
+    { sh: 'shiftL', shf: 'L5', f: 'R2', k: 'j', harf: 'J', soz: ['Harf sağ eldeyse, sol serçe parmağınla sol Shift\'i basılı tut. Sonra sağ elinle harfe bas: büyük J!', 'Harf sağ eldeyse, sol serçe parmağınla sol şifti basılı tut. Sonra sağ elinle harfe bas: büyük je!'] },
+    { sh: 'shiftR', shf: 'R5', f: 'L2', k: 'f', harf: 'F', soz: ['Harf sol eldeyse tam tersi: sağ serçe parmağınla sağ Shift, sol elinle harf. Büyük F!', 'Harf sol eldeyse tam tersi: sağ serçe parmağınla sağ şift, sol elinle harf. Büyük fe!'] }
+  ].map(a => ({
+    tahmin: 15000,
+    kur: klavyeSahnesi(true, vEkran('vMini', 660, 14, 280, 150, '')),
+    async oyna(c) {
+      hazirla(c);
+      c.kamera(800, 430, 1.05, 10);
+      c.$('#vMini').style.opacity = 0;
+      c.gir('#vMini', 300, -30);
+      await c.w(500);
+      const s = (async () => {
+        c.parmakVurgu(a.shf, true); await c.uzan(a.shf, a.sh, 450); c.tusYak(a.sh, '#ffd166');
+        c.a(c.$(`.vk[data-k="${a.sh}"] .vk-ic`), [{ transform: 'translateY(0px)' }, { transform: 'translateY(5px)' }], 200);
+        await c.w(900);
+        c.parmakVurgu(a.f, true); c.parmakBas(a.f, a.k); c.tusYak(a.k, '#ffd166');
+        const y = c.$('#vMini-yazi'); y.setAttribute('x', 800); y.setAttribute('text-anchor', 'middle'); y.setAttribute('font-size', 80); y.textContent = a.harf;
+        c.pop(y);
+        await c.w(1200);
+        c.a(c.$(`.vk[data-k="${a.sh}"] .vk-ic`), [{ transform: 'translateY(5px)' }, { transform: 'translateY(0px)' }], 200);
+        await c.uzan(a.shf, EV[a.shf], 450);
+      })().catch(() => {});
+      await c.soyle(...a.soz);
+      await s;
+    }
+  })),
+  {
+    tahmin: 12000,
+    kur: () => `${vArka('#8a5bd1', '#a37ce0')}${vEkran('vCumle', 220, 330, 1160, 210, '')}${vEtiket('vB1', 400, 650, 'Büyük harfle başla', '#18324a', '#ffd166', 34)}${vEtiket('vB2', 1180, 650, 'Noktayla bitir', '#18324a', '#ffd166', 34)}`,
+    async oyna(c) {
+      const hedef = 'Kedi bahçede top oynuyor.', y = c.$('#vCumle-yazi');
+      const yaz = (async () => { for (let i = 1; i <= hedef.length; i++) { y.textContent = hedef.slice(0, i); if (sesAcik) bip(1500, .02, 'square', .015); await c.w(110); if (i === 1) c.pop('#vB1'); } c.pop('#vB2'); })().catch(() => {});
+      await c.soyle('Cümleler büyük harfle başlar ve noktayla biter.');
+      await yaz;
+      await c.soyle('Haydi kaleye!');
+    }
+  }
+];
+
+/* ---------- oynatıcı ---------- */
+function anlatimBaslat(d) {
+  SN.d = d; SN.sahneler = VIDEOLAR[d.id]; SN.i = 0; SN.oynuyor = false; SN.durdurulan = [];
+  snIptal();
+  $('#anlatimBaslik').textContent = `${d.id}. ${d.ad}`;
+  $('#snCubuk').innerHTML = SN.sahneler.map((x, i) => `<button aria-label="${i + 1}. sahneye git"><i><b></b></i></button>`).join('');
+  $$('#snCubuk button').forEach((b, i) => (b.onclick = () => sahneyeGit(i)));
+  $('#snBitti').hidden = true;
+  $('#snBuyuk').hidden = false;
+  oynatDugmesi();
+  goster('anlatim');
+  sahneCiz(0);
+  $('#snAltyazi').innerHTML = `<span>${esc('Başlamak için ▶ düğmesine bas.')}</span>`;
+  $('#snAltyazi').hidden = !SN.cc;
+  if (!SN.raf) { SN.son = performance.now(); SN.raf = requestAnimationFrame(snTik); }
+}
+function sahneCiz(i) {
+  SN.i = i;
+  document.getAnimations().forEach(a => { if (window.CSSAnimation && a instanceof CSSAnimation) return; try { a.cancel(); } catch (e) {} });
+  SN.durdurulan = [];
+  $('#snSahne').innerHTML = SN.sahneler[i].kur();
+  $('#snSayac').textContent = `${i + 1} / ${SN.sahneler.length}`;
+  SN.sahneBas = SN.t;
+}
+async function sahneOynat(i) {
+  snIptal();
+  sahneCiz(i);
+  const c = ctxYap();
+  c.a('#snSahne', [{ opacity: 0 }, { opacity: 1 }], 350);
+  try {
+    await SN.sahneler[i].oyna(c);
+    await c.w(500);
+  } catch (e) { if (e !== IPTAL) console.error('sahne hatası', e && e.message, e && e.stack, JSON.stringify(e)); return; }
+  if (i + 1 < SN.sahneler.length) sahneOynat(i + 1);
+  else videoBitti();
+}
+function sahneyeGit(i) {
+  $('#snBitti').hidden = true; $('#snBuyuk').hidden = true;
+  if (!SN.oynuyor) oynatAyarla(true);
+  sahneOynat(i);
+}
+function oynatAyarla(o) {
+  SN.oynuyor = o;
+  if (!o) {
+    SN.durdurulan = document.getAnimations().filter(a => a.playState === 'running');
+    SN.durdurulan.forEach(a => a.pause());
+    try { speechSynthesis.pause(); } catch (e) {}
+  } else {
+    SN.durdurulan.forEach(a => { try { a.play(); } catch (e) {} });
+    SN.durdurulan = [];
+    try { speechSynthesis.resume(); } catch (e) {}
+  }
+  oynatDugmesi();
+}
+function oynatDugmesi() { $('#snOynat').innerHTML = `<svg viewBox="0 0 24 24"><use href="#i-${SN.oynuyor ? 'durdur-beyaz' : 'oynat-beyaz'}"/></svg>`; $('#snOynat').title = SN.oynuyor ? 'Durdur' : 'Oynat'; }
+function videoBitti() {
+  SN.oynuyor = false; oynatDugmesi();
+  $$('#snCubuk b').forEach(b => (b.style.width = '100%'));
+  $('#snBitti').hidden = false;
+  SES.tamam();
+}
+$('#snBuyuk').onclick = () => { $('#snBuyuk').hidden = true; oynatAyarla(true); sahneOynat(SN.i); };
+$('#snOynat').onclick = () => {
+  if (!$('#snBuyuk').hidden) { $('#snBuyuk').click(); return; }
+  if (!$('#snBitti').hidden) { sahneyeGit(0); return; }
+  oynatAyarla(!SN.oynuyor);
+};
+$('#snCC').onclick = () => { SN.cc = !SN.cc; yerel.set('kk:cc', SN.cc); $('#snCC').setAttribute('aria-pressed', SN.cc); $('#snAltyazi').hidden = !SN.cc; };
+$('#snCC').setAttribute('aria-pressed', SN.cc);
+$('#snTekrar').onclick = () => sahneyeGit(0);
+$('#snDevam').onclick = () => anlatimBitir();
+$('#anlatimGeri').onclick = () => { snIptal(); SN.oynuyor = false; haritaCiz(); goster('harita'); };
+document.addEventListener('keydown', e => { if (aktifEkran === 'anlatim' && e.key === ' ' && $('#sonucKatman').hidden) { e.preventDefault(); $('#snOynat').click(); } });
+function anlatimBitir() {
+  snIptal(); SN.oynuyor = false;
+  const yeni = sonucIsle(SN.d, { ok: true, y: 0, h: 0, d: 0, sure: 0, hata: 0 });
+  sonucGoster(SN.d, { ok: true, y: 0, anlatim: true }, yeni);
 }
 </script>
 <script>
