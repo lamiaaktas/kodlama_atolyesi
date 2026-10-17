@@ -167,6 +167,23 @@ body:not(.dokunmatik) .kontroller>div{display:none}
 .nasil-ik svg{width:52px;height:52px;display:block}
 @media (max-width:560px){.nasil{grid-template-columns:1fr}.nasil-ik svg{width:40px;height:40px}}
 
+/* En iyi 5 */
+#k-lider{z-index:40}
+.lider{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.lider-satir{display:grid;grid-template-columns:44px 56px minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--panel-2);border-radius:18px;padding:10px 18px 10px 10px}
+.lider-satir.ben{background:#efecff;box-shadow:0 0 0 3px var(--violet) inset}
+.sira{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.35rem;color:var(--ink);background:#fff}
+.lider-yuz{width:56px;height:56px;border-radius:14px;background:#fff;display:block;object-fit:cover}
+.lider-ad{display:flex;flex-direction:column;gap:5px;min-width:0}
+.lider-isim{display:flex;align-items:center;gap:8px;min-width:0}
+.lider-isim b{font-family:var(--display);font-size:1.25rem;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sen{flex:none;background:var(--violet);color:#fff;font-weight:800;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;border-radius:8px;padding:.2em .55em}
+.ada-noktalar{display:flex;gap:5px}
+.ada-noktalar i{width:15px;height:15px;border-radius:5px;display:block}
+.lider-puan{font-family:var(--display);font-weight:800;font-size:1.65rem;font-variant-numeric:tabular-nums;text-align:right;line-height:1}
+.lider-puan small{display:block;font-family:var(--body);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:480px){.lider-satir{grid-template-columns:36px 44px minmax(0,1fr) auto;gap:9px;padding-right:12px}.sira{width:34px;height:34px;font-size:1.1rem}.lider-yuz{width:44px;height:44px}.lider-isim b{font-size:1.05rem}.lider-puan{font-size:1.3rem}}
+
 /* Sertifika */
 #sertifikaTuval{width:100%;height:auto;border-radius:12px;box-shadow:0 6px 24px rgba(31,37,71,.18);display:block}
 .katman>.kart.genis{width:min(980px,100%)}
@@ -261,6 +278,7 @@ tbody tr:hover{background:#f8f9ff}
   <div class="ustbar">
     <div class="kimlik"><canvas class="yuz" id="yuzKucuk" width="84" height="84"></canvas><div><b id="hIsim"></b><small id="hSinif"></small></div><span class="puan-rozet" id="hPuan">0</span></div>
     <div class="ustdugmeler">
+      <button class="btn violet kucuk" id="liderAc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor" fill-opacity=".3"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v3M8 20h8M9.5 17h5"/></svg>En iyi 5</button>
       <button class="btn sun kucuk" id="sertifikaAc" disabled>Sertifikam</button>
       <button class="btn ghost kucuk" id="karakterDuzenle">Karakterim</button>
       <button class="btn ghost kucuk" id="cikisYap">Çıkış</button>
@@ -309,6 +327,7 @@ tbody tr:hover{background:#f8f9ff}
   </div>
 </div></div>
 <div class="katman" id="k-bitis" hidden><div class="kart" id="bitisIc"></div></div>
+<div class="katman" id="k-lider" hidden><div class="kart" id="liderIc"></div></div>
 <div class="katman" id="k-sertifika" hidden><div class="kart genis">
   <canvas id="sertifikaTuval" width="1600" height="1130"></canvas>
   <div class="alt-dugmeler">
@@ -334,6 +353,7 @@ tbody tr:hover{background:#f8f9ff}
       <div class="op-arac">
         <select id="opSinif" aria-label="Sınıf seç"></select>
         <button class="btn ghost kucuk" id="opYenile">Yenile</button>
+        <button class="btn violet kucuk" id="opLider"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0z" fill="currentColor" fill-opacity=".3"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v3M8 20h8M9.5 17h5"/></svg>İlk 5'i göster</button>
         <span class="not" id="opNot"></span>
       </div>
       <div class="ozet" id="opOzet"></div>
@@ -1918,6 +1938,71 @@ async function sertifikaGoster() {
 /* =========================================================
    ÖĞRETMEN PANELİ
    ========================================================= */
+/* =========================================================
+   EN İYİ 5
+   ========================================================= */
+const MADALYA = ['#ffc63d', '#d3d7e6', '#e8b07c'];
+const adaTamam = v => DUNYALAR.filter(d => v && v.dunyalar && v.dunyalar[d.id] && v.dunyalar[d.id].tamam).map(d => d.id);
+const guvenliToplam = v => DUNYALAR.reduce((t, d) => t + ((v && v.dunyalar && v.dunyalar[d.id] && v.dunyalar[d.id].puan) || 0), 0);
+function liderSirala(satirlar) {
+  return satirlar.map(r => ({ name: r.name, toplam: guvenliToplam(r.data), ada: adaTamam(r.data), avatar: (r.data && r.data.avatar) || null, t: (r.data && r.data.guncelleme) || 0 }))
+    .filter(r => r.toplam > 0)
+    .sort((a, b) => b.toplam - a.toplam || b.ada.length - a.ada.length || a.t - b.t);
+}
+const _yuz = new Map();
+function yuzFoto(a) {
+  if (!a) return Promise.resolve(null);
+  const k = JSON.stringify(a);
+  if (!_yuz.has(k)) _yuz.set(k, new Promise(res => {
+    const u = avatarFoto(a, 168); if (!u) { res(null); return; }
+    const im = new Image();
+    im.onload = () => { try { const c = document.createElement('canvas'); c.width = c.height = 112; c.getContext('2d').drawImage(im, 26, 6, 116, 116, 0, 0, 112, 112); res(c.toDataURL('image/png')); } catch (e) { res(null); } };
+    im.onerror = () => res(null); im.src = u;
+  }));
+  return _yuz.get(k);
+}
+function liderCiz(c, sinifAdi, benimIsim, hata) {
+  const ic = $('#liderIc');
+  let h = `<div class="op-ust" style="align-items:flex-start"><div><span class="etk">${esc(sinifAdi || '')}</span><h2>En yüksek puanlar</h2></div><button class="btn ghost kucuk" id="liderKapat">Kapat</button></div>`;
+  if (hata) h += `<div class="geri-bildirim tekrar">${esc(hata)}</div>`;
+  else if (!c) h += '<p class="not" style="padding:28px 0;text-align:center;font-size:1.1rem">Liste yükleniyor…</p>';
+  else if (!c.liste.length) h += `<div class="durum-kutu" style="text-align:center">Henüz kimse bir adayı bitirmedi.${benimIsim ? ' İlk sen ol!' : ''}</div>`;
+  else {
+    h += '<ol class="lider">' + c.liste.map((r, i) => {
+      const ben = benimIsim && r.name === benimIsim;
+      return `<li class="lider-satir${ben ? ' ben' : ''}"><span class="sira" style="background:${i < 3 ? MADALYA[i] : '#fff'}">${i + 1}</span>
+        <img class="lider-yuz" alt="" data-i="${i}">
+        <div class="lider-ad"><span class="lider-isim"><b>${esc(r.name)}</b>${ben ? '<span class="sen">Sen</span>' : ''}</span>
+          <span class="ada-noktalar" aria-label="${r.ada.length} ada tamamlandı">${DUNYALAR.map(d => `<i title="${esc(d.ad)}" style="background:${r.ada.includes(d.id) ? d.renkKod : 'var(--line)'}"></i>`).join('')}</span></div>
+        <b class="lider-puan">${r.toplam}<small>puan</small></b></li>`;
+    }).join('') + '</ol>';
+    if (benimIsim && c.sira > 5 && c.benim) h += `<div class="durum-kutu">Sen <b>${c.sira}.</b> sıradasın · ${c.benim.toplam} puan. Adaları tekrar oynayıp puanını yükseltebilirsin!</div>`;
+    else if (benimIsim && !c.sira) h += '<div class="durum-kutu">Bir adayı bitirince sen de bu listeye girebilirsin!</div>';
+  }
+  ic.innerHTML = h;
+  $('#liderKapat').onclick = () => katman('k-lider', false);
+  if (c && c.liste) $$('#liderIc img[data-i]').forEach(img => yuzFoto(c.liste[+img.dataset.i].avatar).then(u => { if (u) img.src = u; }));
+}
+async function enIyilerAc() {
+  liderCiz(null, S.sinifAdi, S.isim); katman('k-lider', true); $('#liderKapat').focus();
+  try {
+    let c;
+    if (GAS && !S.cevrimdisi) {
+      c = await sunucu('enIyiler', S.kod, S.isim);
+      if (!c || !c.ok) throw new Error((c && c.error) || 'hata');
+    } else {
+      const on = 'siberada:ogr:' + S.kod + ':';
+      const l = liderSirala(yerel.keys().filter(k => k.startsWith(on)).map(k => ({ name: k.slice(on.length), data: (yerel.get(k) || {}).veri })));
+      const i = l.findIndex(r => r.name === S.isim);
+      c = { liste: l.slice(0, 5), sira: i + 1, benim: i >= 0 ? l[i] : null };
+    }
+    liderCiz(c, S.sinifAdi, S.isim);
+  } catch (e) {
+    const m = String((e && e.message) || e);
+    liderCiz(null, S.sinifAdi, S.isim, /not a function|not found|bulunamad/i.test(m) ? 'Bu liste için öğretmeninin oyunun sunucu kodunu güncellemesi gerekiyor.' : 'Liste şu an alınamadı. Biraz sonra tekrar dene.');
+  }
+}
+
 let OP = null;
 function ogretmenAc() {
   goster('e-ogretmen'); $('#opHata').textContent = '';
@@ -2057,6 +2142,12 @@ $('#karakterTamam').onclick = karakterTamam;
 $('#karakterDuzenle').onclick = karakterGoster;
 $('#cikisYap').onclick = () => { S.isim = ''; S.veri = null; girisGoster(); };
 $('#sertifikaAc').onclick = sertifikaGoster;
+$('#liderAc').onclick = enIyilerAc;
+$('#opLider').onclick = () => {
+  const kod = $('#opSinif').value, sn = OP && OP.siniflar[kod]; if (!sn) return;
+  liderCiz({ liste: liderSirala(OP.satirlar.filter(r => r.code === kod)).slice(0, 5), sira: 0 }, sn.name || kod, null);
+  katman('k-lider', true);
+};
 $('#sertifikaKapat').onclick = () => katman('k-sertifika', false);
 $('#sertifikaIndir').onclick = () => {
   try {

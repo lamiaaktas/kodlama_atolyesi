@@ -13,6 +13,9 @@
  *  6. "Sınıflar" sayfasına her öğrenciyi bir satır olarak yazın: Sınıf | Sınıf kodu | Öğrenci
  *     (Dijital Kale'deki Sınıflar sayfasıyla aynı düzende; oradan kopyalayabilirsiniz.)
  *
+ * Bu dosyayı sonradan yeniden yapıştırdıysanız: Kaydet → Dağıt → Dağıtımları yönet →
+ * kalem simgesi → Sürüm: "Yeni sürüm" → Dağıt. Oyunun adresi değişmez.
+ *
  * Güncellemeler: Oyunun ekranı (Index.html) GitHub'daki lamiaaktas/kodlama_atolyesi
  * deposunun siber-adalar klasöründen okunur. Ekran güncellemeleri için bu dosyaya
  * dokunmanız gerekmez; yeni sürüm en geç 5 dakikada kendiliğinden gelir. Projeye ayrıca
@@ -178,10 +181,38 @@ function ilerlemeKaydet(kod, isim, d) {
     const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('İlerleme');
     const r = satirBul_(sh, kod, isim);
     if (r) sh.getRange(r.satir, 1, 1, deger.length).setValues([deger]); else sh.appendRow(deger);
+    CacheService.getScriptCache().remove('sa:lider:' + kod);
     return { ok: true };
   } finally {
     try { kilit.releaseLock(); } catch (e) {}
   }
+}
+
+/* En iyi 5: sınıfın en yüksek toplam puanlı öğrencileri. Bütün sınıf aynı anda bassa da
+   E-Tablo bir kez okunsun diye liste 60 saniye önbellekte tutulur; yeni kayıt gelince silinir. */
+function enIyiler(kod, isim) {
+  kod = kodNorm_(kod); isim = isimNorm_(isim);
+  if (!siniflariOku_()[kod]) return { ok: false, error: 'sinif' };
+  const c = CacheService.getScriptCache(), key = 'sa:lider:' + kod;
+  let liste = null;
+  const hit = c.get(key); if (hit) { try { liste = JSON.parse(hit); } catch (e) {} }
+  if (!liste) {
+    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('İlerleme'), n = BASLIK.length;
+    const rows = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, n).getValues() : [];
+    liste = [];
+    rows.forEach(r => {
+      if (kodNorm_(r[0]) !== kod) return;
+      let d = null; try { d = JSON.parse(r[n - 1] || 'null'); } catch (e) {}
+      const w = (d && d.dunyalar) || {};
+      const toplam = DUNYA_IDLER.reduce((t, id) => t + ((w[id] && w[id].puan) || 0), 0);
+      if (!toplam) return;
+      liste.push({ name: isimNorm_(r[1]), toplam: toplam, ada: DUNYA_IDLER.filter(id => w[id] && w[id].tamam), avatar: (d && d.avatar) || null, t: (d && d.guncelleme) || 0 });
+    });
+    liste.sort((a, b) => b.toplam - a.toplam || b.ada.length - a.ada.length || a.t - b.t);
+    try { c.put(key, JSON.stringify(liste), 60); } catch (e) {}
+  }
+  const i = liste.findIndex(r => r.name === isim);
+  return { ok: true, liste: liste.slice(0, 5), sira: i + 1, benim: i >= 0 ? liste[i] : null };
 }
 
 function ogretmenVerisi(pin) {
