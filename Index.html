@@ -300,7 +300,7 @@ body.sunum .sunum-kapat{display:flex;gap:12px;position:fixed;top:calc(14px + env
 .profil-sol{display:grid;gap:10px;justify-items:center;align-content:start}
 .profil-buyuk{width:210px;height:210px;border-radius:50%;overflow:hidden;box-shadow:0 6px 0 #eadfcd}
 .profil-etiket{justify-self:start;color:var(--muted);font-size:13px}
-.profil-sol input{width:100%;text-align:center;font-family:var(--f-d);font-size:22px}
+.profil-ad{width:100%;text-align:center;font-family:var(--f-d);font-size:22px;font-weight:800;background:#f6f1e8;border-radius:14px;padding:8px 12px;overflow-wrap:anywhere}
 .profil-sag{display:grid;gap:12px;align-content:start;min-width:0}
 .profil-sekme{display:flex;flex-wrap:wrap;gap:8px}
 .ps{display:grid;justify-items:center;gap:2px;width:72px;padding:8px 4px;border-radius:16px;background:#f6f1e8;font-size:26px;color:#6b5e48}
@@ -1122,7 +1122,8 @@ function yuzSVG(y){
 }
 function profilBul(sinif,ad){ const c=(S.siniflar||[]).find(function(x){ return x.ad===sinif; }); return (c&&c.profiller&&c.profiller[ad])||null; }
 function yuzEl(sinif,ad,cls){ const p=profilBul(sinif,ad); const d=el('span',cls||'yuz-av'); d.innerHTML=yuzSVG(yuzDuzelt(p&&p.yuz,ad)); return d; }
-function gorunenAd(sinif,ad){ const p=profilBul(sinif,ad); return (p&&p.lakap)||ad; }
+/* Öğrenciler adlarını değiştiremez: her yerde öğretmenin listesindeki ad görünür (eski takma adlar yok sayılır). */
+function gorunenAd(sinif,ad){ return ad; }
 function profilAc(){
   if(S.inceleme) return;
   const p=profilBul(S.sinif,S.ogrenci)||{};
@@ -1131,18 +1132,17 @@ function profilAc(){
   const ust=el('div','profil-ust'); ust.appendChild(el('h2',null,'Profilim'));
   const kp=icBtn('kapat','x','Kapat'); kp.onclick=kapat; ust.appendChild(kp);
   const govde=el('div','profil-govde'), sol=el('div','profil-sol'), sag=el('div','profil-sag');
-  const buyuk=el('div','profil-buyuk'); const ad=el('input'); ad.id='lakapGir'; ad.maxLength=20; ad.value=p.lakap||S.ogrenci; ad.setAttribute('aria-label','Adın');
+  const buyuk=el('div','profil-buyuk'); const ad=el('div','profil-ad',S.ogrenci);
   const zar=icBtn('cb beyaz hap','zar','Rastgele'); zar.insertAdjacentText('beforeend',' Karıştır');
   zar.onclick=function(){ Object.keys(AV).forEach(function(k){ Y[k]=Math.floor(Math.random()*AV[k].length); }); if(Math.random()<.5) Y.aks=0; ciz(); };
-  const lbl=el('label','profil-etiket','Adın'); lbl.htmlFor='lakapGir';
-  sol.append(buyuk,lbl,ad,zar);
+  sol.append(buyuk,ad,zar);
   const sekmeler=el('div','profil-sekme'), secenek=el('div','profil-secenek');
   sag.append(sekmeler,secenek);
   AV_SEKME.forEach(function(t){ const b=icBtn('ps',t[2],t[1]); b.appendChild(el('small',null,t[1])); b.dataset.k=t[0]; b.onclick=function(){ sek=t[0]; ciz(); }; sekmeler.appendChild(b); });
   const alt=el('div','profil-alt'); const iptal=icBtn('cb gri yuvarlak','x','Vazgeç'), ok=icBtn('cb yesil yuvarlak','check','Kaydet');
   iptal.onclick=kapat;
   ok.onclick=function(){ ok.disabled=true; ok.innerHTML='<span class="spin"></span>';
-    sunucu('profilKaydet',S.sinif,S.ogrenci,ad.value.trim()||S.ogrenci,Y).then(function(r){
+    sunucu('profilKaydet',S.sinif,S.ogrenci,S.ogrenci,Y).then(function(r){
       const c=S.siniflar.find(function(x){ return x.ad===S.sinif; }); if(c){ c.profiller=c.profiller||{}; c.profiller[S.ogrenci]={lakap:r.lakap,yuz:r.yuz}; } ls('kat3:siniflar',S.siniflar);
       kapat(); benCiz(); bildir('Profilin kaydedildi ✓');
     }).catch(function(e){ ok.disabled=false; ok.innerHTML=ic('check'); bildir(hataMetni(e)); }); };
@@ -2292,7 +2292,7 @@ function filtreDoldur(){ const f=$('fSinif'), eski=f.value; f.innerHTML=''; cons
   f.value=eski&&S.siniflar.some(function(c){ return c.ad===eski; })?eski:(S.siniflar[0]?S.siniflar[0].ad:''); ogrDoldur(); }
 function ogrDoldur(){ const f=$('fOgr'), eski=f.value, c=S.siniflar.find(function(x){ return x.ad===$('fSinif').value; });
   f.innerHTML=''; const t=el('option',null,'Tüm öğrenciler'); t.value=''; f.appendChild(t);
-  if(c) c.ogrenciler.forEach(function(o){ const p=profilBul(c.ad,o); const op=el('option',null,o+(p&&p.lakap&&p.lakap!==o?' ('+p.lakap+')':'')); op.value=o; f.appendChild(op); });
+  if(c) c.ogrenciler.forEach(function(o){ const p=profilBul(c.ad,o); const op=el('option',null,o); op.value=o; f.appendChild(op); });
   f.disabled=!c; f.value=c&&c.ogrenciler.indexOf(eski)>=0?eski:''; }
 function ogrenciSecPanel(ad){ $('fOgr').value=ad; $('fTarih').value=''; calismalariYukle(); }
 $('fSinif').onchange=function(){ ogrDoldur(); calismalariYukle(); };
