@@ -66,6 +66,23 @@ svg.i{width:1em;height:1em;display:block;fill:none;stroke:currentColor;stroke-wi
 .ben b{font-family:var(--f-d);font-size:17px;line-height:1;display:block}
 .ben small{color:var(--muted);font-size:11.5px;display:block}
 .etiket{background:#ffd23f;color:#3d2c00;border-radius:999px;padding:3px 10px;font-size:12px}
+.ab.tam{background:#3b8bd6;color:#fff;box-shadow:0 4px 0 #2a6aad}
+.ab.tam:hover{background:#2f7fd0}
+.ab.tam:active{transform:translateY(3px);box-shadow:0 1px 0 #2a6aad}
+.cb.tam-hap{--b:#3b8bd6;--bd:#2a6aad;--fg:#fff}
+.kapat-sayfa{width:46px;height:46px;border-radius:50%;background:#ef4444;color:#fff;display:grid;place-items:center;font-size:24px;flex:none;box-shadow:0 4px 0 #b91c1c;border:3px solid #fff;outline:2px solid #fecaca;transition:transform .1s}
+.kapat-sayfa svg.i,.kahraman .kapat-sayfa svg.i,.etk-bas .kapat-sayfa svg.i{width:1em;height:1em;stroke-width:3.4}
+.kapat-sayfa:hover{background:#dc2626;transform:scale(1.06)}
+.kapat-sayfa:active{transform:translateY(3px);box-shadow:0 1px 0 #b91c1c}
+.kahraman .kapat-sayfa.kose,.etk-bas .kapat-sayfa{width:56px;height:56px;font-size:28px}
+.kahraman .kapat-sayfa.kose{margin-left:auto;align-self:flex-start}
+.etk-bas .etk-cal + .kapat-sayfa{align-self:flex-start}
+.gule{position:fixed;inset:0;z-index:120;background:#f4efe6;display:grid;place-items:center;padding:20px;text-align:center}
+.gule-ic{display:grid;gap:14px;justify-items:center;max-width:520px}
+.gule-robot{width:200px}.gule-robot svg{display:block;width:100%;height:auto}
+.gule h1{font-size:clamp(40px,7vw,64px);color:var(--mor)}
+.gule p{margin:0;color:var(--muted);font-size:18px}
+.gule kbd{font-family:var(--f-d);background:#fff;border-radius:10px;padding:2px 10px;box-shadow:0 3px 0 #dccfb9;color:var(--ink)}
 .gonder{--b:var(--turuncu);--bd:#c86a10;--fg:#fff;padding:7px 16px 7px 8px;font-size:18px;border-radius:16px}
 .gonder .z{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:24px}
 
@@ -722,7 +739,7 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
 <section id="giris" hidden>
   <div class="kahraman">
     <svg viewBox="0 0 96 96" aria-hidden="true"><rect x="42" y="4" width="12" height="14" rx="6" fill="#f08a24"/><rect x="45" y="14" width="6" height="12" fill="#8a6ad0"/><rect x="14" y="24" width="68" height="56" rx="22" fill="#8a6ad0"/><rect x="22" y="34" width="52" height="32" rx="14" fill="#fff"/><circle cx="38" cy="50" r="6" fill="#2b2d42"/><circle cx="58" cy="50" r="6" fill="#2b2d42"/><circle cx="40" cy="48" r="2" fill="#fff"/><circle cx="60" cy="48" r="2" fill="#fff"/><path d="M42 59q6 5 12 0" stroke="#2b2d42" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="28" cy="60" r="4" fill="#ffb3cd"/><circle cx="68" cy="60" r="4" fill="#ffb3cd"/><rect x="6" y="44" width="10" height="20" rx="5" fill="#f6c93c"/><rect x="80" y="44" width="10" height="20" rx="5" fill="#f6c93c"/></svg>
-    <div><h1>Kodlama <b>Atölyesi</b></h1><div class="gun" id="gunYazi"></div></div>
+    <div><h1>Kodlama <b>Atölyesi</b></h1><div class="gun" id="gunYazi"></div></div><button class="kapat-sayfa kose" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
   </div>
   <div id="adim1">
     <div class="adim"><span class="no" aria-hidden="true">1</span><h2>Sınıfın hangisi?</h2></div>
@@ -732,7 +749,7 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
     <div class="adim"><button class="cb beyaz yuvarlak kucuk" id="geriSinif" aria-label="Sınıflara dön"></button><span class="no" aria-hidden="true">2</span><h2 id="adim2Baslik"></h2></div>
     <div class="tiles" id="ogrListe"></div>
   </div>
-  <div class="ayak"><button class="cb beyaz hap" id="tamEkranGiris"></button><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
+  <div class="ayak"><button class="cb hap tam-hap" id="tamEkranGiris"></button><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
 </section>
 
 <!-- STÜDYO -->
@@ -757,8 +774,9 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
     <div class="sag">
       <button class="ben" id="benBtn" aria-label="Profilim"><span id="kimAv"></span><span class="ben-yazi"><b id="kimAd"></b><small id="kimAlt"></small></span><span class="etiket" id="kimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="benKalem"></span></button>
       <button class="cb gonder ogr-ozel" id="gonder" aria-label="Öğretmene gönder"><span class="z" id="gonderIc"></span>Gönder</button>
-      <button class="ab" id="tamEkranBtn" aria-label="Tam ekran" title="Tam ekran"></button>
+      <button class="ab tam" id="tamEkranBtn" aria-label="Tam ekran" title="Tam ekran"></button>
       <button class="ab ogr-ozel" id="cikis" aria-label="Çıkış" title="Çıkış"></button>
+      <button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
       <button class="cb beyaz hap" id="panelDon" hidden></button>
     </div>
   </header>
@@ -791,7 +809,7 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
 
 <!-- ETKİNLİK SEÇİMİ -->
 <section id="etkinlik" hidden>
-  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div><button class="cb beyaz etk-cal" id="eCalismalarim" aria-label="Çalışmalarım"></button></div>
+  <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div><button class="cb beyaz etk-cal" id="eCalismalarim" aria-label="Çalışmalarım"></button><button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button></div>
   <div class="etk-liste" id="etkListe"></div>
   <div class="ayak"><button class="cb beyaz hap" id="eCikis"></button><span></span></div>
 </section>
@@ -811,8 +829,9 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
     <div class="sag">
       <button class="ben" id="rBen" aria-label="Profilim"><span id="rkimAv"></span><span class="ben-yazi"><b id="rkimAd"></b><small id="rkimAlt"></small></span><span class="etiket" id="rkimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="rbenKalem"></span></button>
       <button class="cb gonder r-ogr-ozel" id="rGonder" aria-label="Öğretmene gönder"><span class="z" id="rGonderIc"></span>Gönder</button>
-      <button class="ab" id="rTamEkran" aria-label="Tam ekran" title="Tam ekran"></button>
+      <button class="ab tam" id="rTamEkran" aria-label="Tam ekran" title="Tam ekran"></button>
       <button class="ab r-ogr-ozel" id="rCikis" aria-label="Çıkış" title="Çıkış"></button>
+      <button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
       <button class="cb beyaz hap" id="rPanelDon" hidden></button>
     </div>
   </header>
@@ -835,8 +854,9 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
     <div class="sag">
       <button class="ben" id="yBen" aria-label="Profilim"><span id="ykimAv"></span><span class="ben-yazi"><b id="ykimAd"></b><small id="ykimAlt"></small></span><span class="etiket" id="ykimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="ybenKalem"></span></button>
       <button class="cb gonder y-ogr-ozel" id="yGonder" aria-label="Öğretmene gönder"><span class="z" id="yGonderIc"></span>Gönder</button>
-      <button class="ab" id="yTamEkran" aria-label="Tam ekran" title="Tam ekran"></button>
+      <button class="ab tam" id="yTamEkran" aria-label="Tam ekran" title="Tam ekran"></button>
       <button class="ab y-ogr-ozel" id="yCikis" aria-label="Çıkış" title="Çıkış"></button>
+      <button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
       <button class="cb beyaz hap" id="yPanelDon" hidden></button>
     </div>
   </header>
@@ -862,6 +882,7 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
       <a class="cb beyaz k" id="klasorLink" target="_blank" rel="noopener" hidden>Drive klasörü</a>
       <a class="cb beyaz k" id="tabloLink" target="_blank" rel="noopener" hidden>Kayıt tablosu</a>
       <button class="cb beyaz k" id="panelCikis">Öğrenci ekranı</button>
+      <button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
     </div>
   </div>
   <form class="kutu giris-form" id="loginForm">
@@ -2142,6 +2163,25 @@ function tamEkran(){
     const r=f.call(e); if(r&&r.catch) r.catch(function(){ tamEkranIpucu(); });
   }catch(err){ tamEkranIpucu(); }
 }
+/* Sayfayı kapat: her şeyi kaydeder, öğrenciyi çıkarır, pencereyi kapatmayı dener.
+   Tarayıcılar çoğu zaman sayfanın kendini kapatmasına izin vermez; o zaman "Görüşürüz" ekranı ve kısayol gösterilir. */
+function sayfaKapat(){
+  onayla({e:'👋'},'Sayfa kapatılsın mı? Çalışmaların bu bilgisayarda saklı kalır.',function(){
+    try{ if(S.ekran==='editor'){ taslakKaydet(true); durdur(); } if(S.ekran==='robot') robotTaslak(); if(S.ekran==='yuru'){ yTik(); Y.token++; yuruKaydet(); } }catch(e){}
+    try{ if(tamEkranMi()) (document.exitFullscreen||document.webkitExitFullscreen).call(document); }catch(e){}
+    const g=el('div','gule'); g.setAttribute('role','dialog'); g.setAttribute('aria-modal','true');
+    const ic2=el('div','gule-ic'); const r=el('div','gule-robot'); r.innerHTML=parcaSVG(VITRIN,'20 -10 360 480'); const sv=r.querySelector('svg'); if(sv) sv.classList.add('dans');
+    const tus=/Mac|iPad|iPhone/.test(navigator.platform||navigator.userAgent)?'<kbd>⌘ Command</kbd> + <kbd>W</kbd>':'<kbd>Ctrl</kbd> + <kbd>W</kbd>';
+    const p=el('p'); p.innerHTML='Pencere kendiliğinden kapanmadıysa '+tus+' tuşlarına bas.';
+    const geri=el('button','cb beyaz hap'); geri.innerHTML=ic('back')+'Geri dön'; geri.onclick=function(){ g.remove(); };
+    ic2.append(r,el('h1',null,'Görüşürüz!'),p,geri); g.appendChild(ic2);
+    if(S.ekran!=='panel'){ S.sinif=S.ogrenci=null; S.proje=null; S.robot=null; S.yuru=null; S.inceleme=null; girisAc(); }
+    document.body.appendChild(g);
+    [784,659,523].forEach(function(f,i){ setTimeout(function(){ ton(f,140); },i*120); });
+    setTimeout(function(){ try{ window.close(); }catch(e){} try{ if(window.top!==window) window.top.close(); }catch(e){} },500);
+  });
+}
+document.querySelectorAll('.kapat-sayfa').forEach(function(b){ b.innerHTML=ic('x'); b.onclick=sayfaKapat; });
 function tamEkranIpucu(){ bildir('Tam ekran için klavyede Control + Command + F tuşlarına birlikte bas.'); }
 $('tamEkranBtn').onclick=tamEkran; $('tamEkranGiris').onclick=tamEkran;
 document.addEventListener('fullscreenchange',tamEkranGuncelle); document.addEventListener('webkitfullscreenchange',tamEkranGuncelle);
