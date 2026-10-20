@@ -530,7 +530,15 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
 .yz-mini-1{width:64px;height:48px}
 .yz-mini-4{grid-template-columns:1fr 1fr}
 .yz-sayfa-say{font-family:var(--f-d);color:var(--mor)}
-.yz-durum{display:flex;align-items:center;gap:8px;justify-content:center}
+.yz-durum{display:flex;align-items:center;gap:8px;justify-content:center;text-align:center}
+.yz-dialog{max-width:560px}
+.yz-dialog .sira{flex-wrap:wrap}
+.yz-eposta{width:100%;display:grid;gap:6px;text-align:left;background:#f7f3ff;border-radius:20px;padding:14px}
+.yz-eposta label{font-family:var(--f-d);font-size:17px;color:var(--mor-k)}
+.yz-ep-satir{display:flex;gap:8px}
+.yz-ep-satir input{flex:1;min-width:0;border-color:#dcd2f3}
+.yz-ep-satir .cb{flex:none}
+.yz-eposta small{color:var(--muted);font-size:12px}
 .cb.yz-tek{padding:7px 9px;font-size:18px}
 @media print{
   html,body{height:auto;overflow:visible!important;background:#fff!important;padding:0!important}
@@ -1209,6 +1217,7 @@ const DEMO=(function(){
     gorselGetir:function(){ throw new Error('Önizlemede çalışmaz.'); },
     calismalarim:function(s,o){ ornekler(); return kayit.filter(function(k){ return k.sinif===s&&k.ogrenci===o; }).slice().reverse().slice(0,40).map(function(k){ return {id:k.id,tarih:k.tarih,saat:k.saat,kucuk:k.kucuk||'',puan:k.puan||0,ornek:k.ornek}; }); },
     calismamiAc:function(s,o,id){ const k=bul(id); if(!k) throw new Error('Çalışma bulunamadı.'); if(k.sinif!==s||k.ogrenci!==o) throw new Error('Bu çalışma senin değil.'); return k.proje; },
+    pdfGonder:function(sf){ if(sf!=='1234') throw new Error('Şifre yanlış.'); return {tamam:true,demo:true}; },
     etkinlikDurumu:function(s){ return (ls('kat3:demo:etk')||{})[s]||{}; },
     etkinlikleriGetir:function(sf){ if(sf!=='1234') throw new Error('Şifre yanlış.'); return ls('kat3:demo:etk')||{}; },
     etkinlikKaydet:function(sf,s,d){ if(sf!=='1234') throw new Error('Şifre yanlış.'); const h=ls('kat3:demo:etk')||{}; h[s]=Object.assign(h[s]||{},d); ls('kat3:demo:etk',h); return h; }
@@ -2400,7 +2409,7 @@ $('fYazdir').onclick=function(){ if(S.sonListe&&S.sonListe.length) yazdirAc(S.so
 function yazdirAc(liste){
   let n=liste.length===1?1:4;
   const o=el('div','ortu'), d=el('div','dialog yz-dialog'); d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
-  d.append(el('h2',null,liste.length===1?'Çalışmayı yazdır':liste.length+' çalışmayı yazdır'),el('p',null,'Bir sayfaya kaç çalışma sığsın?'));
+  d.append(el('h2',null,liste.length===1?'Çalışmayı yazdır ya da gönder':liste.length+' çalışmayı yazdır ya da gönder'),el('p',null,'Bir sayfaya kaç çalışma sığsın?'));
   const sec=el('div','yz-sec'), bt=[];
   [[1,'Büyük','1 sayfaya 1'],[2,'Orta','1 sayfaya 2'],[4,'Küçük','1 sayfaya 4']].forEach(function(t){
     const b=el('button','yz-secenek'); const sy=el('span','yz-mini yz-mini-'+t[0]); for(let i=0;i<t[0];i++) sy.appendChild(el('i'));
@@ -2409,8 +2418,135 @@ function yazdirAc(liste){
   function isaret(){ bt.forEach(function(x){ x[1].classList.toggle('on',x[0]===n); }); sayfa.textContent=Math.ceil(liste.length/n)+' sayfa'; }
   const sr=el('div','sira'); const vz=icBtn('cb gri yuvarlak','x','Vazgeç'); vz.onclick=kapat;
   const ok=el('button','cb mor hap'); ok.innerHTML=ic('yazici')+'Yazdır'; ok.onclick=function(){ yazdirHazirla(liste,n,d); };
-  sr.append(vz,ok); d.append(sec,sayfa,sr); o.appendChild(d); katman(o); isaret(); ok.focus();
+  const ind=el('button','cb beyaz hap'); ind.innerHTML=ic('pdf')+'PDF indir'; ind.onclick=function(){ pdfIs(liste,n,d,'indir'); };
+  sr.append(vz,ok,ind);
+  const ep=el('div','yz-eposta'); const lb=el('label',null,'PDF\'i e-postayla gönder'); lb.htmlFor='yzEposta';
+  const satir=el('div','yz-ep-satir'); const inp=el('input'); inp.id='yzEposta'; inp.type='email'; inp.multiple=true; inp.autocomplete='email'; inp.placeholder='ornek@okul.k12.tr';
+  inp.value=ls('kat3:eposta')||'';
+  const gn=el('button','cb mor hap'); gn.innerHTML=ic('mail')+'Gönder'; gn.onclick=function(){ pdfIs(liste,n,d,'eposta',inp.value); };
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter') gn.click(); });
+  satir.append(inp,gn); ep.append(lb,satir,el('small',null,'Birden fazla adres için virgül koyun. E-posta sizin Gmail hesabınızdan gider.'));
+  d.append(sec,sayfa,sr,ep); o.appendChild(d); katman(o); isaret(); ok.focus();
 }
+
+/* ---- PDF: her sayfa tarayıcıda resim olarak çizilir (Türkçe harfler bozulmasın diye), sonra jsPDF ile birleştirilir ---- */
+IC.pdf='<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 16.5h6M9 9.5h3"/>';
+/* Küçük PDF yazıcı: her sayfa tek bir JPEG resimdir. Dış kütüphane gerekmez. */
+function pdfYaz(sayfalar,yatay){
+  const PW=yatay?841.89:595.28, PH=yatay?595.28:841.89, enc=new TextEncoder(), par=[], ofs=[]; let uz=0;
+  function ekle(x){ const b=typeof x==='string'?enc.encode(x):x; par.push(b); uz+=b.length; }
+  function nesne(no,govde,akis){ ofs[no]=uz; ekle(no+' 0 obj\n'+govde); if(akis){ ekle('\nstream\n'); ekle(akis); ekle('\nendstream'); } ekle('\nendobj\n'); }
+  ekle('%PDF-1.4\n%âãÏÓ\n');
+  const n=sayfalar.length, kids=[]; for(let i=0;i<n;i++) kids.push((3+i*3)+' 0 R');
+  nesne(1,'<< /Type /Catalog /Pages 2 0 R >>');
+  nesne(2,'<< /Type /Pages /Kids ['+kids.join(' ')+'] /Count '+n+' >>');
+  sayfalar.forEach(function(sf,i){ const pg=3+i*3, ct=pg+1, im=pg+2;
+    nesne(pg,'<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+PW+' '+PH+'] /Resources << /XObject << /Im0 '+im+' 0 R >> >> /Contents '+ct+' 0 R >>');
+    const c=enc.encode('q '+PW+' 0 0 '+PH+' 0 0 cm /Im0 Do Q'); nesne(ct,'<< /Length '+c.length+' >>',c);
+    nesne(im,'<< /Type /XObject /Subtype /Image /Width '+sf.w+' /Height '+sf.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+sf.jpg.length+' >>',sf.jpg); });
+  const xr=uz, son=3+n*3; let t='xref\n0 '+son+'\n0000000000 65535 f \n'; for(let i=1;i<son;i++) t+=String(ofs[i]).padStart(10,'0')+' 00000 n \n';
+  ekle(t+'trailer\n<< /Size '+son+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF\n');
+  return new Blob(par,{type:'application/pdf'});
+}
+function jpgBayt(c,q){ const b=atob(c.toDataURL('image/jpeg',q).split(',')[1]), u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return u; }
+function blobB64(bl){ return new Promise(function(res,rej){ const r=new FileReader(); r.onload=function(){ res(String(r.result).split('base64,')[1]); }; r.onerror=function(){ rej(new Error('PDF okunamadı.')); }; r.readAsDataURL(bl); }); }
+function pdfIndir(bl,ad){ const u=URL.createObjectURL(bl), a=el('a'); a.href=u; a.download=ad+'.pdf'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); },60000); }
+function svgResim(svg){ return new Promise(function(res){ const im=new Image(); im.onload=function(){ res(im); }; im.onerror=function(){ res(null); }; im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg); }); }
+function urlResim(u){ return new Promise(function(res){ if(!u) return res(null); const im=new Image(); im.onload=function(){ res(im); }; im.onerror=function(){ res(null); }; im.src=u; }); }
+async function pdfGorsel(k){
+  let c=null; try{ c=await yazdirProje(k); }catch(e){}
+  if(c){ k._tur=c.tur;
+    if(c.tur==='robot') return await svgResim(sahneSVG(c.veri,{anim:false,boyut:[960,720]}));
+    if(c.tur==='yuru') return await svgResim(yuruOzetSVG(c.veri,[960,720]));
+    await Promise.race([resimleriBekle(c.veri),new Promise(function(r){ setTimeout(r,4000); })]);
+    const t=document.createElement('canvas'); t.width=W*2; t.height=H*2; sahneCiz(t.getContext('2d'),W*2,H*2,c.veri.scenes[0],[]);
+    if(guvenliURL(t,'image/png')) return t;
+  }
+  return await urlResim(k.kucuk);
+}
+function pdfYildiz(x,cx,cy,r,dolu){ x.beginPath(); for(let i=0;i<10;i++){ const a=-Math.PI/2+i*Math.PI/5, q=i%2?r*.5:r; x.lineTo(cx+q*Math.cos(a),cy+q*Math.sin(a)); } x.closePath();
+  x.fillStyle=dolu?'#ffc83d':'#ebe5da'; x.fill(); x.lineWidth=r*.12; x.strokeStyle=dolu?'#e5a000':'#d4cab8'; x.lineJoin='round'; x.stroke(); }
+function pdfKisalt(x,t,w){ if(x.measureText(t).width<=w) return t; while(t.length>1&&x.measureText(t+'…').width>w) t=t.slice(0,-1); return t+'…'; }
+function pdfHucre(x,bx,by,bw,bh,g){
+  const ch=Math.round(Math.min(130,Math.max(84,bw*0.11))), iw=Math.min(bw,(bh-ch)*4/3), ih=iw*3/4, cx=bx+(bw-iw)/2, R=26; by+=Math.max(0,(bh-ih-ch)/2);
+  x.save(); rr(x,cx,by,iw,ih+ch,R); x.fillStyle='#fff'; x.fill(); x.lineWidth=4; x.strokeStyle='#eadfcd'; x.stroke(); x.clip();
+  x.fillStyle='#f6f1e8'; x.fillRect(cx,by,iw,ih);
+  if(g.im){ const w0=g.im.naturalWidth||g.im.width, h0=g.im.naturalHeight||g.im.height, s=Math.min(iw/w0,ih/h0); x.drawImage(g.im,cx+(iw-w0*s)/2,by+(ih-h0*s)/2,w0*s,h0*s); }
+  else { x.fillStyle='#8c8273'; x.font='700 28px Nunito, sans-serif'; x.textAlign='center'; x.fillText('Çalışma açılamadı',cx+iw/2,by+ih/2); x.textAlign='left'; }
+  x.restore();
+  const k=g.k, py=by+ih, fs=Math.round(ch*0.3), yuzR=ch*0.3;
+  if(g.yuz){ x.save(); x.beginPath(); x.arc(cx+24+yuzR,py+ch/2,yuzR,0,7); x.clip(); x.drawImage(g.yuz,cx+24,py+ch/2-yuzR,yuzR*2,yuzR*2); x.restore(); }
+  const tx=cx+24+yuzR*2+18, sagW=Math.max(ch*1.9,200);
+  x.fillStyle='#2b2d42'; x.font='800 '+fs+'px "Baloo 2", Nunito, sans-serif'; x.textBaseline='alphabetic';
+  x.fillText(pdfKisalt(x,k.ogrenci,iw-(tx-cx)-sagW),tx,py+ch*0.47);
+  x.fillStyle='#8c8273'; x.font='700 '+Math.round(fs*0.62)+'px Nunito, sans-serif';
+  x.fillText(pdfKisalt(x,k.sinif+' · '+etkAd(k._tur),iw-(tx-cx)-sagW),tx,py+ch*0.47+fs*0.85);
+  const sr=fs*0.42, sx=cx+iw-24-sr*5.6; for(let j=0;j<3;j++) pdfYildiz(x,sx+sr+j*sr*2.3,py+ch*0.36,sr,j<(k.puan||0));
+  x.fillStyle='#8c8273'; x.textAlign='right'; x.fillText(tarihYazi(k.tarih)+' · '+k.saat,cx+iw-24,py+ch*0.47+fs*0.85); x.textAlign='left';
+}
+function pdfAdi(liste){
+  const sn=liste.map(function(k){ return k.sinif; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+  const tr=liste.map(function(k){ return k.tarih; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+  const og=liste.map(function(k){ return k.ogrenci; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+  const p=['Kodlama Atölyesi']; if(og.length===1) p.push(og[0]); if(sn.length===1) p.push(sn[0]); p.push(tr.length===1?tr[0]:(liste.length+' çalışma'));
+  return p.join(' - ');
+}
+async function pdfOlustur(liste,n,ilerleme){
+  try{ await document.fonts.ready; }catch(e){}
+  const yatay=n===1, PW=yatay?1754:1240, PH=yatay?1240:1754;
+  const gor=new Array(liste.length); let biten=0;
+  async function bir(i){ const k=liste[i]; const im=await pdfGorsel(k); const yz=await svgResim(yuzSVG(yuzDuzelt((profilBul(k.sinif,k.ogrenci)||{}).yuz,k.ogrenci)));
+    gor[i]={k:k,im:im,yuz:yz}; biten++; ilerleme(biten,liste.length); }
+  for(let i=0;i<liste.length;i+=4) await Promise.all(liste.slice(i,i+4).map(function(_,j){ return bir(i+j); }));
+  const sayfalar=[];
+  const sayfaSay=Math.ceil(gor.length/n), baslik=pdfAdi(liste).replace(/^Kodlama Atölyesi - /,'');
+  for(let p=0;p<sayfaSay;p++){
+    const c=document.createElement('canvas'); c.width=PW; c.height=PH; const x=c.getContext('2d');
+    x.fillStyle='#fff'; x.fillRect(0,0,PW,PH);
+    const M=70; x.font='800 34px "Baloo 2", Nunito, sans-serif'; x.fillStyle='#8a6ad0'; x.fillText('Kodlama Atölyesi',M,M+28);
+    x.font='700 24px Nunito, sans-serif'; x.fillStyle='#8c8273'; x.textAlign='right'; x.fillText(baslik+'   '+(p+1)+' / '+sayfaSay,PW-M,M+28); x.textAlign='left';
+    x.fillStyle='#eadfcd'; x.fillRect(M,M+48,PW-2*M,3);
+    const ax=M, ay=M+80, aw=PW-2*M, ah=PH-ay-M, gap=44, parca=gor.slice(p*n,p*n+n);
+    parca.forEach(function(g,i){
+      if(n===1) pdfHucre(x,ax,ay,aw,ah,g);
+      else if(n===2) pdfHucre(x,ax,ay+i*(ah+gap)/2,aw,(ah-gap)/2,g);
+      else pdfHucre(x,ax+(i%2)*(aw+gap)/2,ay+Math.floor(i/2)*(ah+gap)/2,(aw-gap)/2,(ah-gap)/2,g);
+    });
+    sayfalar.push({jpg:jpgBayt(c,0.86),w:PW,h:PH});
+  }
+  return pdfYaz(sayfalar,yatay);
+}
+async function pdfIs(liste,n,d,ne,eposta){
+  if(ne==='eposta'){
+    eposta=String(eposta||'').trim();
+    const adr=eposta.split(/[,;\s]+/).filter(String);
+    if(!adr.length){ bildir('Önce e-posta adresini yazın.'); $('yzEposta').focus(); return; }
+    const hatali=adr.find(function(a){ return !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a); });
+    if(hatali){ bildir('Bu adres hatalı görünüyor: '+hatali); $('yzEposta').focus(); return; }
+    ls('kat3:eposta',eposta);
+  }
+  d.querySelectorAll('button,input').forEach(function(b){ b.disabled=true; });
+  let durum=d.querySelector('.yz-durum'); if(!durum){ durum=el('p','yz-durum'); d.appendChild(durum); }
+  durum.innerHTML='<span class="spin"></span> <span>PDF hazırlanıyor…</span>';
+  const yaz=function(t){ durum.lastChild.textContent=t; };
+  try{
+    const pdf=await pdfOlustur(liste,n,function(a,b){ yaz('PDF hazırlanıyor… '+a+' / '+b); });
+    const ad=pdfAdi(liste);
+    if(ne==='indir'){ pdfIndir(pdf,ad); kapat(); bildir('PDF indirildi.'); return; }
+    yaz('Gönderiliyor…');
+    const b64=await blobB64(pdf);
+    const sn=liste.map(function(k){ return k.sinif; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+    const ozet=liste.length+' çalışma'+(sn.length?' · '+sn.join(', '):'')+'\n'+liste.map(function(k){ return k.ogrenci+' ('+k.sinif+', '+etkAd(k._tur)+', '+tarihYazi(k.tarih)+' '+k.saat+')'; }).slice(0,60).join('\n');
+    const r=await sunucu('pdfGonder',S.sifre,eposta,ad,b64,ad,ozet);
+    if(r&&r.demo){ pdfIndir(pdf,ad); kapat(); bildir('Önizlemede e-posta gönderilmez; PDF indirildi.'); return; }
+    kapat(); bildir('PDF gönderildi: '+eposta); konfeti();
+  }catch(e){
+    const m=hataMetni(e);
+    durum.textContent=/pdfGonder/.test(m)?'E-posta için Apps Script\'teki Code.gs güncellenmeli. Şimdilik "PDF indir"i kullanabilirsiniz.':m;
+    d.querySelectorAll('button,input').forEach(function(b){ b.disabled=false; });
+  }
+}
+
 async function yazdirProje(k){
   if(YZ_ONB[k.id]) return YZ_ONB[k.id];
   const js=k.ornek?DEMO.calismaAc('1234',k.id):await sunucu('calismaAc',S.sifre,k.id);

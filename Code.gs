@@ -567,3 +567,36 @@ function calismamiAc(sinif, ogrenci, id) {
   }
   throw new Error('Çalışma bulunamadı.');
 }
+
+/* ---------- çalışmaları PDF olarak e-postayla gönderme ----------
+   PDF öğretmen panelinde hazırlanır; burada yalnızca öğretmenin Gmail'inden gönderilir.
+   İlk kullanımda Google "sizin adınıza e-posta gönderme" izni ister. İzni önceden vermek için
+   işlev listesinden "epostaIzni"ni seçip bir kez Çalıştır'a basın. */
+function pdfGonder(sifre, eposta, konu, pdfBase64, dosyaAdi, ozet) {
+  sifreKontrol_(sifre);
+  const adresler = String(eposta || '').split(/[,;\s]+/).map(function (x) { return x.trim(); }).filter(String);
+  if (!adresler.length) throw new Error('E-posta adresi yazın.');
+  if (adresler.length > 10) throw new Error('En fazla 10 adres yazabilirsiniz.');
+  adresler.forEach(function (a) { if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(a)) throw new Error('Bu adres hatalı görünüyor: ' + a); });
+  const b64 = String(pdfBase64 || '');
+  if (b64.length < 100) throw new Error('PDF hazırlanamadı.');
+  if (b64.length > 26000000) throw new Error('PDF çok büyük. Daha az çalışma seçin ya da sayfaya 4 çalışma koyun.');
+  if (MailApp.getRemainingDailyQuota() < adresler.length) throw new Error('Bugünkü e-posta gönderme hakkınız doldu. Yarın tekrar deneyin.');
+  dosyaAdi = temizAd_(dosyaAdi || 'Calismalar').replace(/\.pdf$/i, '') + '.pdf';
+  konu = String(konu || 'Kodlama Atölyesi çalışmaları').slice(0, 200);
+  const satir = String(ozet || '').replace(/[<>&]/g, '').slice(0, 2000);
+  const pdf = Utilities.newBlob(Utilities.base64Decode(b64), 'application/pdf', dosyaAdi);
+  MailApp.sendEmail({
+    to: adresler.join(','),
+    subject: konu,
+    name: 'Kodlama Atölyesi',
+    body: 'Merhaba,\n\n' + satir + '\n\nÇalışmalar ekteki PDF dosyasındadır.\n\nKodlama Atölyesi',
+    htmlBody: '<p>Merhaba,</p><p>' + satir.replace(/\n/g, '<br>') + '</p><p>Çalışmalar ekteki PDF dosyasındadır.</p><p style="color:#8a6ad0"><b>Kodlama Atölyesi</b></p>',
+    attachments: [pdf]
+  });
+  return { tamam: true, kalan: MailApp.getRemainingDailyQuota() };
+}
+
+function epostaIzni() {
+  Logger.log('E-posta izni tamam. Bugün kalan gönderme hakkı: ' + MailApp.getRemainingDailyQuota());
+}
