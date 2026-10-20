@@ -272,6 +272,11 @@ td.sayi,th.sayi{text-align:right}
 .bolum-bas{font:800 14px var(--body);text-transform:uppercase;letter-spacing:1px;color:var(--ink-2);margin:16px 0 6px}
 .bildirim{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;z-index:40;max-width:calc(100% - 32px);text-align:center}
 .kayit-durum{font-size:13px;color:var(--ink-3)}
+.ses-durum{margin:14px 0 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ses-durum b{font:800 17px var(--body);display:inline}
+.ses-durum span{text-transform:none;letter-spacing:0;font-size:15px;font-weight:700}
+.ses-durum span.not{font-weight:600;color:var(--ink-2)}
+.surum{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:max(6px,env(safe-area-inset-bottom,0px));font-size:12px;color:var(--ink-3)}
 
 @media (max-width:600px){
   .olcumler b{font-size:26px}
@@ -308,6 +313,7 @@ td.sayi,th.sayi{text-align:right}
     </div>
     <div><button class="ogretmen-link" id="ogretmenAc">Öğretmen girişi</button></div>
   </div>
+  <span class="surum" id="surumYazi"></span>
 </section>
 
 <!-- HARİTA -->
@@ -410,6 +416,7 @@ td.sayi,th.sayi{text-align:right}
       <div class="sekmeler" id="sinifSekme" role="tablist"></div>
       <div class="kutucuklar" id="ogrKutu"></div>
       <div class="tablo-kap"><table><thead id="ogrBas"></thead><tbody id="ogrGovde"></tbody></table></div>
+      <div class="kutu ses-durum" id="sesDurum"></div>
       <p class="not">Hız: 1 dakikalık alıştırma ve hız testlerinde dakikada doğru yazılan kelime (5 vuruş = 1 kelime). Doğruluk: son 5 yazma bölümünün ortalaması. Her bitirilen bölüm E-Tablodaki "Denemeler" sayfasına da yazılır.</p>
     </div>
   </div>
@@ -540,38 +547,72 @@ try { sesleriBul(); speechSynthesis.onvoiceschanged = sesleriBul; } catch (e) {}
 /* Google ile üretilmiş ses dosyaları. Site Apps Script'ten açılınca öğretmenin Drive'ındaki
    "Klavye Kâşifleri Sesler" klasöründen alınır. Sesi olmayan cümlelerde cihazın sesi kullanılır. */
 function sesKimligi(s) { let h = 0x811c9dc5; for (const ch of String(s).trim()) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); }
-const sesOnbellek = {};
+const SURUM = '20 Ekim · 3';
+const sesOnbellek = {};                       // id → AudioBuffer
+const SES_DURUM = { hazir: 0, toplam: 0, hata: '' };
 const sesDosyasi = soz => sesOnbellek[sesKimligi(soz)] || null;
+function sesMotoru() {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+  return actx;
+}
+/* Tarayıcılar sesi ancak bir dokunuştan sonra açar: ilk dokunuşta ses motorunu açıp sessiz bir ses çalarız. */
+let sesKilitAcik = false;
+function sesKilidiAc() {
+  const m = sesMotoru(); if (!m) return;
+  try { if (m.state !== 'running') m.resume(); } catch (e) {}
+  if (sesKilitAcik) return;
+  try { const k = m.createBuffer(1, 1, 22050), s = m.createBufferSource(); s.buffer = k; s.connect(m.destination); s.start(0); sesKilitAcik = true; } catch (e) {}
+}
+['pointerdown', 'touchend', 'keydown', 'click'].forEach(t => document.addEventListener(t, sesKilidiAc, { capture: true, passive: true }));
+function sesCoz(b64) {
+  return new Promise((res, rej) => {
+    const m = sesMotoru(); if (!m) return rej(new Error('ses motoru yok'));
+    const bin = atob(b64), buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    try { const p = m.decodeAudioData(buf.buffer, res, rej); if (p && p.then) p.then(res, rej); } catch (e) { rej(e); }
+  });
+}
 let seslerYukleniyor = null;
 function sesleriYukle() {
-  if (seslerYukleniyor || !GAS) return seslerYukleniyor || Promise.resolve();
+  if (!GAS) { SES_DURUM.hata = 'deneme modu'; return Promise.resolve(); }
+  if (seslerYukleniyor) return seslerYukleniyor;
   seslerYukleniyor = (async () => {
     try {
+      SES_DURUM.hata = '';
       const r = await sunucu('sesListesi');
-      const ids = ((r && r.ids) || []).filter(id => !sesOnbellek[id]);
-      for (let i = 0; i < ids.length; i += 20) {
-        const p = await sunucu('sesleriGetir', ids.slice(i, i + 20));
-        Object.entries((p && p.sesler) || {}).forEach(([id, b64]) => {
-          const a = new Audio('data:audio/mpeg;base64,' + b64); a.preload = 'auto'; sesOnbellek[id] = a;
-        });
+      const ids = (r && r.ids) || [];
+      SES_DURUM.toplam = ids.length;
+      if (!ids.length) { SES_DURUM.hata = 'klasör boş'; return; }
+      const eksik = ids.filter(id => !sesOnbellek[id]);
+      for (let i = 0; i < eksik.length; i += 20) {
+        const p = await sunucu('sesleriGetir', eksik.slice(i, i + 20));
+        await Promise.all(Object.entries((p && p.sesler) || {}).map(async ([id, b64]) => {
+          try { sesOnbellek[id] = await sesCoz(b64); } catch (e) { SES_DURUM.hata = 'ses dosyası açılamadı'; }
+        }));
+        SES_DURUM.hazir = Object.keys(sesOnbellek).length;
       }
-    } catch (e) { seslerYukleniyor = null; }
+    } catch (e) {
+      SES_DURUM.hata = /sesListesi|sesleriGetir|not found|bulunamadı|is not defined|function/i.test(String(e && e.message)) ? 'sunucu işlevi yok' : 'bağlantı';
+      seslerYukleniyor = null;
+    }
   })();
   return seslerYukleniyor;
 }
-let calanSes = null;
+let calanSes = null;                          // { kaynak, bitir }
 function konusmaDur() {
   try { speechSynthesis.cancel(); } catch (e) {}
-  if (calanSes) { try { calanSes.pause(); calanSes.currentTime = 0; } catch (e) {} calanSes = null; }
+  if (calanSes) { const c = calanSes; calanSes = null; try { c.kaynak.onended = null; c.kaynak.stop(); } catch (e) {} c.bitir(); }
 }
 /* Ses dosyasını çalar; bitince (ya da hata olursa) çözülür. */
-function dosyaCal(a) {
+function dosyaCal(buf) {
   return new Promise(res => {
-    let bitti = false; const bit = () => { if (!bitti) { bitti = true; a.onended = a.onerror = null; res(); } };
-    a.onended = bit; a.onerror = bit;
-    try { a.currentTime = 0; } catch (e) {}
-    calanSes = a;
-    const p = a.play(); if (p && p.catch) p.catch(bit);
+    const m = sesMotoru(); if (!m) return res();
+    try { if (m.state !== 'running') m.resume(); } catch (e) {}
+    let bitti = false; const bit = () => { if (!bitti) { bitti = true; if (calanSes && calanSes.kaynak === k) calanSes = null; res(); } };
+    const k = m.createBufferSource(); k.buffer = buf; k.connect(m.destination);
+    k.onended = bit;
+    calanSes = { kaynak: k, bitir: bit };
+    try { k.start(0); } catch (e) { bit(); }
   });
 }
 /* Metni okur; ses yoksa okuma süresi kadar bekler. Söz bitince çözülür. */
@@ -1404,9 +1445,7 @@ function ctxYap() {
       let tahmin = 900 + soz.length * 72;
       const dosya = sesAcik ? sesDosyasi(soz) : null;
       if (dosya) {
-        if (!(dosya.duration > 0)) await Promise.race([new Promise(r => dosya.addEventListener('loadedmetadata', r, { once: true })), c.w(1500)]);
-        kontrol();
-        if (dosya.duration > 0) tahmin = dosya.duration * 1000;
+        tahmin = dosya.duration * 1000;
         altyaziKur(yazi, tahmin);
         $('#sinema').classList.add('konusuyor');
         konusmaDur();
@@ -1997,12 +2036,12 @@ function oynatAyarla(o) {
     SN.durdurulan = document.getAnimations().filter(a => a.playState === 'running');
     SN.durdurulan.forEach(a => a.pause());
     try { speechSynthesis.pause(); } catch (e) {}
-    if (calanSes) try { calanSes.pause(); } catch (e) {}
+    if (calanSes && actx) try { actx.suspend(); } catch (e) {}
   } else {
     SN.durdurulan.forEach(a => { try { a.play(); } catch (e) {} });
     SN.durdurulan = [];
     try { speechSynthesis.resume(); } catch (e) {}
-    if (calanSes && !calanSes.ended) try { calanSes.play(); } catch (e) {}
+    if (actx && actx.state !== 'running') try { actx.resume(); } catch (e) {}
   }
   oynatDugmesi();
 }
@@ -2017,6 +2056,7 @@ $('#snBuyuk').onclick = async () => {
   const b = $('#snBuyuk');
   if (b.classList.contains('bekliyor')) return;
   b.classList.add('bekliyor');
+  sesKilidiAc();
   await Promise.race([sesleriYukle(), bekle(8000)]); // sesler gelmediyse cihazın sesiyle başlar
   b.classList.remove('bekliyor');
   b.hidden = true; oynatAyarla(true); sahneOynat(SN.i);
@@ -2387,6 +2427,24 @@ function yagmurKur(d) {
    ========================================================= */
 const og = { pin: '', classes: {}, rows: [], sinif: '', siralama: { alan: 'isim', yon: 1 } };
 if (!GAS) $('#pinDemo').hidden = false;
+$('#surumYazi').textContent = 'Sürüm: ' + SURUM;
+async function sesDurumuGoster() {
+  const e = $('#sesDurum');
+  e.innerHTML = '<b>Google sesleri:</b> <span>kontrol ediliyor…</span>';
+  await sesleriYukle();
+  const d = SES_DURUM, m = {
+    'deneme modu': 'Deneme modunda Google sesleri yok; site Apps Script adresinden açılınca kullanılır.',
+    'klasör boş': 'Drive\'daki "Klavye Kâşifleri Sesler" klasöründe ses yok. Apps Script\'te "seslendir" işlevini çalıştırın.',
+    'sunucu işlevi yok': 'Sunucu sesleri vermiyor. Code.gs\'in son hâlini yapıştırıp Dağıt → Dağıtımları yönet → kalem → Yeni sürüm → Dağıt adımlarını yapın.',
+    'bağlantı': 'Sunucuya ulaşılamadı. Sayfayı yenileyip tekrar deneyin.',
+    'ses dosyası açılamadı': 'Bazı ses dosyaları bu tarayıcıda açılamadı.'
+  };
+  const iyi = !d.hata && d.hazir > 0;
+  e.innerHTML = `<b>Google sesleri:</b> <span class="etk ${iyi ? 'iyi' : 'dusuk'}">${iyi ? d.hazir + ' / ' + d.toplam + ' ses hazır' : 'çalışmıyor'}</span>
+    <span class="not">${esc(iyi ? 'Videolar ve tuş tanıtımları bu seslerle konuşuyor.' : (m[d.hata] || d.hata))}</span>
+    <button class="btn ikincil kucuk" id="sesDinle">Dinle</button><span class="not">Sürüm: ${esc(SURUM)}</span>`;
+  $('#sesDinle').onclick = () => { sesKilidiAc(); konus('Merhaba! Ben Tuşi. Bugün birlikte klavyeyle tanışacağız.'); };
+}
 $('#ogretmenAc').onclick = () => { $('#ogrPin').hidden = false; $('#ogrIcerik').hidden = true; $('#pinHata').textContent = ''; goster('ogretmen'); setTimeout(() => $('#pinGir').focus(), 50); };
 $('#ogrCikis').onclick = () => { og.pin = ''; $('#pinGir').value = ''; goster('giris'); };
 $('#pinDevam').onclick = () => ogrGiris($('#pinGir').value.trim());
@@ -2415,7 +2473,7 @@ async function ogrGiris(pin) {
   const kodlar = Object.keys(og.classes);
   if (!og.sinif || !og.classes[og.sinif]) og.sinif = kodlar[0] || '';
   $('#ogrPin').hidden = true; $('#ogrIcerik').hidden = false;
-  ogrCiz();
+  ogrCiz(); sesDurumuGoster();
 }
 function ogrenciSatirlari() {
   const s = og.classes[og.sinif]; if (!s) return [];
