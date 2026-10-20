@@ -254,8 +254,8 @@ function ogrenciSifirla(pin, kod, isim) {
    1. "sesleriDene" işlevini çalıştırın: Drive'ınızdaki "Klavye Kâşifleri Sesler" klasörüne
       aynı cümleyi farklı seslerle okuyan deneme dosyaları gelir. Dinleyip beğendiğinizi seçin.
    2. Aşağıdaki TTS_SES satırına beğendiğiniz sesin adını yazın (örnek: 'tr-TR-Chirp3-HD-Leda').
-   3. "seslendir" işlevini çalıştırın. Sitedeki bütün cümleler MP3 olarak klasöre yazılır ve
-      hepsi "sesler.zip" dosyasında toplanır. Süre yetmezse işlev durur; bir kez daha çalıştırın,
+   3. "seslendir" işlevini çalıştırın. Sitedeki bütün cümleler MP3 olarak klasöre yazılır, hepsi
+      "sesler.zip" dosyasında toplanır ve site bu sesleri doğrudan bu klasörden çalar. Süre yetmezse işlev durur; bir kez daha çalıştırın,
       kaldığı yerden devam eder.
    Sesi sonradan değiştirmek isterseniz TTS_SES'i değiştirip "seslendirBastan" işlevini çalıştırın.
    ========================================================= */
@@ -321,7 +321,8 @@ function seslendir() {
   const blobs = liste.map(function (x) { return var_[x.id + '.mp3'].getBlob().setName(x.id + '.mp3'); });
   const eski = klasor.getFilesByName('sesler.zip'); while (eski.hasNext()) eski.next().setTrashed(true);
   const zip = klasor.createFile(Utilities.zip(blobs, 'sesler.zip'));
-  Logger.log('Tamam: ' + liste.length + ' ses hazır (' + yeni + ' yeni). Ses: ' + TTS_SES + '. Zip: ' + zip.getUrl());
+  const c = CacheService.getScriptCache(); c.remove(ON + 'sesharita'); c.removeAll(liste.map(function (x) { return ON + 'ses:' + x.id; }));
+  Logger.log('Tamam: ' + liste.length + ' ses hazır (' + yeni + ' yeni). Ses: ' + TTS_SES + '. Site bu sesleri kullanıyor. Zip: ' + zip.getUrl());
 }
 
 /* Sesi değiştirdiyseniz: eski MP3'leri çöp kutusuna atar ve hepsini yeniden üretir. */
@@ -329,4 +330,40 @@ function seslendirBastan() {
   const klasor = sesKlasoru_(), it = klasor.getFiles();
   while (it.hasNext()) { const f = it.next(); if (/^[0-9a-f]{8}\.mp3$/.test(f.getName()) || f.getName() === 'sesler.zip') f.setTrashed(true); }
   seslendir();
+}
+
+/* ---------- Sitenin sesleri Drive'dan alması ----------
+   Site açılınca hangi seslerin hazır olduğunu sorar, sonra MP3'leri birkaç parça hâlinde alır.
+   Sesler 6 saat önbellekte tutulur; bütün sınıf aynı anda açsa da Drive bir kez okunur. */
+function sesDosyaHaritasi_() {
+  const c = CacheService.getScriptCache(), hit = c.get(ON + 'sesharita');
+  if (hit) return JSON.parse(hit);
+  const harita = {};
+  const it = DriveApp.getFoldersByName(SES_KLASOR_ADI);
+  if (it.hasNext()) {
+    const fs = it.next().getFiles();
+    while (fs.hasNext()) { const f = fs.next(), ad = f.getName(); if (/^[0-9a-f]{8}\.mp3$/.test(ad)) harita[ad.slice(0, 8)] = f.getId(); }
+  }
+  try { c.put(ON + 'sesharita', JSON.stringify(harita), 21600); } catch (e) {}
+  return harita;
+}
+
+function sesListesi() {
+  return { ok: true, ids: Object.keys(sesDosyaHaritasi_()) };
+}
+
+function sesleriGetir(ids) {
+  const harita = sesDosyaHaritasi_(), c = CacheService.getScriptCache(), sonuc = {};
+  ids = (ids || []).filter(id => /^[0-9a-f]{8}$/.test(id) && harita[id]).slice(0, 25);
+  const hit = c.getAll(ids.map(id => ON + 'ses:' + id));
+  const yaz = {};
+  ids.forEach(id => {
+    let b64 = hit[ON + 'ses:' + id];
+    if (!b64) {
+      try { b64 = Utilities.base64Encode(DriveApp.getFileById(harita[id]).getBlob().getBytes()); yaz[ON + 'ses:' + id] = b64; } catch (e) { b64 = null; }
+    }
+    if (b64) sonuc[id] = b64;
+  });
+  try { if (Object.keys(yaz).length) c.putAll(yaz, 21600); } catch (e) {}
+  return { ok: true, sesler: sonuc };
 }

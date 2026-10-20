@@ -196,6 +196,8 @@ button.cip{box-shadow:0 3px 0 var(--line)}
 .sn-buyuk{position:absolute;inset:0;border:0;background:rgba(11,31,51,.25);display:grid;place-items:center}
 .sn-buyuk span{width:clamp(80px,12vw,124px);aspect-ratio:1;border-radius:50%;background:var(--coral);display:grid;place-items:center;box-shadow:0 6px 0 var(--coral-d)}
 .sn-buyuk svg{width:42%;height:42%;margin-left:8%}
+.sn-buyuk.bekliyor span{animation:nabiz 1s ease-in-out infinite}
+@keyframes nabiz{50%{transform:scale(.9);opacity:.75}}
 .sn-bitti{position:absolute;inset:0;background:rgba(11,31,51,.55);display:grid;place-content:center;gap:18px;text-align:center}
 .sn-bitti b{font:800 clamp(30px,5vw,56px) var(--display);color:#fff}
 /* ---- oyun ---- */
@@ -535,18 +537,28 @@ function sesleriBul() {
   } catch (e) { trSes = null; }
 }
 try { sesleriBul(); speechSynthesis.onvoiceschanged = sesleriBul; } catch (e) {}
-/* Google ile üretilmiş ses dosyaları (klavye-kasifleri/ses). Listede olmayan cümlelerde cihazın sesi kullanılır. */
-const SES_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/klavye-kasifleri/ses/';
-const SES_DOSYA = new Set([]);
+/* Google ile üretilmiş ses dosyaları. Site Apps Script'ten açılınca öğretmenin Drive'ındaki
+   "Klavye Kâşifleri Sesler" klasöründen alınır. Sesi olmayan cümlelerde cihazın sesi kullanılır. */
 function sesKimligi(s) { let h = 0x811c9dc5; for (const ch of String(s).trim()) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); }
 const sesOnbellek = {};
-function sesIdDosya(id) {
-  if (!SES_DOSYA.has(id)) return null;
-  if (!sesOnbellek[id]) { const a = new Audio(SES_URL + id + '.mp3'); a.preload = 'auto'; sesOnbellek[id] = a; }
-  return sesOnbellek[id];
+const sesDosyasi = soz => sesOnbellek[sesKimligi(soz)] || null;
+let seslerYukleniyor = null;
+function sesleriYukle() {
+  if (seslerYukleniyor || !GAS) return seslerYukleniyor || Promise.resolve();
+  seslerYukleniyor = (async () => {
+    try {
+      const r = await sunucu('sesListesi');
+      const ids = ((r && r.ids) || []).filter(id => !sesOnbellek[id]);
+      for (let i = 0; i < ids.length; i += 20) {
+        const p = await sunucu('sesleriGetir', ids.slice(i, i + 20));
+        Object.entries((p && p.sesler) || {}).forEach(([id, b64]) => {
+          const a = new Audio('data:audio/mpeg;base64,' + b64); a.preload = 'auto'; sesOnbellek[id] = a;
+        });
+      }
+    } catch (e) { seslerYukleniyor = null; }
+  })();
+  return seslerYukleniyor;
 }
-const sesDosyasi = soz => sesIdDosya(sesKimligi(soz));
-function sesleriHazirla() { SES_DOSYA.forEach(sesIdDosya); }
 let calanSes = null;
 function konusmaDur() {
   try { speechSynthesis.cancel(); } catch (e) {}
@@ -1104,6 +1116,7 @@ async function ogrenciSec(isim) {
   }
   oturum.veri = Object.assign(bosVeri(), veri || {});
   haritaCiz(); goster('harita');
+  sesleriYukle();
   if ((yerel.get(kuyrukAnahtar()) || []).length) kaydet();
 }
 $('#kodDevam').onclick = sinifAc;
@@ -1939,7 +1952,7 @@ VIDEOLAR[47] = [
 
 /* ---------- oynatıcı ---------- */
 function anlatimBaslat(d) {
-  SN.d = d; SN.sahneler = VIDEOLAR[d.id]; SN.i = 0; if (SES_DOSYA.size) sesleriHazirla(); SN.oynuyor = false; SN.durdurulan = [];
+  SN.d = d; SN.sahneler = VIDEOLAR[d.id]; SN.i = 0; SN.oynuyor = false; SN.durdurulan = [];
   snIptal();
   $('#anlatimBaslik').textContent = `${d.id}. ${d.ad}`;
   $('#snCubuk').innerHTML = SN.sahneler.map((x, i) => `<button aria-label="${i + 1}. sahneye git"><i><b></b></i></button>`).join('');
@@ -2000,7 +2013,14 @@ function videoBitti() {
   $('#snBitti').hidden = false;
   SES.tamam();
 }
-$('#snBuyuk').onclick = () => { $('#snBuyuk').hidden = true; oynatAyarla(true); sahneOynat(SN.i); };
+$('#snBuyuk').onclick = async () => {
+  const b = $('#snBuyuk');
+  if (b.classList.contains('bekliyor')) return;
+  b.classList.add('bekliyor');
+  await Promise.race([sesleriYukle(), bekle(8000)]); // sesler gelmediyse cihazın sesiyle başlar
+  b.classList.remove('bekliyor');
+  b.hidden = true; oynatAyarla(true); sahneOynat(SN.i);
+};
 $('#snOynat').onclick = () => {
   if (!$('#snBuyuk').hidden) { $('#snBuyuk').click(); return; }
   if (!$('#snBitti').hidden) { sahneyeGit(0); return; }
