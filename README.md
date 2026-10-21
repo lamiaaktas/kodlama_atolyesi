@@ -4,6 +4,8 @@
 
 - `Index.html` – sitenin ekranı. Apps Script bu dosyayı buradan okur; buraya gönderilen her güncelleme en geç 5 dakikada siteye yansır.
 - `Code.gs` – Apps Script'teki sunucu kodunun kopyası (öğretmen şifresi burada değil, yalnızca Apps Script'te yazılıdır).
+- `LegoSes.gs` – Lego Atölyesi'nin Google seslendirmesi. Apps Script projesine ayrı bir dosya olarak eklenir; kurulum adımları dosyanın başında.
+- `lego-ses/liste.json` – Lego Atölyesi'nde sesli okunan cümlelerin listesi (Index.html'deki `legoSesMetinleri()` ile üretilir).
 
 Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt ve Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
 

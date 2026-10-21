@@ -2271,7 +2271,7 @@ async function gonderGercek(puan,d,paket){
   try{
     const pk=await paket();
     const r=await sunucu('calismaGonder',Object.assign({sinif:S.sinif,ogrenci:S.ogrenci,puan:puan},pk));
-    if(S.ekran==='robot') robotTaslak(); else if(S.ekran==='lego'){ legoTaslak(); lKonus('Aferin! Çalışman öğretmenine gönderildi.'); } else taslakKaydet(true); konfeti(); ton(523,150); setTimeout(function(){ ton(659,150); },150); setTimeout(function(){ ton(784,260); },300);
+    if(S.ekran==='robot') robotTaslak(); else if(S.ekran==='lego') legoTaslak(); else taslakKaydet(true); konfeti(); ton(523,150); setTimeout(function(){ ton(659,150); },150); setTimeout(function(){ ton(784,260); },300);
     const o=el('div','ortu'), dd=el('div','dialog'); dd.setAttribute('role','dialog'); dd.setAttribute('aria-modal','true');
     const bk=el('div','buyuk'); bk.appendChild(yuzEl(S.sinif,S.ogrenci));
     dd.append(bk,el('h2',null,'Gönderildi!'),yildizEl(puan,'yildizlar orta'),el('p',null,'Öğretmenin çalışmanı aldı · '+r.saat));
@@ -3686,20 +3686,62 @@ function legoDuzelt(p){ if(!p||p.tur!=='lego') return null; const g=p.gorev&&typ
   return {tur:'lego',v:1,bricks:lTemiz(p.bricks),gorev:g}; }
 function legoAnahtar(){ return 'kat3:lego:'+S.sinif+'|'+S.ogrenci; }
 
-/* ---------- seslendirme (Google Türkçe sesi varsa o seçilir) ---------- */
+/* ---------- seslendirme: yalnızca hoparlör düğmesine basınca ----------
+   Önce Google Cloud seslendirmesi (Apps Script'teki LegoSes.gs, Klavye Kâşifleri ile aynı ses) denenir.
+   Sunucuda ses yoksa ya da önizlemedeyse tarayıcının Türkçe sesi kullanılır.
+   Okunan her cümle L_SOZ / L_TAV / lAdimSoz içinden gelir; hepsinin listesi legoSesMetinleri() ile
+   lego-ses/liste.json dosyasına yazılır (sunucu yalnızca bu listedeki cümleleri seslendirir). */
+const L_SOZ={dondu:'Parça döndü!',geriYok:'Geri alınacak bir şey yok.',yuksek:'Bu kule çok yükseldi! Başka bir yere ekle.',sonraki:'Süper! Sıradaki adım.',
+  tebrik:'Tebrikler! Etrafında dönüp yapına bak.',temiz:'Tertemiz! Yeni bir şey yap.',yanlis:'Buraya karttaki parça gelecek. Kartı kontrol et!',
+  bitti:'Harika, bitirdin!',bittiYol:'Öğretmenine göndermek için yeşil düğmeye, başka görev için sarı düğmeye, serbest oyun için beyaz düğmeye bas.',
+  secici:'Bir görev seç. Resme tıkla, sonra parçaları parlayan yere koy.',yaptin:'Bunu yaptın!'};
+const L_TAV={parca:'Önce yanıp sönen parçayı seç.',renk:function(c){ return 'Şimdi '+lRenkAd(c).toLocaleLowerCase('tr')+' rengi seç.'; },cevir:'Çevir düğmesine bas, parça dönsün.',
+  ekle:'Ekle düğmesine bas.',fazla:'Parlayan yerin altında fazladan parça var. Sil ile kaldır.',hazir:'Hazırsın! Parlayan yere tıkla.'};
 const L_HOP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
-function lSes(){ try{ const l=(speechSynthesis.getVoices()||[]).filter(function(v){ return /^tr/i.test(v.lang); });
+function lSesNorm(t){ return String(t||'').replace(/\s*·\s*/g,'. ').replace(/\s+/g,' ').trim(); }
+function legoSesMetinleri(){
+  const l=[];
+  Object.keys(L_IPUCU).forEach(function(k){ l.push(L_IPUCU[k]); });
+  Object.keys(L_SOZ).forEach(function(k){ l.push(L_SOZ[k]); });
+  Object.keys(L_TAV).forEach(function(k){ if(typeof L_TAV[k]==='string') l.push(L_TAV[k]); });
+  L_RENK.forEach(function(r){ l.push(L_TAV.renk(r[1])); [1,2,4,6,8].forEach(function(n){ l.push(lAdimSoz({c:r[1],w:n,d:1})); }); });
+  for(let i=1;i<=12;i++) l.push('Adım '+i+'.');
+  L_GOREV.forEach(function(g){ l.push(g.ad+' hazır.'); l.push(lGorevAdSoz(g)); });
+  return l.map(lSesNorm).filter(function(t,i,a){ return t&&a.indexOf(t)===i; });
+}
+function lGorevAdSoz(g){ return g.ad+'. '+g.adimlar.length+' adım.'; }
+function lSesSec(){ try{ const l=(speechSynthesis.getVoices()||[]).filter(function(v){ return /^tr/i.test(v.lang); });
   const puan=function(v){ return /google/i.test(v.name)?0:/natural|online|neural/i.test(v.name)?1:2; };
   return l.sort(function(a,b){ return puan(a)-puan(b); })[0]||null; }catch(e){ return null; } }
 try{ if(window.speechSynthesis){ speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged=function(){ speechSynthesis.getVoices(); }; } }catch(e){}
-let lKonusan=null;
-function lKonus(metin,btn){
-  const s=window.speechSynthesis; if(!s||!metin) return;
-  try{ s.cancel(); const u=new SpeechSynthesisUtterance(String(metin).replace(/·/g,'. '));
-    u.lang='tr-TR'; u.rate=.88; u.pitch=1.1; const v=lSes(); if(v) u.voice=v;
-    if(lKonusan) lKonusan.classList.remove('konusuyor'); lKonusan=btn||null; if(btn) btn.classList.add('konusuyor');
-    u.onend=u.onerror=function(){ if(btn) btn.classList.remove('konusuyor'); };
-    s.speak(u); }catch(e){}
+const LSES={onb:new Map(),yok:false,ses:null,jeton:0,btn:null};
+function lSesDurdur(){ LSES.jeton++; try{ if(LSES.ses){ LSES.ses.pause(); LSES.ses=null; } }catch(e){} try{ window.speechSynthesis&&speechSynthesis.cancel(); }catch(e){}
+  if(LSES.btn){ LSES.btn.classList.remove('konusuyor'); LSES.btn=null; } }
+/* Google seslerini önceden ister (çalmaz); düğmeye basılınca hemen çıksın diye. */
+async function lSesHazirla(parca){
+  if(LSES.yok) return;
+  const eksik=parca.filter(function(t){ return !LSES.onb.has(t); }).slice(0,8); if(!eksik.length) return;
+  try{ const r=await sunucu('legoSesleri',eksik)||{};
+    Object.keys(r.sesler||{}).forEach(function(t){ LSES.onb.set(t,r.sesler[t]); });
+    if(r.anahtar===false&&!Object.keys(r.sesler||{}).length) LSES.yok=true; }
+  catch(e){ LSES.yok=true; }
+}
+async function lKonus(metin,btn){
+  const parca=(Array.isArray(metin)?metin:[metin]).map(lSesNorm).filter(Boolean); if(!parca.length) return;
+  const ayni=LSES.btn&&LSES.btn===btn; lSesDurdur(); if(ayni) return;      // aynı düğmeye ikinci basış: sustur
+  const j=LSES.jeton; LSES.btn=btn||null; if(btn) btn.classList.add('konusuyor');
+  const bitir=function(){ if(j!==LSES.jeton) return; if(btn) btn.classList.remove('konusuyor'); LSES.btn=null; };
+  await lSesHazirla(parca);
+  if(j!==LSES.jeton) return;
+  if(parca.every(function(t){ return LSES.onb.has(t); })){
+    let i=0; const sonraki=function(){ if(j!==LSES.jeton) return; if(i>=parca.length){ bitir(); return; }
+      const a=new Audio('data:audio/mpeg;base64,'+LSES.onb.get(parca[i++])); LSES.ses=a; a.onended=sonraki; a.onerror=sonraki;
+      const p=a.play(); if(p&&p.catch) p.catch(sonraki); };
+    sonraki(); return;
+  }
+  const s=window.speechSynthesis; if(!s){ bitir(); return; }
+  try{ const u=new SpeechSynthesisUtterance(parca.join(' ')); u.lang='tr-TR'; u.rate=.88; u.pitch=1.1; const v=lSesSec(); if(v) u.voice=v;
+    u.onend=u.onerror=bitir; s.speak(u); }catch(e){ bitir(); }
 }
 function lHop(b,metinFn){ b.innerHTML=L_HOP; b.addEventListener('click',function(e){ e.stopPropagation(); lKonus(metinFn(),b); }); }
 
@@ -3843,9 +3885,9 @@ function lTikla(e){
       const yakin=Math.abs((s.x+s.w/2)-(t.x+t.w/2))<=1.6&&Math.abs((s.z+s.d/2)-(t.z+t.d/2))<=1.6;
       const dogru=s.w===t.w&&s.d===t.d&&LG.renk===t.c;
       if(yakin&&dogru&&lKat(t.x,t.z,t.w,t.d)===t.l) s={x:t.x,z:t.z,w:t.w,d:t.d,l:t.l};
-      else if(!dogru&&s.l<=t.l&&s.x<t.x+t.w&&s.x+s.w>t.x&&s.z<t.z+t.d&&s.z+s.d>t.z){ lIpucu('Buraya karttaki parça gelecek. Kartı kontrol et!',false,true); lSalla(); return; }
+      else if(!dogru&&s.l<=t.l&&s.x<t.x+t.w&&s.x+s.w>t.x&&s.z<t.z+t.d&&s.z+s.d>t.z){ lIpucu(L_SOZ.yanlis); lSalla(); return; }
     }
-    if(s.l>=L_MAXKAT){ lIpucu('Bu kule çok yükseldi! Başka bir yere ekle.'); return; }
+    if(s.l>=L_MAXKAT){ lIpucu(L_SOZ.yuksek); return; }
     const b={x:s.x,z:s.z,w:s.w,d:s.d,l:s.l,c:LG.renk}; lEkle(b,true); LG.geri.push({t:'ekle',id:b.id}); ton(660,50,'sine');
   } else {
     const id=h.object.userData.id; if(!id) return;
@@ -3860,7 +3902,7 @@ function lDegisti(){ legoTaslak(); lGorevGuncelle(); }
 /* ---------- alt panel ---------- */
 const L_IPUCU={ekle:'Tıkla: parça ekle · Basılı tut ve sürükle: döndür · Fare tekerleği: yaklaş',boya:'Boyamak istediğin parçaya tıkla',sil:'Silmek istediğin parçaya tıkla'};
 let lIpZ=null;
-function lIpucu(t,kalici,sesli){ $('lIpucu').textContent=t; if(sesli) lKonus(t); clearTimeout(lIpZ); if(!kalici) lIpZ=setTimeout(function(){ $('lIpucu').textContent=L_IPUCU[LG.arac]; },2600); }
+function lIpucu(t,kalici){ $('lIpucu').textContent=t; clearTimeout(lIpZ); if(!kalici) lIpZ=setTimeout(function(){ $('lIpucu').textContent=L_IPUCU[LG.arac]; },2600); }
 function lAracSec(a){ LG.arac=a; document.querySelectorAll('#lAraclar [data-arac]').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.arac===a); });
   lIpucu(L_IPUCU[a],true); if(LG.hayalet) LG.hayalet.visible=false; if(LG.hazir) lVurguSil(); lTavsiye(); }
 function lBoylariCiz(){
@@ -3880,10 +3922,10 @@ function lPanelKur(){
   $('lego').style.setProperty('--lr',LG.renk);
   lBoylariCiz();
   document.querySelectorAll('#lAraclar [data-arac]').forEach(function(b){ b.onclick=function(){ lAracSec(b.dataset.arac); }; });
-  $('lCevir').onclick=function(){ LG.cevir=!LG.cevir; lBoylariCiz(); lAracSec('ekle'); lIpucu('Parça döndü!'); };
+  $('lCevir').onclick=function(){ LG.cevir=!LG.cevir; lBoylariCiz(); lAracSec('ekle'); lIpucu(L_SOZ.dondu); };
   lHop($('lIpucuHop'),function(){ return $('lIpucu').textContent; });
-  lHop($('lKartHop'),function(){ const t=lAdim(); return t?'Adım '+(LG.gorev.adimlar.indexOf(t)+1)+'. '+lAdimSoz(t)+' '+$('lTavsiye').textContent:''; });
-  lHop($('lBittiHop'),function(){ return 'Harika, bitirdin! '+(LG.gorev?LG.gorev.ad+' hazır. ':'')+'Öğretmenine göndermek için yeşil düğmeye, başka görev için sarı düğmeye, serbest oyun için beyaz düğmeye bas.'; });
+  lHop($('lKartHop'),function(){ const t=lAdim(); return t?lKartSoz(t):[]; });
+  lHop($('lBittiHop'),function(){ return [L_SOZ.bitti].concat(LG.gorev?[LG.gorev.ad+' hazır.']:[]).concat([L_SOZ.bittiYol]); });
   $('lIpucu').textContent=L_IPUCU.ekle;
 }
 lPanelKur();
@@ -3891,18 +3933,19 @@ lPanelKur();
 /* ---------- görevler ---------- */
 const lAyni=function(b,t){ return b.x===t.x&&b.z===t.z&&b.w===t.w&&b.d===t.d&&b.l===t.l&&b.c===t.c; };
 function lAdim(){ if(!LG.gorev||S.inceleme) return null; return LG.gorev.adimlar.find(function(t){ return !LG.bricks.some(function(b){ return lAyni(b,t); }); })||null; }
+function lKartSoz(t){ return ['Adım '+(LG.gorev.adimlar.indexOf(t)+1)+'.',lAdimSoz(t),$('lTavsiye').textContent]; }
 function lAdimSoz(t){ return lRenkAd(t.c)+' renkli, '+(t.w*t.d)+' noktalı parçayı al. Parlayan yere koy.'; }
 function lIstek(list){ document.querySelectorAll('#lego .l-iste').forEach(function(e){ e.classList.remove('l-iste'); }); (list||[]).forEach(function(e){ if(e) e.classList.add('l-iste'); }); }
 function lTavsiye(){
   const t=lAdim(); if(!t) return;
   const o=[Math.min(t.w,t.d),Math.max(t.w,t.d)], s=lOlcu();
   let m, iste=[], hazir=false;
-  if(LG.boy[0]!==o[0]||LG.boy[1]!==o[1]){ m='Önce yanıp sönen parçayı seç.'; iste=[document.querySelector('#lBoylar [data-s="'+o[0]+'x'+o[1]+'"]')]; }
-  else if(LG.renk!==t.c){ m='Şimdi '+lRenkAd(t.c).toLocaleLowerCase('tr')+' rengi seç.'; iste=[document.querySelector('#lRenkler [data-c="'+t.c+'"]')]; }
-  else if(s[0]!==t.w||s[1]!==t.d){ m='Çevir düğmesine bas, parça dönsün.'; iste=[$('lCevir')]; }
-  else if(LG.arac!=='ekle'){ m='Ekle düğmesine bas.'; iste=[document.querySelector('#lAraclar [data-arac="ekle"]')]; }
-  else if(LG.hazir&&lKat(t.x,t.z,t.w,t.d)!==t.l){ m='Parlayan yerin altında fazladan parça var. Sil ile kaldır.'; iste=[document.querySelector('#lAraclar [data-arac="sil"]')]; }
-  else { m='Hazırsın! Parlayan yere tıkla.'; hazir=true; }
+  if(LG.boy[0]!==o[0]||LG.boy[1]!==o[1]){ m=L_TAV.parca; iste=[document.querySelector('#lBoylar [data-s="'+o[0]+'x'+o[1]+'"]')]; }
+  else if(LG.renk!==t.c){ m=L_TAV.renk(t.c); iste=[document.querySelector('#lRenkler [data-c="'+t.c+'"]')]; }
+  else if(s[0]!==t.w||s[1]!==t.d){ m=L_TAV.cevir; iste=[$('lCevir')]; }
+  else if(LG.arac!=='ekle'){ m=L_TAV.ekle; iste=[document.querySelector('#lAraclar [data-arac="ekle"]')]; }
+  else if(LG.hazir&&lKat(t.x,t.z,t.w,t.d)!==t.l){ m=L_TAV.fazla; iste=[document.querySelector('#lAraclar [data-arac="sil"]')]; }
+  else { m=L_TAV.hazir; hazir=true; }
   $('lTavsiye').textContent=m; $('lTavsiye').classList.toggle('hazir',hazir); lIstek(iste);
 }
 function lGorevGuncelle(){
@@ -3918,12 +3961,11 @@ function lGorevGuncelle(){
     if(LG.sonAdim!=='bitti'){ LG.sonAdim='bitti'; konfeti(); [523,659,784,1047].forEach(function(f,k){ setTimeout(function(){ ton(f,140); },k*120); });
       LG.yapilan.add(LG.gorev.id); if(S.ogrenci) ls(legoAnahtar()+':gorev',Array.from(LG.yapilan));
       $('lBittiYazi').textContent=LG.gorev.ad+' hazır. '+ad.length+' parçanın hepsini doğru yere koydun.';
-      lIpucu('Tebrikler! Etrafında dönüp yapına bak.',true);
-      lKonus('Harika, bitirdin! '+LG.gorev.ad+' hazır. Şimdi yeşil düğmeye basıp öğretmenine gönderebilirsin.',$('lBittiHop')); }
+      lIpucu(L_SOZ.tebrik,true); lSesHazirla([L_SOZ.bitti,LG.gorev.ad+' hazır.',L_SOZ.bittiYol]); }
     return;
   }
   const anahtar=LG.gorev.id+i, yeni=anahtar!==LG.sonAdim, ilk=LG.sonAdim===null;
-  if(yeni&&!ilk&&LG.sonAdim!=='bitti'&&i>0) lIpucu('Süper! Sıradaki adım.');
+  if(yeni&&!ilk&&LG.sonAdim!=='bitti'&&i>0) lIpucu(L_SOZ.sonraki);
   LG.sonAdim=anahtar;
   $('lAdimNo').textContent='Adım '+(i+1)+' / '+ad.length;
   const o=[Math.min(t.w,t.d),Math.max(t.w,t.d)];
@@ -3932,14 +3974,14 @@ function lGorevGuncelle(){
   for(let k=0;k<t.w*t.d;k++){ const x=el('i'); x.style.background=t.c; n.appendChild(x); } p.appendChild(n);
   if(LG.hedef){ LG.hedef.scale.set(t.w,1,t.d); LG.hedef.position.set(t.x+t.w/2,t.l*L_H+L_H/2,t.z+t.d/2); LG.hedefKutu.material.color.set(t.c); LG.hedef.visible=true; }
   lTavsiye();
-  if(yeni) lKonus((ilk?'':'Süper! ')+lAdimSoz(t)+' '+$('lTavsiye').textContent,$('lKartHop'));
+  if(yeni){ lSesDurdur(); lSesHazirla(lKartSoz(t)); }
 }
 function lSalla(){ const k=$('lKart'); if(!k.animate||matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   k.animate([{transform:'translateX(0)'},{transform:'translateX(-8px)'},{transform:'translateX(8px)'},{transform:'translateX(0)'}],{duration:300}); }
 function lGorevSecici(){
   const o=el('div','ortu'), d=el('div','secici'); d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
   const bas=el('div','secici-bas'), bb=el('div'); bb.append(el('h2',null,'Bir görev seç'),el('p',null,'Kartı takip et, parçaları parlayan yere koy. Serbest yapın kaybolmaz, çıkınca geri gelir.'));
-  const hp=el('button','l-hop'); hp.setAttribute('aria-label','Sesli oku'); lHop(hp,function(){ return 'Bir görev seç. Resme tıkla, sonra parçaları parlayan yere koy.'; });
+  const hp=el('button','l-hop'); hp.setAttribute('aria-label','Sesli oku'); lHop(hp,function(){ return L_SOZ.secici; });
   const kp=icBtn('kapat','x','Kapat'); kp.onclick=kapat; const sag=el('div'); sag.style.cssText='display:flex;gap:10px;align-items:center'; sag.append(hp,kp); bas.append(bb,sag);
   const izg=el('div','izgara'); izg.style.gridTemplateColumns='repeat(auto-fill,minmax(190px,1fr))';
   L_GOREV.forEach(function(g){
@@ -3948,10 +3990,10 @@ function lGorevSecici(){
     const m=el('div','l-meta'); m.append(el('span',null,g.adimlar.length+' adım'));
     m.append(LG.yapilan.has(g.id)?el('span',null,'Yaptın ✓'):el('span','l-yildiz','★'.repeat(g.yildiz)+'☆'.repeat(3-g.yildiz)));
     b.append(kare,el('b',null,g.ad),m); b.onclick=function(){ kapat(); lGorevBasla(g); };
-    const sp=el('button','l-hop kucuk'); sp.setAttribute('aria-label',g.ad+' sesli oku'); lHop(sp,function(){ return g.ad+'. '+g.adimlar.length+' adım.'+(LG.yapilan.has(g.id)?' Bunu yaptın!':''); });
+    const sp=el('button','l-hop kucuk'); sp.setAttribute('aria-label',g.ad+' sesli oku'); lHop(sp,function(){ return [lGorevAdSoz(g)].concat(LG.yapilan.has(g.id)?[L_SOZ.yaptin]:[]); });
     kap.append(b,sp); izg.appendChild(kap); });
   d.append(bas,izg); o.appendChild(d); o.onclick=function(e){ if(e.target===o) kapat(); }; katman(o);
-  lKonus('Bir görev seç. Resme tıkla, sonra parçaları parlayan yere koy.',hp);
+  lSesHazirla([L_SOZ.secici].concat(L_GOREV.map(lGorevAdSoz)));
 }
 function lGorevBasla(g){
   if(!LG.gorev) LG.serbest=lDuz(LG.bricks);
@@ -3979,7 +4021,7 @@ async function legoAc(v){
   lKameraSifirla(); lAracSec('ekle');
   if(inc){ const g=v.gorev; lIpucu(g&&g.ad?'Görev: '+g.ad+(g.bitti?' (bitti)':' (yarım)')+' · '+v.bricks.length+' parça':'Serbest yapı · '+v.bricks.length+' parça',true); }
   lGorevGuncelle();
-  if(!inc&&!v.bricks.length) lKonus('Lego atölyesine hoş geldin! Bir renk ve parça seç, sonra yeşil plakaya tıkla.',$('lIpucuHop'));
+  if(!inc) lSesHazirla([L_IPUCU.ekle]);
 }
 function lResim(w,h,tip,q){
   const hv=LG.hayalet.visible, hd=LG.hedef.visible; LG.hayalet.visible=false; LG.hedef.visible=false; lVurguSil();
@@ -3992,24 +4034,23 @@ function lResim(w,h,tip,q){
 }
 function legoGonder(){
   if(!LG.hazir||S.inceleme) return;
-  if(!LG.bricks.length){ bildir('Önce bir şeyler yap!'); lKonus('Önce bir şeyler yap, sonra gönder.'); return; }
+  if(!LG.bricks.length){ bildir('Önce bir şeyler yap!'); return; }
   const buyuk=lResim(960,720,'image/png'), kucuk=lResim(240,180,'image/jpeg',.85);
   const v={tur:'lego',v:1,bricks:lDuz(LG.bricks),gorev:LG.gorev?{id:LG.gorev.id,ad:LG.gorev.ad,bitti:!lAdim()}:null};
   const g=el('div','r-gonder-res'); if(buyuk){ const im=el('img'); im.src=buyuk; im.alt=''; g.appendChild(im); } else g.innerHTML=legoOzetSVG(v);
-  lKonus('Çalışmanı ne kadar beğendin? Yıldızları seç, sonra gönder düğmesine bas.');
   gonderAc(async function(){ return {proje:JSON.stringify(v),resim:buyuk,kucuk:kucuk}; },g,'Lego yapını ne kadar beğendin? Yıldızları seç.');
 }
 $('lGonder').onclick=legoGonder; $('lBittiGonder').onclick=legoGonder;
 $('lGorev').onclick=function(){ if(LG.hazir) lGorevSecici(); };
 $('lBittiBaska').onclick=lGorevSecici; $('lBittiSerbest').onclick=lGorevBitir; $('lKartCik').onclick=lGorevBitir;
-$('lGeri').onclick=function(){ if(!LG.hazir||S.inceleme) return; const u=LG.geri.pop(); if(!u){ lIpucu('Geri alınacak bir şey yok.'); return; }
+$('lGeri').onclick=function(){ if(!LG.hazir||S.inceleme) return; const u=LG.geri.pop(); if(!u){ lIpucu(L_SOZ.geriYok); return; }
   if(u.t==='ekle') lCikar(u.id); else if(u.t==='sil') lEkle(u.b,true); else if(u.t==='boya') lBoya(u.id,u.c); else if(u.t==='temiz') u.list.forEach(function(b){ lEkle(b,false); });
   ton(300,60,'sine',200); lDegisti(); };
 $('lKamera').onclick=lKameraSifirla;
 $('lYeni').onclick=function(){ if(!LG.hazir) return; onayla({e:'✨'},'Plaka temizlensin mi? Göndermediysen önce gönder. (Geri al ile eski hâli döner.)',function(){
-  const list=lDuz(LG.bricks); lHepsiniCikar(); if(list.length) LG.geri.push({t:'temiz',list:list}); lDegisti(); lIpucu('Tertemiz! Yeni bir şey yap.'); }); };
+  const list=lDuz(LG.bricks); lHepsiniCikar(); if(list.length) LG.geri.push({t:'temiz',list:list}); lDegisti(); lIpucu(L_SOZ.temiz); }); };
 $('lCalismalarim').onclick=calismalarimAc;
-$('lEtk').onclick=function(){ legoTaslak(); etkinlikAc(); };
+$('lEtk').onclick=function(){ lSesDurdur(); legoTaslak(); etkinlikAc(); };
 $('lBen').onclick=profilAc;
 $('lCikis').onclick=function(){ onayla({e:'👋'},'Çıkış yapılsın mı? Lego yapın bu bilgisayarda saklı kalır.',function(){ legoTaslak(); cikisYap(); }); };
 $('lTamEkran').onclick=tamEkran;
