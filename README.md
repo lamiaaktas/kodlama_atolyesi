@@ -14,3 +14,4 @@ Karakter çizimleri: [Microsoft Fluent Emoji](https://github.com/microsoft/fluen
 - [`dijital-kale/`](dijital-kale/) – Dijital Kale Macerası: 4. sınıflar için dijital vatandaşlık dersleri (ayrı Apps Script projesi).
 - [`siber-adalar/`](siber-adalar/) – Siber Adalar: 3. sınıflar için dört adalı 3B dijital vatandaşlık platform oyunu (ayrı Apps Script projesi).
 - [`klavye-kasifleri/`](klavye-kasifleri/) – Klavye Kâşifleri: 4. sınıflar için Türkçe Q on parmak klavye kursu; anlatımlar, oyunlar, rozetler ve öğrenci hızlarını gösteren öğretmen paneli (ayrı Apps Script projesi).
+- [`okuma-gunlugu/`](okuma-gunlugu/) – Okuma Günlüğüm: öğrencilerin günlük kitap okumalarını, sayfa sayılarını ve ne anladıklarını takip eden uygulama; kitap kurdu, öğretmen mesajları ve öğretmen paneli (ayrı Apps Script projesi).
