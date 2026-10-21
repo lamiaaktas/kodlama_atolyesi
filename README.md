@@ -5,6 +5,8 @@
 - `Index.html` – sitenin ekranı. Apps Script bu dosyayı buradan okur; buraya gönderilen her güncelleme en geç 5 dakikada siteye yansır.
 - `Code.gs` – Apps Script'teki sunucu kodunun kopyası (öğretmen şifresi burada değil, yalnızca Apps Script'te yazılıdır).
 
+Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt ve Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
+
 Çocukların çalışmaları, sınıf listeleri ve profiller bu depoda değil, öğretmenin Google Drive'ında tutulur.
 
 Karakter çizimleri: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) (MIT lisansı).
