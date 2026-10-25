@@ -308,6 +308,56 @@ function calismaGonder(veri) {
   return { tamam: true, saat: saat, tarih: tarih, puan: puan };
 }
 
+/* ---------- Robotumu Yürüt: ilerleme kendiliğinden kaydedilir ----------
+   Öğrenci her seviyeyi geçtiğinde çağrılır. Her öğrenci için Drive'da tek dosya ve
+   "Gönderimler" sayfasında tek satır tutulur: dosya güncellenir, satır en alta (en yeniye) taşınır. */
+function yuruIlerleme(veri) {
+  const sinif = String(veri && veri.sinif || '').trim();
+  const ogrenci = String(veri && veri.ogrenci || '').trim();
+  const proje = String(veri && veri.proje || '');
+  const kucuk = String(veri && veri.kucuk || '');
+  const sinifObj = siniflariGetir().filter(function (c) { return c.ad === sinif; })[0];
+  if (!sinifObj || sinifObj.ogrenciler.indexOf(ogrenci) < 0) throw new Error('Sınıf ya da öğrenci listede yok.');
+  if (proje.length > 1000000) throw new Error('Kayıt çok büyük.');
+  let v = null;
+  try { v = JSON.parse(proje); } catch (e) { v = null; }
+  if (!v || v.tur !== 'yuru') throw new Error('Kayıt hatalı.');
+
+  const d = depo_();
+  const simdi = new Date();
+  const tarih = Utilities.formatDate(simdi, SAAT_DILIMI, 'yyyy-MM-dd');
+  const saat = Utilities.formatDate(simdi, SAAT_DILIMI, 'HH:mm');
+  const p = PropertiesService.getScriptProperties();
+  const anahtar = 'YURU|' + sinif + '|' + ogrenci;
+
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(20000);
+  try {
+    let dosya = null;
+    const eskiId = p.getProperty(anahtar);
+    if (eskiId) { try { dosya = DriveApp.getFileById(eskiId); if (dosya.isTrashed()) dosya = null; } catch (e) { dosya = null; } }
+    if (dosya) dosya.setContent(proje);
+    else {
+      const hedef = altKlasor_(altKlasor_(d.klasor, temizAd_(sinif)), 'Robotumu Yürüt');
+      dosya = hedef.createFile(Utilities.newBlob(proje, 'application/json', temizAd_(ogrenci) + ' - Robotumu Yürüt.kodlama.json'));
+      p.setProperty(anahtar, dosya.getId());
+    }
+    const id = dosya.getId();
+    const g = d.tablo.getSheetByName('Gönderimler');
+    const son = g.getLastRow();
+    if (son >= 2) {
+      const ids = g.getRange(2, 7, son - 1, 1).getValues();
+      for (let i = ids.length - 1; i >= 0; i--) if (String(ids[i][0]) === id) g.deleteRow(i + 2);
+    }
+    g.appendRow([tarih, saat, sinif, ogrenci, dosya.getUrl(), '', id, kucuk.length < 45000 ? kucuk : '', '', '']);
+    const link = acLinki_(id);
+    if (link) g.getRange(g.getLastRow(), 9).setFormula(link);
+  } finally {
+    kilit.releaseLock();
+  }
+  return { tamam: true, saat: saat, tarih: tarih };
+}
+
 function sonCalismam(sinif, ogrenci) {
   const g = depo_().tablo.getSheetByName('Gönderimler');
   const son = g.getLastRow();
