@@ -490,6 +490,7 @@ button.chip{cursor:pointer}
 .y-robot-sec{width:68px;height:54px;border-radius:16px;background:#fbf6ee;border:3px solid #f0c48a;display:grid;place-items:center;overflow:hidden;font-size:24px;color:var(--turuncu)}
 .y-robot-sec svg{width:100%;height:100%}
 body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oynuyor .y-dongu-son{opacity:.45;pointer-events:none}
+.y-neden{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:4px;font-size:16px;color:#7a4b12}.y-neden li::before{content:'• ';color:var(--turuncu)}
 .y-kazan-robot{width:150px}.y-kazan-robot svg{display:block;width:100%;height:auto}
 .y-garaj{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 .y-garaj .kare{width:100%;height:auto;aspect-ratio:4/5;background:#eef4ff}
@@ -3765,6 +3766,23 @@ function yKosulMu(){ return yUnite().id==='kosul'; }
 function yHataMi(){ return yUnite().id==='hata'; }
 const Y_ENC={};
 function yEn(u,i){ const k=u.id+'-'+i; if(!(k in Y_ENC)) Y_ENC[k]=u.id==='hata'?u.seviyeler[i].hata:yCoz(ySevObj(u,i)).en; return Y_ENC[k]; }
+/* robotun pile bütün yıldızlarla gidebileceği en kısa yol (adım) */
+function yEnKisaYol(sev){
+  const m=yHaritaCoz(sev), anah=function(s){ return s.x+','+s.y+'|'+(s.acik.a?1:0)+(s.acik.b?1:0)+'|'+Object.keys(s.top).sort().join(';'); };
+  const bas={x:m.bas[0],y:m.bas[1],acik:{},top:{}}; yEtki(m,bas,bas.x,bas.y,[]);
+  let kat=[bas]; const gor={}; gor[anah(bas)]=1;
+  for(let n=0;n<=60;n++){ const yeni=[];
+    for(const st of kat){ if(ySonuc(m,st)==='kazandi') return n;
+      for(const d of ['u','d','l','r']){ const nx=st.x+Y_YON[d][0], ny=st.y+Y_YON[d][1]; if(yKapali(m,nx,ny,st.acik)) continue;
+        const s2={x:nx,y:ny,acik:Object.assign({},st.acik),top:Object.assign({},st.top)}; yEtki(m,s2,nx,ny,[]); const k=anah(s2); if(!gor[k]){ gor[k]=1; yeni.push(s2); } } }
+    kat=yeni; }
+  return 99;
+}
+function yEnYol(u,i){ const k='yol:'+u.id+'-'+i;
+  if(!(k in Y_ENC)){ const sv=ySevObj(u,i), en=yEnKisaYol(sv);
+    /* Hata Ayıklama: Bip'in düzeltilmiş kodunun yolu daha uzunsa o da tam puan */
+    Y_ENC[k]=u.id==='hata'&&u.seviyeler[i].duz?Math.max(en,ySimule(sv,u.seviyeler[i].duz).olaylar.filter(function(o){ return o.t==='git'; }).length):en; }
+  return Y_ENC[k]; }
 function yAcik(u,i){ return i===0||!!S.yuru.seviye[u.id+'-'+(i-1)]||!!S.yuru.seviye[u.id+'-'+i]||!!S.inceleme; }
 function yIlkCozulmemis(u){ for(let i=0;i<u.seviyeler.length;i++) if(!S.yuru.seviye[u.id+'-'+i]) return i; return u.seviyeler.length-1; }
 function yUniteOzet(v,u){ let b=0,y=0; u.seviyeler.forEach(function(_,i){ const s=v.seviye[u.id+'-'+i]; if(s){ b++; y+=s.y; } }); return {bitti:b,yildiz:y}; }
@@ -4189,15 +4207,21 @@ async function yOyna(){
   Y.calisiyor=false; $('yOyna').disabled=false; document.body.classList.remove('y-oynuyor');
   document.querySelectorAll('#ySlotlar .calisiyor').forEach(function(e){ e.classList.remove('calisiyor'); });
   if(!tamam) return;
-  if(r.sonuc==='kazandi') return yKazandi(kosul?kurallar.length:yHataMi()?Y.duzen:ySay());
+  if(r.sonuc==='kazandi'||r.sonuc==='yildiz'){
+    const tumu=yHaritaCoz(sv).yildiz.length, alinan=r.olaylar.filter(function(o){ return o.t==='yildiz'; }).length;
+    const adim=r.olaylar.filter(function(o){ return o.t==='git'; }).length;
+    return yKazandi(kosul?kurallar.length:yHataMi()?Y.duzen:ySay(),tumu-alinan,adim); }
   yKodCiz();
   if(r.sonuc==='pil'){ Y.tahta.balon('Pil nerede?','kotu'); ton(300,200,'sine',200); }
-  else if(r.sonuc==='yildiz'){ Y.tahta.balon('Yıldızlar eksik!','kotu'); ton(300,200,'sine',200); }
   else if(r.sonuc==='dongu'){ Y.tahta.balon('Hep dönüyorum!','kotu'); ton(300,200,'sine',200); }
 }
-function yKazandi(n){
+function yKazandi(n,eksik,adim){
   const u=yUnite(), i=ySira(), key=yAnahtar(), en=yEn(u,i), hata=yHataMi(), kosul=yKosulMu();
-  const yz=n<=en?3:n<=en+(kosul?1:2)?2:1, once=S.yuru.seviye[key];
+  eksik=eksik||0;
+  /* yıldız: 3'ten başlar. Fazla kart/kural/değişiklik ya da daha uzun yol: -1 (çok fazlaysa -2). Toplanmayan her yıldız: -1. En az 1. */
+  const kartCeza=n<=en?0:n<=en+(kosul?1:2)?1:2;
+  const uzun=!kosul&&!eksik&&adim>yEnYol(u,i), yolCeza=uzun?1:0;
+  const yz=Math.max(1,3-Math.max(kartCeza,yolCeza)-eksik), once=S.yuru.seviye[key];
   if(!once||yz>once.y||(yz===once.y&&n<once.k)) S.yuru.seviye[key]={y:yz,k:n};
   if(!S.inceleme){ yTik(); const st=yIstat(key); if(!st.ok){ st.ok=1; st.d=Math.max(1,st.d); } }
   yuruKaydet(); ySeviyeleriCiz();
@@ -4209,7 +4233,11 @@ function yKazandi(n){
     const o=el('div','ortu'), d=el('div','dialog y-kazan'); d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
     const bk=el('div','y-kazan-robot'); bk.innerHTML=S.yuru.robot?parcaSVG(S.yuru.robot,'20 -10 360 480'):''; const sv=bk.querySelector('svg'); if(sv) sv.classList.add('dans');
     d.append(bk,el('h2',null,son?'Bölümü bitirdin!':'Pil bulundu!'),yildizEl(yz,'yildizlar buyuk'));
-    if(yz<3) d.appendChild(el('p',null,hata?'Daha az değişiklikle dene, 3 yıldız kazan!':kosul?'Daha az kuralla dene, 3 yıldız kazan!':'Daha az kartla dene, 3 yıldız kazan!'));
+    if(yz<3){ const ned=el('ul','y-neden');
+      if(eksik) ned.appendChild(el('li',null,eksik===1?'1 yıldızı toplamadın.':eksik+' yıldızı toplamadın.'));
+      if(uzun) ned.appendChild(el('li',null,'Pile giden daha kısa bir yol var.'));
+      if(kartCeza) ned.appendChild(el('li',null,hata?'Daha az değişiklikle de düzelebilir.':kosul?'Daha az kuralla da olur.':'Daha az kartla da olur.'));
+      d.appendChild(ned); d.appendChild(el('p',null,'Tekrar dene, 3 yıldız kazan!')); }
     const sr=el('div','sira'); const tk=icBtn('cb beyaz yuvarlak','reset','Tekrar oyna'); tk.onclick=function(){ kapat(); ySeviyeBasla(); };
     sr.appendChild(tk);
     if(!son){ const ss=icBtn('cb yesil yuvarlak','fwd','Sonraki seviye'); ss.onclick=function(){ kapat(); S.yuru.sec[u.id]=i+1; yuruKaydet(); ySeviyeBasla(); yHikaye(); }; sr.appendChild(ss); }
