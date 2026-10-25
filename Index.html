@@ -356,11 +356,6 @@ button.chip{cursor:pointer}
 .y-tablo tfoot td{font-weight:900;border-top:2px solid #bfe3cb}
 .y-cozmedi{color:var(--kirmizi-k)}
 .y-tablo-not{font-size:11.5px}
-.y-tablo tr.kodlu td{border-bottom:0}.y-tablo-kodsat td{border-top:0;padding:0 6px 6px 30px}
-.y-tablo-kod{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center;zoom:.5;padding:16px 0 4px}
-.y-tablo-kod .y-kart{width:54px;flex:none}
-.y-tablo-kod.kural{gap:8px;padding:4px 0}
-.y-tablo-kod .y-kural{padding:4px 8px;box-shadow:none}
 .y-kayit-durum{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:var(--muted);margin:2px 0 0}
 .y-kayit-durum.tamam{color:#2b8a4c}.y-kayit-durum svg{width:18px;height:18px}
 @media (max-width:760px){.detay{grid-template-columns:minmax(0,1fr)}}
@@ -3758,18 +3753,10 @@ function yuruAnahtar(){ return 'kat3:yuru:'+S.sinif+'|'+S.ogrenci; }
 function yuruBos(){ return {tur:'yuru',v:2,robot:null,seviye:{},istat:{},unite:'sira',sec:{}}; }
 function yUniteBul(id){ return Y_UNITE.find(function(u){ return u.id===id; })||null; }
 function yAnahtarGecerli(k){ const m=/^([a-z]+)-(\d+)$/.exec(String(k)); if(!m) return false; const u=yUniteBul(m[1]); return !!u&&+m[2]<u.seviyeler.length; }
-function yKodTemiz(kod,kosul){
-  if(!Array.isArray(kod)||!kod.length) return null; const yon=function(d){ return 'udlr'.indexOf(d)>=0&&d.length===1; };
-  if(kosul){ const l=kod.slice(0,4).filter(function(r){ return r&&['duvar','y','p','g'].indexOf(r.k)>=0&&yon(r.d); }).map(function(r){ return {k:r.k,d:r.d}; }); return l.length?l:null; }
-  const l=[]; kod.slice(0,12).forEach(function(c){ if(!c) return;
-    if(c.t==='tek'&&Array.isArray(c.ic)) l.push({t:'tek',n:Math.max(2,Math.min(5,parseInt(c.n,10)||2)),ic:c.ic.slice(0,3).filter(function(o){ return o&&yon(o.d); }).map(function(o){ return {d:o.d}; })});
-    else if(yon(c.d)) l.push({d:c.d}); });
-  return l.length?l:null;
-}
 function yuruDuzelt(p){ if(!p||p.tur!=='yuru') return null; const v=yuruBos();
   v.robot=p.robot?robotDuzelt(p.robot):null;
   if(p.v!==2) return v;      // eski (tek bölümlü) sürümün seviyeleri artık yok
-  if(p.seviye&&typeof p.seviye==='object') Object.keys(p.seviye).forEach(function(k){ const s=p.seviye[k]; if(yAnahtarGecerli(k)&&s) { v.seviye[k]={y:Math.max(1,Math.min(3,parseInt(s.y,10)||1)),k:Math.max(0,Math.min(99,parseInt(s.k,10)||0))}; const kd=yKodTemiz(s.kod,k.indexOf('kosul-')===0); if(kd) v.seviye[k].kod=kd; } });
+  if(p.seviye&&typeof p.seviye==='object') Object.keys(p.seviye).forEach(function(k){ const s=p.seviye[k]; if(yAnahtarGecerli(k)&&s) v.seviye[k]={y:Math.max(1,Math.min(3,parseInt(s.y,10)||1)),k:Math.max(0,Math.min(99,parseInt(s.k,10)||0))}; });
   if(p.istat&&typeof p.istat==='object') Object.keys(p.istat).forEach(function(k){ const t=p.istat[k]; if(yAnahtarGecerli(k)&&t) v.istat[k]={d:Math.max(0,Math.min(999,parseInt(t.d,10)||0)),sn:Math.max(0,Math.min(36000,Math.round((+t.sn||0)*10)/10)),ok:t.ok?1:0}; });
   if(yUniteBul(p.unite)) v.unite=p.unite;
   if(p.sec&&typeof p.sec==='object') Y_UNITE.forEach(function(u){ const n=parseInt(p.sec[u.id],10); if(n>=0&&n<u.seviyeler.length) v.sec[u.id]=n; });
@@ -4262,9 +4249,7 @@ function yKazandi(n,eksik,adim){
   const kartCeza=n<=en?0:n<=en+(kosul?1:2)?1:2;
   const uzun=!kosul&&!eksik&&adim>yEnYol(u,i), yolCeza=uzun?1:0;
   const yz=Math.max(1,3-Math.max(kartCeza,yolCeza)-eksik), once=S.yuru.seviye[key];
-  const kod=JSON.parse(JSON.stringify(kosul?Y.kurallar.filter(function(r){ return r.d; }):Y.kartlar));
-  if(!once||yz>once.y||(yz===once.y&&n<once.k)) S.yuru.seviye[key]={y:yz,k:n,kod:kod};
-  else if(!once.kod) once.kod=kod;
+  if(!once||yz>once.y||(yz===once.y&&n<once.k)) S.yuru.seviye[key]={y:yz,k:n};
   if(!S.inceleme){ yTik(); const st=yIstat(key); if(!st.ok){ st.ok=1; st.d=Math.max(1,st.d); } }
   yuruKaydet(); ySeviyeleriCiz(); const kayitSoz=yOtoKaydet();
   Y.tahta.kazan();
@@ -4350,14 +4335,12 @@ function yuruTablo(v){
     sat.forEach(function(i){ const k=u.id+'-'+i, sv=v.seviye[k], st=v.istat[k]||{}; let tr=el('tr'); topD+=st.d||0; if(st.ok) topS+=st.sn||0;
       const yt=el('td'); yt.appendChild(yildizEl(sv?sv.y:0));
       tr.append(el('td','y-no',String(i+1)),yt,el('td',null,st.d?String(st.d):'—'),el('td',st.ok||sv?null:'y-cozmedi',st.ok?ySure(st.sn):(sv?'—':'çözmedi')));
-      if(sv&&sv.kod&&sv.kod.length){ tb.appendChild(tr); tr.classList.add('kodlu'); const kr=el('tr','y-tablo-kodsat'), kt=el('td'); kt.colSpan=4;
-        const kk=el('div','y-tablo-kod'+(u.id==='kosul'?' kural':'')); if(u.id==='kosul') yKuralStatik(kk,sv.kod); else yKodStatik(kk,sv.kod); kt.appendChild(kk); kr.appendChild(kt); tr=kr; }
       tb.appendChild(tr); });
   });
   if(!herhangi){ kutu.appendChild(el('p','not','Henüz bir seviye denenmemiş.')); return kutu; }
   t.appendChild(tb);
   const tf=el('tfoot'); tf.innerHTML='<tr><td>Toplam</td><td></td><td>'+topD+'</td><td>'+ySure(topS)+'</td></tr>'; t.appendChild(tf);
-  kutu.appendChild(t); kutu.appendChild(el('p','not y-tablo-not','Deneme: bayrağa kaç kez bastığı (çözene kadar). Süre: seviyeyi ilk çözene kadar geçen zaman. Satırın altındaki kartlar: en çok yıldız aldığı kodu.'));
+  kutu.appendChild(t); kutu.appendChild(el('p','not y-tablo-not','Deneme: bayrağa kaç kez bastığı (çözene kadar). Süre: seviyeyi ilk çözene kadar geçen zaman.'));
   return kutu;
 }
 /* Seslendirme listesi (lego-ses/liste.json) için bu oyunun bütün cümleleri */
