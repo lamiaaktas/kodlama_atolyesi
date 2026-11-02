@@ -358,6 +358,14 @@ function yuruIlerleme(veri) {
   return { tamam: true, saat: saat, tarih: tarih };
 }
 
+/* Öğrenci Robotumu Yürüt'ü açınca kendi kayıtlı ilerlemesini geri alır (başka tablette ya da hafıza silinince). */
+function yuruIlerlemem(sinif, ogrenci) {
+  sinif = String(sinif || '').trim(); ogrenci = String(ogrenci || '').trim();
+  const id = PropertiesService.getScriptProperties().getProperty('YURU|' + sinif + '|' + ogrenci);
+  if (!id) return null;
+  try { const f = DriveApp.getFileById(id); if (f.isTrashed()) return null; return f.getBlob().getDataAsString(); } catch (e) { return null; }
+}
+
 function sonCalismam(sinif, ogrenci) {
   const g = depo_().tablo.getSheetByName('Gönderimler');
   const son = g.getLastRow();

@@ -1580,6 +1580,7 @@ const DEMO=(function(){
     profilKaydet:function(s,o,l,y){ profil[s+'|'+o]={lakap:String(l||'').slice(0,20),yuz:y}; ls('kat3:demo:profil',profil); return kopya(profil[s+'|'+o]); },
     calismaGonder:function(v){ ornekler(); const d=new Date(); const saat=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
       kayit.push({tarih:yerelTarih(d),saat:saat,sinif:v.sinif,ogrenci:v.ogrenci,id:'d'+Date.now(),proje:v.proje,kucuk:v.kucuk,puan:v.puan||0}); ls('kat3:demo:kayit',kayit); return {tamam:true,saat:saat}; },
+    yuruIlerlemem:function(s,o){ ornekler(); const k=kayit.find(function(x){ return x.id==='yuru|'+s+'|'+o; }); return k?k.proje:null; },
     yuruIlerleme:function(v){ ornekler(); const d=new Date(); const saat=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); const id='yuru|'+v.sinif+'|'+v.ogrenci;
       kayit=kayit.filter(function(k){ return k.id!==id; }); kayit.push({tarih:yerelTarih(d),saat:saat,sinif:v.sinif,ogrenci:v.ogrenci,id:id,proje:v.proje,kucuk:v.kucuk,puan:0}); ls('kat3:demo:kayit',kayit); return {tamam:true,saat:saat}; },
     sonCalismam:function(s,o){ ornekler(); for(let i=kayit.length-1;i>=0;i--){ if(kayit[i].sinif===s&&kayit[i].ogrenci===o) return kayit[i].proje; } return null; },
@@ -2529,7 +2530,7 @@ function eskiyiAc(c){
   if(S.ekran==='lego') legoTaslak();
   if(c.tur==='lego'){ legoAc(c.veri).then(legoTaslak); }
   else if(c.tur==='robot'){ garajaEkle(c.veri); robotAc(c.veri); robotTaslak(); }
-  else if(c.tur==='yuru'){ const yerel=yuruDuzelt(ls(yuruAnahtar())); const v=c.veri; if(yerel){ Object.keys(yerel.seviye).forEach(function(k){ const a=yerel.seviye[k], b=v.seviye[k]; if(!b||a.y>b.y) v.seviye[k]=a; }); Object.keys(yerel.istat||{}).forEach(function(k){ const a=yerel.istat[k], b=v.istat[k]; if(!b||(a.ok&&!b.ok)||(a.ok===b.ok&&a.d>b.d)) v.istat[k]=a; }); } yuruAc(v); yuruKaydet(); }
+  else if(c.tur==='yuru'){ const v=yuruBirlestir(c.veri,yuruDuzelt(ls(yuruAnahtar()))); yuruAc(v); yuruKaydet(); }
   else { editorAc(c.veri); taslakKaydet(true); }
   ton(523,100); setTimeout(function(){ ton(784,140); },100);
 }
@@ -4000,7 +4001,50 @@ async function yOrnekOynat(kap,u){
 
 /* ---- ekran ---- */
 let Y={kartlar:[],acik:-1,secim:null,kurallar:[],secKural:-1,calisiyor:false,j:{v:0},son:null,tahta:null,duzen:0,ekran:'harita',yer:{}};
-function yuruGir(){ const v=yuruDuzelt(ls(yuruAnahtar()))||yuruBos(); yuruAc(v); }
+/* İki ilerlemeyi birleştirir: her seviyede en çok yıldız, çözülmüş istatistik, görülen tanıtımlar. */
+function yuruBirlestir(v,ek){
+  if(!ek) return v; if(!v) return ek;
+  Object.keys(ek.seviye).forEach(function(k){ const a=ek.seviye[k], b=v.seviye[k]; if(!b||a.y>b.y||(a.y===b.y&&a.k<b.k)) v.seviye[k]=a; });
+  Object.keys(ek.istat||{}).forEach(function(k){ const a=ek.istat[k], b=v.istat[k]; if(!b||(a.ok&&!b.ok)||(a.ok===b.ok&&a.d>b.d)) v.istat[k]=a; });
+  Object.keys(ek.tanit||{}).forEach(function(k){ v.tanit[k]=1; });
+  Object.keys(ek.sec||{}).forEach(function(k){ if(v.sec[k]==null||ek.sec[k]>v.sec[k]) v.sec[k]=ek.sec[k]; });
+  if(!v.robot&&ek.robot) v.robot=ek.robot;
+  return v;
+}
+/* Sunucudaki kopya: önce yeni işlev; Code.gs eskiyse öğrencinin gönderdiklerinden en yeni Robotumu Yürüt kaydı. */
+async function yuruSunucudan(sinif,ogrenci){
+  try{ const js=await sunucu('yuruIlerlemem',sinif,ogrenci); return js?yuruDuzelt(JSON.parse(js)):null; }
+  catch(e){ if(!/yuruIlerlemem|bulunamad|not found|is not a function|Script function/i.test(String(e&&e.message||e))) throw e; }
+  const l=await sunucu('calismalarim',sinif,ogrenci)||[]; let bul=null;
+  for(const k of l.slice(0,8)){ try{ const p=JSON.parse(await sunucu('calismamiAc',sinif,ogrenci,k.id)); if(p&&p.tur==='yuru'){ const v=yuruDuzelt(p); bul=yuruBirlestir(bul,v); if(Object.keys(v.seviye).length) break; } }catch(e){} }
+  return bul;
+}
+function yuruSay(v){ return v?Object.keys(v.seviye).length:0; }
+async function yuruGir(){
+  const sinif=S.sinif, ogrenci=S.ogrenci, yerel=yuruDuzelt(ls(yuruAnahtar()));
+  const bos=!yerel||(!yuruSay(yerel)&&!yerel.robot);
+  let sunucuSoz=null;
+  if(ogrenci&&!S.inceleme) sunucuSoz=yuruSunucudan(sinif,ogrenci).catch(function(){ return null; });
+  if(bos&&sunucuSoz){
+    const o=el('div','ortu'), d=el('div','dialog'); d.append(el('div','buyuk','🤖'),el('h2',null,'İlerlemen yükleniyor…')); const sp=el('p'); sp.innerHTML='<span class="spin"></span>'; d.appendChild(sp); o.appendChild(d); katman(o);
+    const sv=await Promise.race([sunucuSoz,new Promise(function(r){ setTimeout(function(){ r(undefined); },8000); })]);
+    kapat();
+    if(S.ogrenci!==ogrenci) return;
+    const v=yuruBirlestir(sv||yuruBos(),yerel); yuruAc(v); yuruKaydet();
+    if(sv===undefined) sunucuSoz.then(function(s2){ yuruSonradanBirlestir(s2,ogrenci); });
+    return;
+  }
+  yuruAc(yerel||yuruBos());
+  if(sunucuSoz) sunucuSoz.then(function(sv){ yuruSonradanBirlestir(sv,ogrenci); });
+}
+function yuruSonradanBirlestir(sv,ogrenci){
+  if(!sv||S.ogrenci!==ogrenci||S.ekran!=='yuru'||!S.yuru||S.inceleme) return;
+  const once=JSON.stringify([S.yuru.seviye,S.yuru.tanit,!!S.yuru.robot]);
+  yuruBirlestir(S.yuru,sv);
+  if(JSON.stringify([S.yuru.seviye,S.yuru.tanit,!!S.yuru.robot])===once) return;
+  yuruKaydet(); bildir('İlerlemen geri yüklendi!');
+  if(Y.ekran==='harita') yHaritaCiz(); else if(!Y.calisiyor){ ySeviyeleriCiz(); yRobotDugme(); }
+}
 function yuruAc(v){
   goster('yuru'); S.yuru=v; Y.j.v++; Y.calisiyor=false; const inc=!!S.inceleme; benCiz();
   $('ybenKalem').hidden=inc; $('yBen').disabled=inc; $('ykimInceleme').hidden=!inc;
