@@ -7,7 +7,7 @@
 - `LegoSes.gs` – Lego Atölyesi'nin Google seslendirmesi. Apps Script projesine ayrı bir dosya olarak eklenir; kurulum adımları dosyanın başında.
 - `lego-ses/liste.json` – Lego Atölyesi'nde sesli okunan cümlelerin listesi (Index.html'deki `legoSesMetinleri()` ile üretilir).
 
-Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt ve Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
+Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt, Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları) ve Küçük Kâşif (kulüpteki mat üzerinde giden robot için 5 seviyeli 12 görev; öğrenci önce dijitalde çözer, sonra gerçek robotta dener). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
 
 Çocukların çalışmaları, sınıf listeleri ve profiller bu depoda değil, öğretmenin Google Drive'ında tutulur.
 

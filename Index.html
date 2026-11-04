@@ -975,6 +975,16 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
   body.duzen-r .fabrika{flex:1 1 auto;min-height:0;grid-template-rows:minmax(0,1fr)}
   body.duzen-r .r-cerceve{width:min(100%,calc((100dvh - 150px) * 4 / 3));max-width:none}
 }
+/* ---------- küçük kâşif ---------- */
+#kasif{display:flex;flex-direction:column;height:100vh;height:100dvh}
+#kasif .ust{flex:none}
+#kasifCerceve{flex:1;min-height:0;width:100%;border:0;display:block;background:#eef3ec;border-radius:22px}
+.etk-kasif{display:grid;grid-template-columns:repeat(4,46px);gap:5px;padding:10px;background:#fff;border-radius:16px;border:4px solid #a8743f;box-shadow:0 5px 0 #a8743f;position:relative}
+.etk-kasif i{width:46px;height:46px;border-radius:6px;display:grid;place-items:center;font-style:normal;font-size:26px}
+.etk-kasif .kbl{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);display:flex;gap:5px}
+.etk-kasif .kbl b{width:34px;height:34px;border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.25);display:grid;place-items:center}
+.etk-kasif .kbl svg{width:22px;height:22px}
+
 /* ---------- lego atölyesi ---------- */
 #lego{display:flex;flex-direction:column;gap:12px;padding-bottom:12px}
 .l-ana{display:flex;flex-direction:column;gap:12px;min-height:0}
@@ -1191,6 +1201,725 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
     </div>
   </div>
 </section>
+
+<!-- KÜÇÜK KÂŞİF -->
+<section id="kasif" hidden>
+  <header class="ust">
+    <div class="logo"><svg viewBox="0 0 96 96" aria-hidden="true"><rect x="6" y="6" width="84" height="84" rx="12" fill="#9fd17a"/><path d="M34 6V90M62 6V90M6 34H90M6 62H90" stroke="#7fb35c" stroke-width="3"/><rect x="38" y="38" width="20" height="20" rx="5" fill="#c98a4b"/><path d="M48 30l7 8H41z" fill="#ff7a1a"/></svg><span>KÜÇÜK KÂŞİF</span></div>
+    <div class="arac">
+      <button class="ab ev k-ogr-ozel" id="kEtk" aria-label="Etkinlikler" title="Etkinlikler"></button>
+    </div>
+    <div class="sag">
+      <button class="ben" id="kBen" aria-label="Profilim"><span id="kkimAv"></span><span class="ben-yazi"><b id="kkimAd"></b><small id="kkimAlt"></small></span><span class="etiket" id="kkimInceleme" hidden>İnceleme</span><span class="ben-kalem" id="kbenKalem"></span></button>
+      <button class="ab tam" id="kTamEkran" aria-label="Tam ekran" title="Tam ekran"></button>
+      <button class="ab k-ogr-ozel" id="kCikis" aria-label="Çıkış" title="Çıkış"></button>
+      <button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button>
+    </div>
+  </header>
+  <iframe id="kasifCerceve" title="Küçük Kâşif görevleri"></iframe>
+</section>
+<!-- Küçük Kâşif uygulamasının kaynağı: açılınca yukarıdaki çerçeveye yüklenir. -->
+<template id="kasifKaynak">
+<title>Küçük Kâşif Matı</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: level path strip on top; left = task card (yönerge) + labeled mat; right = wooden coding board + robot step */
+:root{
+  --bg:#eef3ec; --fg:#2b2a24; --muted:#6b6a5c;
+  --wood:#d9a86c; --wood-dark:#a8743f; --wood-grain:#c9955a; --slot:#8c5e30;
+  --panel:#fffdf7; --line:#d8d2c2; --chip:#e4ecdc;
+  --green:#3fa34d; --yellow:#f2b632; --red:#e05a4b; --blue:#3f7fd6; --purple:#8a5cc7;
+  --grass:#9fd17a; --grass2:#8cc56a; --water:#7cc4e8; --sand:#f0d99a; --rock:#b9b4a8;
+  --plain1:#f6f1e4; --plain2:#e9e1cc; --wall:#5b4a3a;
+  --target:#ff7a1a;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1c211d; --fg:#f1eee4; --muted:#aaa797; --panel:#262c27; --line:#3b433c; --chip:#33402f;
+  --wood:#9a6e3f; --wood-dark:#6e4a25; --wood-grain:#8a6034; --slot:#4d3218;
+  --grass:#6fa653; --grass2:#629a48; --water:#4f9cc4; --sand:#c9b276; --rock:#8e897d;
+  --plain1:#d8d0bb; --plain2:#c4baa0; --purple:#a67de0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1c211d; --fg:#f1eee4; --muted:#aaa797; --panel:#262c27; --line:#3b433c; --chip:#33402f;
+  --wood:#9a6e3f; --wood-dark:#6e4a25; --wood-grain:#8a6034; --slot:#4d3218;
+  --grass:#6fa653; --grass2:#629a48; --water:#4f9cc4; --sand:#c9b276; --rock:#8e897d;
+  --plain1:#d8d0bb; --plain2:#c4baa0; --purple:#a67de0; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+body.kk-ogr h1,body.kk-ogr #editToggle,body.kk-ogr #editor{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 28px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,36px);margin:0;line-height:1;text-wrap:balance}
+h1 span{color:var(--green)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,button,input[type=text]{font-family:var(--body);font-weight:800;font-size:15px}
+select,input[type=text]{padding:9px 12px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--fg);min-width:0}
+.pill{padding:9px 14px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.pill.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.score{font-family:var(--display);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums}
+
+/* Level path */
+.path{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:10px 12px}
+.lvg{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lvg .lvn{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:2px}
+.chip{padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+.chip.cur{border-color:var(--blue);background:var(--blue);color:#fff}
+.path.off{opacity:.5;pointer-events:none}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* Task card */
+.card{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--chip);color:var(--fg)}
+.badge.tbuild{background:var(--green);color:#fff} .badge.tpredict{background:var(--purple);color:#fff}
+.badge.tdebug{background:var(--red);color:#fff} .badge.tcollect{background:var(--yellow);color:#2b2a24} .badge.tfree{background:var(--blue);color:#fff}
+.card h2{font-family:var(--display);font-size:24px;margin:0;line-height:1.1}
+.goal{font-weight:800;font-size:16px}
+.card ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;line-height:1.45;max-width:65ch}
+.card ol li::marker{font-weight:800;color:var(--blue)}
+.rules{display:flex;gap:6px;flex-wrap:wrap}
+.rule{font-size:13px;font-weight:800;padding:4px 10px;border-radius:8px;border:2px dashed var(--blue);color:var(--blue)}
+.stages{display:flex;gap:6px;flex-wrap:wrap}
+.stage{font-size:13px;font-weight:800;padding:5px 11px;border-radius:999px;border:2px solid var(--line);color:var(--muted)}
+.stage.now{border-color:var(--blue);color:var(--blue)}
+.stage.done{border-color:var(--green);background:var(--green);color:#fff}
+.hint{background:var(--chip);border-radius:12px;padding:8px 12px;font-weight:700;line-height:1.45}
+
+/* Mat */
+.mat-wrap{background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.frame{display:grid;gap:4px}
+.ax{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:clamp(13px,2.4vw,17px);color:var(--muted)}
+.mat{position:relative;width:100%;border-radius:12px;overflow:hidden;display:grid;border:4px solid var(--wood-dark)}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,5vw,34px);
+  border-right:1px dashed rgba(0,0,0,.16);border-bottom:1px dashed rgba(0,0,0,.16);cursor:pointer;user-select:none;aspect-ratio:1}
+.cell.grass{background:var(--grass)} .cell.grass.alt{background:var(--grass2)}
+.cell.water{background:var(--water)} .cell.sand{background:var(--sand)} .cell.rock{background:var(--rock)}
+.cell.plain{background:var(--plain1)} .cell.plain.alt{background:var(--plain2)}
+.cell .coord{position:absolute;left:4px;top:2px;font-size:10px;font-weight:800;opacity:.5;color:#2b2a24}
+.cell.wall{background:repeating-linear-gradient(45deg,var(--wall) 0 8px,#6e5b48 8px 16px)!important}
+.cell.wall::before{content:"✋";font-size:.8em}
+.cell.start-mark::before{content:"";position:absolute;inset:14%;border:3px dashed rgba(0,0,0,.35);border-radius:12px}
+.cell.target::after{content:"";position:absolute;inset:6%;border:4px solid var(--target);border-radius:12px;animation:pulse 1.2s ease-in-out infinite}
+.cell.got::after{border-color:var(--green);animation:none;background:rgba(63,163,77,.18)}
+@keyframes pulse{50%{transform:scale(.9);opacity:.55}}
+.cell .num{position:absolute;right:4px;top:3px;background:var(--target);color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;z-index:2}
+.cell.got .num{background:var(--green)}
+.cell .predmark{position:absolute;inset:8%;border:4px dashed var(--purple);border-radius:12px;display:flex;align-items:flex-end;justify-content:flex-end;font-size:16px;z-index:2}
+.trail{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
+.robot{position:absolute;left:0;top:0;transition:left .45s ease,top .45s ease;pointer-events:none;z-index:3}
+.robot .body{width:100%;height:100%;padding:10%;transition:transform .4s ease}
+.robot.bump .body{animation:bump .35s ease 2}
+@keyframes bump{50%{translate:0 -6%}}
+.robot.happy .body{animation:hop .5s ease 3}
+@keyframes hop{50%{scale:1.15}}
+.help{color:var(--muted);font-size:13.5px;line-height:1.5;max-width:65ch;margin:0}
+
+/* Editor */
+.editor h2{font-family:var(--display);font-size:22px;margin:0}
+.editor label{font-weight:800;font-size:13px;color:var(--muted)}
+
+/* Board */
+.board{background:repeating-linear-gradient(90deg,var(--wood) 0 22px,var(--wood-grain) 22px 24px,var(--wood) 24px 50px);
+  border:3px solid var(--wood-dark);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 0 var(--wood-dark)}
+.lbl{font-family:var(--display);font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.35);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lbl small{font-family:var(--body);font-size:12px;opacity:.9;text-align:right}
+.line{display:grid;gap:7px;padding:9px;border-radius:14px;background:rgba(0,0,0,.14);border:3px solid transparent;cursor:pointer}
+.line.active{border-color:#fff;background:rgba(255,255,255,.18)}
+#mainLine{grid-template-columns:repeat(6,1fr)}
+#fnLine{grid-template-columns:repeat(4,1fr)}
+.slot{aspect-ratio:1;border-radius:10px;background:var(--slot);box-shadow:inset 0 3px 5px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;position:relative}
+.slot .n{position:absolute;font-size:11px;font-weight:800;color:rgba(255,255,255,.4)}
+.line.active .slot.cursor{outline:3px dashed #fff;outline-offset:1px}
+.blk{width:100%;height:100%;border-radius:10px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.3);padding:12%}
+.blk svg{width:100%;height:100%}
+.F{background:var(--green)} .L{background:var(--yellow)} .R{background:var(--red)} .P{background:var(--blue)}
+.slot.now{outline:4px solid #fff!important;outline-offset:2px}
+.slot.now .blk{transform:translateY(-3px)}
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.palette .blk{aspect-ratio:1;height:auto;max-width:86px;justify-self:center}
+.palette .cap{display:block;text-align:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.4);margin-top:4px}
+.board.locked .palette{opacity:.4;pointer-events:none}
+.board.locked .line{cursor:default}
+.lockmsg{color:#fff;font-weight:800;font-size:13px;text-shadow:0 1px 0 rgba(0,0,0,.4)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap}
+.ctrl button{flex:1;min-width:90px;padding:12px 10px;border-radius:14px;border:none;cursor:pointer;color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.3)}
+#go{background:var(--blue);font-size:18px;flex:2}
+#go:disabled{opacity:.6;cursor:default}
+#stop{background:var(--red)} #clear{background:#7d6f5d} #reset{background:#5f8a5a}
+.speed{display:flex;align-items:center;gap:8px;color:#fff;font-weight:800;font-size:13px;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.speed input{flex:1}
+.msg{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:700;min-height:46px;display:flex;align-items:center;line-height:1.4}
+.msg.ok{border-color:var(--green)} .msg.bad{border-color:var(--red)}
+
+/* Robot step */
+.try{background:var(--panel);border:3px solid var(--green);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.try h3{margin:0;font-family:var(--display);font-size:19px}
+.checks{display:flex;flex-direction:column;gap:7px}
+.checks label{display:flex;gap:8px;align-items:flex-start;line-height:1.4;font-weight:700;cursor:pointer}
+.checks input{width:20px;height:20px;flex:none;margin-top:1px;accent-color:var(--green)}
+.seqrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding-left:28px}
+.seqrow span{font-size:12.5px;font-weight:800;color:var(--muted);margin-right:4px}
+.mini{display:inline-flex;width:30px;height:30px;border-radius:7px;padding:5px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.mini svg{width:100%;height:100%}
+.note{margin:0;font-size:13px;color:var(--muted)}
+.ask{border-top:2px dashed var(--line);padding-top:9px;display:flex;flex-direction:column;gap:8px}
+.yes{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
+.fb ul{margin:4px 0 0;padding-left:20px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Küçük <span>Kâşif</span> Matı</h1>
+    <div class="row">
+      <span class="score" id="score"></span>
+      <button class="pill" id="editToggle">✏️ Görev Hazırla</button>
+    </div>
+  </header>
+
+  <nav class="path" id="path" aria-label="Görevler"></nav>
+
+  <div class="main">
+    <div class="col">
+      <section class="card" id="card"></section>
+
+      <section class="card editor" id="editor" hidden>
+        <h2>Görev Hazırla</h2>
+        <p class="help">Karelere dokunarak başlangıcı, hedefi ve engelleri yerleştirin. Blokları dizip çalıştırarak görevi test edebilirsiniz.</p>
+        <div class="row">
+          <label for="mapSel">Mat</label>
+          <select id="mapSel"><option value="koord">Düz koordinat matı</option><option value="kasif">Kâşif haritası (6×6)</option></select>
+          <label for="colsIn">Sütun</label><select id="colsIn"></select>
+          <label for="rowsIn">Satır</label><select id="rowsIn"></select>
+        </div>
+        <div class="row">
+          <label for="rowDir">Satır numarası</label>
+          <select id="rowDir"><option value="top">Üstten 1 başlar</option><option value="bottom">Alttan 1 başlar</option></select>
+        </div>
+        <div class="row" id="tools">
+          <button class="pill on" data-tool="start">🤖 Başlangıç</button>
+          <button class="pill" data-tool="target">🎯 Hedef</button>
+          <button class="pill" data-tool="wall">✋ Engel</button>
+          <button class="pill" data-tool="erase">🧽 Sil</button>
+        </div>
+        <div class="row">
+          <label>Robot yönü</label>
+          <button class="pill dir" data-d="0" aria-label="Yukarı">↑</button><button class="pill dir" data-d="1" aria-label="Sağa">→</button>
+          <button class="pill dir" data-d="2" aria-label="Aşağı">↓</button><button class="pill dir" data-d="3" aria-label="Sola">←</button>
+        </div>
+        <input type="text" id="tName" placeholder="Görev adı (ör. Hazineye git)">
+        <input type="text" id="tNote" placeholder="Öğrenciye ek yönerge (isteğe bağlı)">
+        <div class="row">
+          <label for="tMax">En fazla blok</label>
+          <select id="tMax"><option value="0">Sınır yok</option></select>
+          <label><input type="checkbox" id="tFn"> Fonksiyon zorunlu</label>
+        </div>
+        <div class="goal" id="edStatus"></div>
+        <div class="row">
+          <button class="pill on" id="saveTask">Kaydet</button>
+          <button class="pill" id="delTask">Sil</button>
+        </div>
+      </section>
+
+      <section class="mat-wrap">
+        <div class="frame" id="frame"></div>
+        <p class="help" id="matHelp"></p>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="board" id="board">
+        <div>
+          <div class="lbl">Ana Program <small>12 blok</small></div>
+          <div class="line active" id="mainLine" data-line="main"></div>
+        </div>
+        <div>
+          <div class="lbl">Fonksiyon Satırı <small>4 blok · mavi blok bunu çalıştırır</small></div>
+          <div class="line" id="fnLine" data-line="fn"></div>
+        </div>
+        <div>
+          <div class="lbl">Bloklar <small>Dokun: kesikli çizgili yere eklenir</small></div>
+          <div class="palette" id="palette"></div>
+          <div class="lockmsg" id="lockmsg" hidden>🔒 Bu bir tahmin görevi. Program değiştirilemez.</div>
+        </div>
+        <div class="speed"><label for="spd">Hız</label><input type="range" id="spd" min="1" max="3" value="2"></div>
+        <div class="ctrl">
+          <button id="go">▶ Çalıştır</button>
+          <button id="stop">■ Dur</button>
+          <button id="reset">↺ Başa Al</button>
+          <button id="clear">Temizle</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      </section>
+      <section class="try" id="try" hidden></section>
+    </div>
+  </div>
+</div>
+
+<script>
+const ICON={
+ F:'<svg viewBox="0 0 40 40"><path d="M20 5 L33 20 H25 V35 H15 V20 H7 Z" fill="#fff"/></svg>',
+ L:'<svg viewBox="0 0 40 40"><path d="M32 35 V20 Q32 12 24 12 H17 V5 L5 15 L17 25 V18 H24 Q26 18 26 20 V35 Z" fill="#fff"/></svg>',
+ R:'<svg viewBox="0 0 40 40"><path d="M8 35 V20 Q8 12 16 12 H23 V5 L35 15 L23 25 V18 H16 Q14 18 14 20 V35 Z" fill="#fff"/></svg>',
+ P:'<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="none" stroke="#fff" stroke-width="5"/><path d="M20 11 L26 5 M20 11 L26 17" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>'
+};
+const NAME={F:'İleri',L:'Sola dön',R:'Sağa dön',P:'Fonksiyon'};
+const DIRNAME=['yukarı','sağa','aşağı','sola'];
+const ROBOT='<svg viewBox="0 0 100 100"><rect x="10" y="14" width="80" height="76" rx="14" fill="#c98a4b" stroke="#7a4f24" stroke-width="4"/><rect x="18" y="22" width="64" height="40" rx="8" fill="#e8b57c"/><circle cx="36" cy="40" r="9" fill="#fff"/><circle cx="64" cy="40" r="9" fill="#fff"/><circle cx="36" cy="37" r="4.5" fill="#2b2a24"/><circle cx="64" cy="37" r="4.5" fill="#2b2a24"/><path d="M38 52 Q50 60 62 52" stroke="#7a4f24" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M50 0 L64 14 H36 Z" fill="#ff7a1a"/><rect x="4" y="30" width="8" height="30" rx="3" fill="#3b3a33"/><rect x="88" y="30" width="8" height="30" rx="3" fill="#3b3a33"/></svg>';
+
+const KASIF=[
+ [['rock','⛰️'],['rock',''],['grass','🌲'],['grass','🌲'],['grass','🏠'],['grass','']],
+ [['rock',''],['grass',''],['grass','🌲'],['grass',''],['grass',''],['sand','']],
+ [['grass','🐄'],['grass',''],['water',''],['water','🐟'],['grass',''],['sand','🐚']],
+ [['grass',''],['grass','🌻'],['water',''],['water',''],['grass','🏫'],['sand','']],
+ [['sand',''],['grass',''],['grass',''],['grass',''],['grass',''],['water','⛵']],
+ [['sand','🏰'],['sand',''],['grass','🍎'],['grass',''],['water',''],['water','']]
+];
+const ICONT={'⛰️':'dağ','🌲':'orman','🏠':'ev','🐄':'inek','🐟':'balık','🐚':'deniz kabuğu','🌻':'çiçek','🏫':'okul','⛵':'tekne','🏰':'kale','🍎':'elma'};
+const LEVELS={1:'İleri git',2:'Dönüşler',3:'Engel ve hata',4:'Fonksiyon',5:'Sırayla topla'};
+const TYPES={build:'Yolu bul',predict:'Tahmin et',debug:'Hatayı bul',collect:'Sırayla topla',free:'Serbest'};
+
+const TASKS=[
+ {id:'1a',lv:1,type:'build',name:'İlk adımlar',start:[0,4,1],targets:[[4,4]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Hedef kare {T}. Parmağınla robottan hedefe kadar kareleri say.','Saydığın kadar yeşil İleri bloğunu ana programa koy.','▶ Çalıştır\'a bas ve robotu izle.'],
+  hint:'Robot ile hedef arasında 4 kare var.'},
+ {id:'1b',lv:1,type:'predict',name:'Nereye gider?',start:[1,5,0],preset:{main:['F','F','F']},
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Ana programdaki bloklara bak. Robot kaç kare ilerleyecek?','Robotun duracağını düşündüğün kareye dokun.','▶ Çalıştır\'a bas ve tahminini kontrol et.'],
+  hint:'Her yeşil blok robotu baktığı yöne 1 kare götürür.'},
+ {id:'2a',lv:2,type:'build',name:'Elmayı topla',start:[0,4,1],targets:[[2,5]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor. Elma {T} karesinde.','Robot önce sağa doğru kaç kare gitmeli? Bul.','Sonra robotun aşağı bakması için hangi dönüş bloğu gerekir, düşün.','Dönüş blokları robotu yerinde çevirir, ilerletmez. Dönüşten sonra bir İleri bloğu daha koy.','Programını çalıştır.'],
+  hint:'Kendini robotun yerine koy: sağa bakarken aşağı dönmek için Sağa dön bloğu gerekir.'},
+ {id:'2b',lv:2,type:'predict',name:'Dön ve git',start:[3,5,0],preset:{main:['F','L','F','F']},
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Blokları tek tek oku. Sola döndükten sonra robot hangi yöne bakar?','Robotun duracağı kareye dokun.','▶ Çalıştır ve kontrol et.'],
+  hint:'Yukarı bakarken sola dönen robot, matın sol kenarına bakar.'},
+ {id:'2c',lv:2,type:'build',name:'Okula yetiş',start:[3,5,0],targets:[[4,3]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor. Okul {T} karesinde.','Okul hangi satırda? Robot önce o satıra kadar ilerlesin.','Sonra doğru yöne dönüp okula gitsin.','Programını kur ve çalıştır.'],
+  hint:'Okul, robotun sağ tarafında kalıyor.'},
+ {id:'3a',lv:3,type:'build',name:'Gölün etrafından',start:[1,2,1],targets:[[4,2]],walls:[[2,2],[3,2]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor. Hedef {T}.','Önündeki ✋ kareler engel. Robot oraya giremez.','Engelin etrafından dolaşan bir yol bul: üstten ya da alttan.','Her yön değişiminde bir dönüş bloğu kullan.','Programı çalıştır. Robot engele çarparsa programını düzelt.'],
+  hint:'Üstten gitmek için önce Sola dön bloğuyla robotu yukarı çevir.'},
+ {id:'3b',lv:3,type:'debug',name:'Hatayı bul',start:[3,4,1],targets:[[5,2]],preset:{main:['F','F','R','F','F']},
+  steps:['Bu program robotu deniz kabuğuna ({T}) götürmeli ama içinde bir hata var.','Önce ▶ Çalıştır\'a bas ve robotun nereye gittiğini izle.','Hangi blok yanlış? O bloğa dokun, çıkar.','Doğru bloğu seç. Yeni blok, çıkardığın bloğun yerine girer.','Tekrar çalıştır.'],
+  hint:'Deniz kabuğu robotun yukarısında. Robot sağa dönünce aşağı bakıyor.'},
+ {id:'4a',lv:4,type:'build',name:'Dağa tırman',start:[5,0,3],targets:[[0,0]],maxMain:3,mustFn:true,
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor. Dağ {T} karesinde.','Robot 5 kare ileri gitmeli ama ana programa en fazla 3 blok koyabilirsin.','Fonksiyon satırına dokun ve oraya İleri blokları koy.','Ana programa mavi Fonksiyon bloğunu koy. Mavi blok, fonksiyon satırındaki her şeyi çalıştırır.','Toplam 5 adım olacak şekilde düzenle ve çalıştır.'],
+  hint:'Fonksiyona 2 İleri koyarsan, ana programda 2 mavi blok + 1 İleri yeter.'},
+ {id:'4b',lv:4,type:'predict',name:'Merdiven',start:[1,5,0],preset:{main:['P','P'],fn:['F','R','F','L']},
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Fonksiyon satırını oku. Fonksiyon bir kez çalışınca robot nereye gider?','Ana programda 2 mavi blok var, yani fonksiyon 2 kez çalışır.','Robotun duracağı kareye dokun, sonra çalıştır.'],
+  hint:'Fonksiyon her çalıştığında robot 1 kare yukarı, 1 kare sağa gider.'},
+ {id:'4c',lv:4,type:'build',name:'Kaleden eve',start:[0,5,0],targets:[[4,0]],maxMain:6,mustFn:true,
+  steps:['Robot kalede ({S}), yüzü {D} bakıyor. Ev {T} karesinde.','Merdiven gibi bir yol düşün: yukarı, sağa, yukarı, sağa…','Bir basamağı fonksiyon satırına yaz.','Ana programda fonksiyonu tekrar tekrar çalıştır. En fazla 6 blok kullan.','Son adımı unutma ve çalıştır.'],
+  hint:'Bir basamak: İleri, Sağa dön, İleri, Sola dön.'},
+ {id:'5a',lv:5,type:'collect',name:'Çiftlik turu',start:[0,5,0],targets:[[0,2],[1,3]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Önce 1 numaralı hedefe ({T}) git ve ineği ziyaret et.','Sonra 2 numaralı hedefe ({T2}) git ve çiçeği kokla.','İki hedefe sırayla uğrayan tek bir program yaz ve çalıştır.'],
+  hint:'İnekten sonra sağa dön, 1 ileri git, sonra aşağı dön.'},
+ {id:'5b',lv:5,type:'collect',name:'Okul yolu',start:[0,4,1],targets:[[1,3],[4,3]],
+  steps:['Robot {S} karesinde, yüzü {D} bakıyor.','Okula gitmeden önce çiçek topla: 1 numaralı hedef {T}.','Sonra okula git: 2 numaralı hedef {T2}.','Programını kur ve çalıştır.'],
+  hint:'Çiçeğe varınca robot yukarı bakar. Okula gitmek için sağa dönmesi gerekir.'}
+];
+const FREE={id:'free',type:'free',name:'Serbest oyun',start:[0,4,1],targets:[],
+  steps:['Bir kareye dokunarak robotun başlangıç yerini seç.','Robotun durduğu kareye tekrar dokunursan yönü değişir.','Blokları diz ve robotu istediğin yere götür.','Aynı programı gerçek robotta da dene.']};
+
+const DX=[0,1,0,-1],DY=[-1,0,1,0],LET='ABCDEFGHIJ';
+const $=id=>document.getElementById(id);
+const KK=window.KK||{},KP=KK.anahtar?KK.anahtar+':':'';
+if(KK.ogrenci)document.body.classList.add('kk-ogr');
+const store={get(k,d){try{const v=localStorage.getItem(KP+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(KP+k,JSON.stringify(v))}catch(e){}}};
+
+let custom=KK.ogrenci?[]:store.get('kk-custom3',[]);
+let progress=store.get('kk-prog3',{});
+let rowDir=store.get('kk-rowdir','top');
+let prog={main:Array(12).fill(null),fn:Array(4).fill(null)},cursor={main:0,fn:0};
+let active='main',task=null,pos={x:0,y:0,d:1},rot=90,running=false,stopFlag=false,path=[],next=0,pred=null,hintOpen=false;
+let editing=false,tool='start',draft=null;
+let matEl,robotEl,rbody,trail,cells=[];
+
+function norm(t){
+  const o={map:'kasif',cols:6,rows:6,walls:[],targets:[],preset:null,...t};
+  if(o.custom)o.steps=['Robot {S} karesinde, yüzü {D} bakıyor. Hedef {T}.',...(o.note?[o.note]:[]),'Blokları diz ve ▶ Çalıştır\'a bas.'];
+  return o;
+}
+const builtins=TASKS.map(norm),freeTask=norm(FREE);
+function allTasks(){return [...builtins,...custom.map(norm)]}
+function cur(){return editing?draft:task}
+const coord=(x,y,rows)=>LET[x]+(rowDir==='top'?y+1:rows-y);
+const itemAt=(t,x,y)=>t.map==='kasif'?(KASIF[y]?.[x]?.[1]||''):'';
+const same=(a,b)=>a&&b&&a[0]===b[0]&&a[1]===b[1];
+function fmt(s,t){
+  const R=t.rows,tg=t.targets;
+  return s.replace(/\{S\}/g,'<b>'+coord(t.start[0],t.start[1],R)+'</b>').replace(/\{D\}/g,'<b>'+DIRNAME[t.start[2]]+'</b>')
+   .replace(/\{T\}/g,tg[0]?'<b>'+coord(tg[0][0],tg[0][1],R)+'</b>':'?').replace(/\{T2\}/g,tg[1]?'<b>'+coord(tg[1][0],tg[1][1],R)+'</b>':'?');
+}
+const mini=k=>`<span class="mini ${k}" title="${NAME[k]}">${ICON[k]}</span>`;
+
+/* ---------- path strip ---------- */
+function renderPath(){
+  const p=$('path');p.innerHTML='';
+  const groups={};builtins.forEach(t=>(groups[t.lv]=groups[t.lv]||[]).push(t));
+  const st=t=>{const g=progress[t.id]||{};return g.r?' 🤖':g.d?' ⭐':''};
+  Object.keys(groups).forEach(lv=>{
+    const g=document.createElement('div');g.className='lvg';
+    g.innerHTML=`<span class="lvn">${lv}. ${LEVELS[lv]}</span>`;
+    groups[lv].forEach((t,i)=>g.insertAdjacentHTML('beforeend',`<button class="chip${task&&task.id===t.id?' cur':''}" data-id="${t.id}" title="${t.name}">${lv}.${i+1}${st(t)}</button>`));
+    p.appendChild(g);
+  });
+  const g=document.createElement('div');g.className='lvg';
+  g.innerHTML='<span class="lvn">Diğer</span>';
+  custom.map(norm).forEach(t=>g.insertAdjacentHTML('beforeend',`<button class="chip${task&&task.id===t.id?' cur':''}" data-id="${t.id}">${t.name}${st(t)}</button>`));
+  g.insertAdjacentHTML('beforeend',`<button class="chip${task&&task.id==='free'?' cur':''}" data-id="free">Serbest</button>`);
+  p.appendChild(g);
+  p.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{if(!running)selectTask(c.dataset.id)});
+  p.classList.toggle('off',editing);
+  const all=allTasks(),d=all.filter(t=>progress[t.id]?.d).length,r=all.filter(t=>progress[t.id]?.r).length;
+  $('score').textContent=`⭐ ${d}/${all.length}  ·  🤖 ${r}/${all.length}`;
+}
+
+/* ---------- task card ---------- */
+function renderCard(){
+  $('card').hidden=editing;$('editor').hidden=!editing;
+  if(editing){edStatus();return}
+  const t=task,g=progress[t.id]||{};
+  const tg=t.targets;
+  let goal='';
+  if(t.type==='build'||t.type==='debug')goal=`🎯 Hedef: ${itemAt(t,...tg[0])} <b>${coord(tg[0][0],tg[0][1],t.rows)}</b>`;
+  else if(t.type==='collect')goal=tg.map((p,i)=>`${i+1}. ${itemAt(t,...p)} <b>${coord(p[0],p[1],t.rows)}</b>`).join(' → ');
+  else if(t.type==='predict')goal='❓ Robot hangi karede duracak?';
+  const rules=[];
+  if(t.maxMain)rules.push(`Ana programda en fazla ${t.maxMain} blok`);
+  if(t.mustFn)rules.push('Fonksiyon kullanmalısın');
+  const lvTxt=t.lv?`Seviye ${t.lv} · ${LEVELS[t.lv]}`:(t.custom?'Öğretmen görevi':'Serbest');
+  $('card').innerHTML=`
+    <div class="badges"><span class="badge">${lvTxt}</span><span class="badge t${t.type}">${TYPES[t.type]}</span></div>
+    <h2>${t.name}</h2>
+    ${goal?`<div class="goal">${goal}</div>`:''}
+    <ol>${t.steps.map(s=>`<li>${fmt(s,t)}</li>`).join('')}</ol>
+    ${rules.length?`<div class="rules">${rules.map(r=>`<span class="rule">${r}</span>`).join('')}</div>`:''}
+    ${t.type!=='free'?`<div class="stages"><span class="stage ${g.d?'done':'now'}">1 · Dijitalde çöz${g.d?' ✓':''}</span><span class="stage ${g.r?'done':g.d?'now':''}">2 · Robotta dene${g.r?' ✓':''}</span></div>`:''}
+    ${t.hint?`<div class="row"><button class="pill" id="hintBtn">💡 ${hintOpen?'İpucunu gizle':'İpucu'}</button></div>${hintOpen?`<div class="hint">${t.hint}</div>`:''}`:''}`;
+  const hb=$('hintBtn');if(hb)hb.onclick=()=>{hintOpen=!hintOpen;renderCard()};
+  $('matHelp').textContent=t.type==='predict'?'Tahminini işaretlemek için mattaki bir kareye dokun.':t.type==='free'?'Kareye dokun: robot oraya gider. Robotun karesine dokun: yönü değişir.':'Turuncu çerçeveli kare hedefin. Kesikli çizgili kare robotun başlangıç yeri.';
+}
+
+/* ---------- mat ---------- */
+function buildMat(){
+  const t=cur(),C=t.cols,R=t.rows,f=$('frame');
+  f.style.gridTemplateColumns=`1.6em repeat(${C},minmax(0,1fr))`;
+  f.innerHTML='<div></div>';
+  for(let x=0;x<C;x++)f.insertAdjacentHTML('beforeend',`<div class="ax">${LET[x]}</div>`);
+  for(let y=0;y<R;y++)f.insertAdjacentHTML('beforeend',`<div class="ax" style="grid-column:1;grid-row:${y+2}">${rowDir==='top'?y+1:R-y}</div>`);
+  matEl=document.createElement('div');matEl.className='mat';
+  matEl.style.gridColumn=`2 / span ${C}`;matEl.style.gridRow=`2 / span ${R}`;
+  matEl.style.gridTemplateColumns=`repeat(${C},1fr)`;matEl.style.gridTemplateRows=`repeat(${R},1fr)`;
+  const walls=new Set((t.walls||[]).map(w=>w.join(',')));
+  const showT=t.type!=='predict';
+  cells=[];
+  for(let y=0;y<R;y++){cells[y]=[];for(let x=0;x<C;x++){
+    const c=document.createElement('div');
+    let cls='plain',item='';
+    if(t.map==='kasif'&&KASIF[y]&&KASIF[y][x])[cls,item]=KASIF[y][x];
+    c.className='cell '+cls+(((cls==='grass'||cls==='plain')&&(x+y)%2)?' alt':'');
+    const wall=walls.has(x+','+y);
+    if(wall)c.classList.add('wall');
+    if(t.start[0]===x&&t.start[1]===y)c.classList.add('start-mark');
+    let num='';
+    if(showT)t.targets.forEach((p,i)=>{if(p[0]===x&&p[1]===y){c.classList.add('target');if(t.targets.length>1)num=`<span class="num">${i+1}</span>`}});
+    c.innerHTML=`<span class="coord">${coord(x,y,R)}</span>${num}${wall?'':item}`;
+    c.onclick=()=>cellClick(x,y);
+    matEl.appendChild(c);cells[y][x]=c;
+  }}
+  trail=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  trail.setAttribute('class','trail');trail.setAttribute('viewBox',`0 0 ${C*100} ${R*100}`);trail.setAttribute('preserveAspectRatio','none');
+  matEl.appendChild(trail);
+  robotEl=document.createElement('div');robotEl.className='robot';
+  robotEl.style.width=(100/C)+'%';robotEl.style.height=(100/R)+'%';
+  robotEl.innerHTML='<div class="body">'+ROBOT+'</div>';rbody=robotEl.firstChild;
+  matEl.appendChild(robotEl);
+  f.appendChild(matEl);
+  markPred();
+}
+function markPred(){
+  document.querySelectorAll('.predmark').forEach(e=>e.remove());
+  if(pred&&cells[pred[1]]?.[pred[0]])cells[pred[1]][pred[0]].insertAdjacentHTML('beforeend','<span class="predmark">❓</span>');
+}
+function resetRobot(){
+  const t=cur();
+  pos={x:t.start[0],y:t.start[1],d:t.start[2]};rot=pos.d*90;path=[[pos.x,pos.y]];next=0;
+  document.querySelectorAll('.cell.got').forEach(c=>c.classList.remove('got'));
+  robotEl.classList.remove('bump','happy');
+  rbody.style.transition='none';robotEl.style.transition='none';draw();
+  void robotEl.offsetWidth;rbody.style.transition='';robotEl.style.transition='';
+}
+function draw(){
+  const t=cur();
+  robotEl.style.left=(pos.x*100/t.cols)+'%';robotEl.style.top=(pos.y*100/t.rows)+'%';
+  rbody.style.transform=`rotate(${rot}deg)`;
+  const pts=path.map(([x,y])=>`${x*100+50},${y*100+50}`).join(' ');
+  trail.innerHTML=path.length>1?`<polyline points="${pts}" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="10" stroke-dasharray="4 16" stroke-linecap="round" stroke-linejoin="round"/>`:'';
+}
+function show(){buildMat();resetRobot();renderCard()}
+function cellClick(x,y){
+  if(running)return;
+  const t=cur();
+  if(editing){
+    const k=x+','+y;draft.walls=draft.walls.filter(w=>w.join(',')!==k);
+    if(tool==='start'){draft.start=[x,y,draft.start[2]];if(same(draft.targets[0],[x,y]))draft.targets=[]}
+    else if(tool==='target'){if(!same(draft.start,[x,y]))draft.targets=[[x,y]]}
+    else if(tool==='wall'){if(!same(draft.start,[x,y])){draft.walls.push([x,y]);if(same(draft.targets[0],[x,y]))draft.targets=[]}}
+    else if(tool==='erase'){if(same(draft.targets[0],[x,y]))draft.targets=[]}
+    show();return;
+  }
+  if(t.type==='predict'){pred=[x,y];markPred();hideTry();say(`Tahminin: ${coord(x,y,t.rows)}. Şimdi ▶ Çalıştır'a bas.`);return}
+  if(t.type==='free'){
+    if(same(t.start,[x,y]))t.start[2]=(t.start[2]+1)%4;else t.start=[x,y,t.start[2]];
+    buildMat();resetRobot();hideTry();
+  }
+}
+
+/* ---------- program board ---------- */
+['F','L','R','P'].forEach(k=>{
+  const w=document.createElement('div');
+  w.innerHTML=`<button class="blk ${k}" aria-label="${NAME[k]}">${ICON[k]}</button><span class="cap">${NAME[k]}</span>`;
+  w.querySelector('button').onclick=()=>addBlock(k);$('palette').appendChild(w);
+});
+const locked=()=>!editing&&task.type==='predict';
+const count=n=>prog[n].filter(Boolean).length;
+document.querySelectorAll('.line').forEach(l=>l.addEventListener('click',e=>{
+  if(e.target.closest('.blk')||locked())return;
+  active=l.dataset.line;cursor[active]=count(active);renderLines();
+}));
+function addBlock(k){
+  if(running||locked())return;
+  if(active==='fn'&&k==='P'){say('Fonksiyon satırına mavi blok konamaz.','bad');return}
+  const arr=prog[active],n=count(active);
+  if(n>=arr.length){say(active==='main'?'Ana program dolu (12 blok).':'Fonksiyon satırı dolu (4 blok).','bad');return}
+  const c=Math.min(cursor[active],n);
+  arr.splice(c,0,k);arr.pop();cursor[active]=c+1;
+  renderLines();hideTry();
+}
+function removeBlock(name,i){
+  if(running||locked())return;
+  prog[name].splice(i,1);prog[name].push(null);cursor[name]=i;active=name;renderLines();hideTry();
+}
+function renderLines(){
+  $('board').classList.toggle('locked',locked());$('lockmsg').hidden=!locked();
+  $('mainLine').classList.toggle('active',active==='main'&&!locked());$('fnLine').classList.toggle('active',active==='fn'&&!locked());
+  ['main','fn'].forEach(name=>{
+    const el=$(name==='main'?'mainLine':'fnLine');el.innerHTML='';
+    const c=Math.min(cursor[name],count(name));
+    prog[name].forEach((k,i)=>{
+      const s=document.createElement('div');s.className='slot'+(i===c?' cursor':'');
+      if(k){const b=document.createElement('button');b.className='blk '+k;b.innerHTML=ICON[k];
+        b.setAttribute('aria-label',NAME[k]+(locked()?'':' bloğunu çıkar'));
+        b.onclick=e=>{e.stopPropagation();removeBlock(name,i)};s.appendChild(b)}
+      else s.innerHTML=`<span class="n">${i+1}</span>`;
+      el.appendChild(s);
+    });
+  });
+}
+function loadProgram(t){
+  const pad=(a,n)=>{const r=(a||[]).slice(0,n);while(r.length<n)r.push(null);return r};
+  prog={main:pad(t.preset?.main,12),fn:pad(t.preset?.fn,4)};
+  cursor={main:count('main'),fn:count('fn')};active='main';renderLines();
+}
+function say(t,c=''){const m=$('msg');m.innerHTML=t;m.className='msg '+c}
+function hideTry(){$('try').hidden=true}
+
+/* ---------- run ---------- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const delay=()=>[0,900,600,330][$('spd').value];
+function highlight(name,i){
+  document.querySelectorAll('.slot.now').forEach(s=>s.classList.remove('now'));
+  if(name==null)return;const el=$(name==='main'?'mainLine':'fnLine').children[i];if(el)el.classList.add('now');
+}
+async function step(k){
+  const t=cur();
+  if(k==='L'){pos.d=(pos.d+3)%4;rot-=90;draw();await sleep(delay());return true}
+  if(k==='R'){pos.d=(pos.d+1)%4;rot+=90;draw();await sleep(delay());return true}
+  const nx=pos.x+DX[pos.d],ny=pos.y+DY[pos.d];
+  const wall=(t.walls||[]).some(w=>w[0]===nx&&w[1]===ny);
+  if(nx<0||ny<0||nx>=t.cols||ny>=t.rows||wall){
+    robotEl.classList.remove('bump');void robotEl.offsetWidth;robotEl.classList.add('bump');
+    say(wall?'Dur! Önünde engel var, robot o kareye giremez. Programını düzelt.':'Hop! Robot matın kenarına geldi, daha ileri gidemez. Hangi blok robotu yanlış yöne çevirdi?','bad');
+    await sleep(700);return false}
+  pos.x=nx;pos.y=ny;path.push([nx,ny]);draw();
+  if(t.type==='collect'&&same(t.targets[next],[nx,ny])){cells[ny][nx].classList.add('got');next++}
+  await sleep(delay());return true;
+}
+async function run(){
+  if(running)return;
+  const t=cur();
+  if(!prog.main.some(Boolean)){say('Önce ana programa blok koy.','bad');return}
+  if(t.type==='predict'&&!pred){say('Önce tahminini işaretle: robotun duracağı kareye dokun.','bad');return}
+  hideTry();resetRobot();await sleep(250);
+  running=true;stopFlag=false;$('go').disabled=true;
+  say('Robot çalışıyor…');
+  let ok=true;
+  outer:for(let i=0;i<12;i++){
+    const k=prog.main[i];if(!k)continue;if(stopFlag)break;
+    highlight('main',i);
+    if(k==='P'){
+      if(!prog.fn.some(Boolean)){await sleep(delay())}
+      for(let j=0;j<4;j++){const f=prog.fn[j];if(!f)continue;if(stopFlag)break outer;highlight('fn',j);if(!(await step(f))){ok=false;break outer}}
+    }else if(!(await step(k))){ok=false;break}
+  }
+  highlight(null);running=false;$('go').disabled=false;
+  evaluate(ok);
+}
+function evaluate(ok){
+  const t=cur();
+  if(stopFlag){say('Durduruldu.');return}
+  if(!ok)return;
+  const R=t.rows,here=coord(pos.x,pos.y,R),C=p=>coord(p[0],p[1],R);
+  if(t.type==='free'){const it=itemAt(t,pos.x,pos.y);say(`Robot <b>${here}</b> karesine vardı${it?': '+ICONT[it]+' '+it:''}.`,'ok');showTry();return}
+  let win=false,why='';
+  if(t.type==='predict'){
+    win=same(pred,[pos.x,pos.y]);
+    if(!win)why=`Robot <b>${here}</b> karesinde durdu, senin tahminin <b>${C(pred)}</b>. Blokları tek tek takip et, yeni bir kareye dokun ve tekrar dene.`;
+  }else if(t.type==='collect'){
+    win=next===t.targets.length;
+    if(!win)why=`Robot ${next+1} numaralı hedefe (<b>${C(t.targets[next])}</b>) uğramadı. Robot <b>${here}</b> karesinde durdu. Programını düzelt.`;
+  }else{
+    win=same(t.targets[0],[pos.x,pos.y]);
+    if(!win)why=`Robot <b>${here}</b> karesinde durdu. Hedef <b>${C(t.targets[0])}</b>. Programını düzelt ve tekrar dene.`;
+  }
+  if(win){
+    const n=count('main');
+    if(t.maxMain&&n>t.maxMain){win=false;why=`Hedefe ulaştın ama ana programda ${n} blok var. En fazla ${t.maxMain} blok kullanmalısın. Fonksiyonu dene!`}
+    else if(t.mustFn&&!(prog.main.includes('P')&&prog.fn.some(Boolean))){win=false;why='Hedefe ulaştın! Ama bu görevde fonksiyon kullanman gerekiyor. Mavi bloğu ve fonksiyon satırını kullan.'}
+  }
+  if(!win){say(why,'bad');return}
+  robotEl.classList.add('happy');
+  say(t.type==='predict'?'Tahminin doğru! 🎉 Şimdi aynı programı gerçek robotta dene.':'Harika! Dijital görev tamam. 🎉 Şimdi aynı programı gerçek robotta dene.','ok');
+  if(!editing){progress[t.id]={...(progress[t.id]||{}),d:1};store.set('kk-prog3',progress);renderPath();renderCard()}
+  showTry();
+}
+
+/* ---------- robot step ---------- */
+function showTry(){
+  const t=cur(),R=t.rows,C=p=>coord(p[0],p[1],R);
+  const fnRow=prog.main.includes('P')?`<div class="seqrow"><span>Fonksiyon satırı:</span>${prog.fn.filter(Boolean).map(mini).join('')}</div>`:'';
+  let q='';
+  if(t.type==='predict')q=`Robot, tahmin ettiğin <b>${C(pred)}</b> karesinde durdu mu?`;
+  else if(t.type==='collect')q=`Robot önce <b>${C(t.targets[0])}</b>, sonra <b>${C(t.targets[1])}</b> karesine uğradı mı?`;
+  else if(t.type!=='free')q=`Robot <b>${C(t.targets[0])}</b> karesine ulaştı mı?`;
+  const tr=$('try');
+  tr.innerHTML=`<h3>🤖 2. Adım: Gerçek robotta dene</h3>
+    <div class="checks">
+      <label><input type="checkbox" id="c1"> Robotu matta <b>${C(t.start)}</b> karesine koy.</label>
+      <label><input type="checkbox" id="c2"> Robotun önü <b>${DIRNAME[t.start[2]]}</b> baksın.</label>
+      <label><input type="checkbox" id="c3"> Blokları tahtaya aynı sırayla diz:</label>
+      <div class="seqrow"><span>Ana program:</span>${prog.main.filter(Boolean).map(mini).join('')}</div>${fnRow}
+      <label><input type="checkbox" id="c4"> Düğmeye bas ve robotu izle.</label>
+    </div>
+    <p class="note">Gerçek matındaki resimler farklı olabilir. Önemli olan kare ve yön.</p>
+    ${q&&!editing?`<div class="ask"><div>${q}</div><div class="row"><button class="pill yes" id="yes">✅ Evet</button><button class="pill" id="no">🤔 Hayır</button></div><div class="fb" id="fb"></div></div>`:''}`;
+  tr.hidden=false;
+  const y=$('yes'),n=$('no');
+  if(y)y.onclick=()=>{
+    progress[t.id]={...(progress[t.id]||{}),d:1,r:1};store.set('kk-prog3',progress);renderPath();renderCard();
+    const all=allTasks(),i=all.findIndex(a=>a.id===t.id),nx=all[i+1];
+    $('fb').innerHTML=`<b>🎉 Görev tamam! Hem dijitalde hem robotta çözdün.</b>${nx?`<div class="row" style="margin-top:8px"><button class="pill on" id="nextBtn">Sonraki görev: ${nx.name} →</button></div>`:''}`;
+    const nb=$('nextBtn');if(nb)nb.onclick=()=>selectTask(nx.id);
+  };
+  if(n)n.onclick=()=>{
+    $('fb').innerHTML=`<b>Sorun değil, birlikte kontrol edelim:</b><ul>
+      <li>Robot doğru karede mi başladı? Karenin tam ortasına koy.</li>
+      <li>Robotun önü doğru yöne bakıyor muydu?</li>
+      <li>Tahtadaki bloklar ekrandakiyle aynı sırada mı?</li>
+      ${prog.main.includes('P')?'<li>Fonksiyon bloklarını fonksiyon satırına koydun mu?</li>':''}
+      <li>Her şeyi düzeltip robotu tekrar çalıştır.</li></ul>`;
+  };
+  tr.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ---------- select ---------- */
+function selectTask(id){
+  task=id==='free'?freeTask:(allTasks().find(t=>t.id===id)||builtins[0]);
+  pred=null;hintOpen=false;hideTry();loadProgram(task);show();renderPath();
+  say(task.type==='predict'?'Önce tahmin et: robotun duracağı kareye dokun.':task.type==='debug'?'Önce programı olduğu gibi çalıştır ve robotun nereye gittiğini izle.':'Yönergeyi oku, blokları diz ve ▶ Çalıştır\'a bas.');
+  store.set('kk-last',task.id);
+}
+
+/* ---------- editor ---------- */
+for(let n=3;n<=8;n++){$('colsIn').insertAdjacentHTML('beforeend',`<option>${n}</option>`);$('rowsIn').insertAdjacentHTML('beforeend',`<option>${n}</option>`)}
+for(let n=2;n<=12;n++)$('tMax').insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
+$('rowDir').value=rowDir;
+function syncEditor(){
+  $('mapSel').value=draft.map;$('colsIn').value=draft.cols;$('rowsIn').value=draft.rows;
+  $('colsIn').disabled=$('rowsIn').disabled=draft.map==='kasif';
+  $('tName').value=draft.name||'';$('tNote').value=draft.note||'';$('tMax').value=draft.maxMain||0;$('tFn').checked=!!draft.mustFn;
+  $('delTask').hidden=!draft.id;
+  document.querySelectorAll('.dir').forEach(b=>b.classList.toggle('on',+b.dataset.d===draft.start[2]));
+}
+function edStatus(){
+  const t=draft;
+  $('edStatus').innerHTML=`Robot <b>${coord(t.start[0],t.start[1],t.rows)}</b>, ${DIRNAME[t.start[2]]} bakıyor · Hedef ${t.targets[0]?'<b>'+coord(t.targets[0][0],t.targets[0][1],t.rows)+'</b>':'seçilmedi'}`;
+  document.querySelectorAll('.dir').forEach(b=>b.classList.toggle('on',+b.dataset.d===t.start[2]));
+  $('matHelp').textContent='Seçili aracı kullanmak için karelere dokun.';
+}
+$('editToggle').onclick=()=>{
+  if(running)return;editing=!editing;$('editToggle').classList.toggle('on',editing);
+  if(editing){
+    const src=task.custom?task:null;
+    draft=src?JSON.parse(JSON.stringify(src)):{custom:true,type:'build',map:'koord',cols:6,rows:6,start:[0,5,0],targets:[[3,2]],walls:[],name:'',note:''};
+    draft=norm(draft);syncEditor();hideTry();
+    prog={main:Array(12).fill(null),fn:Array(4).fill(null)};cursor={main:0,fn:0};active='main';renderLines();
+    say('Karelere dokunarak görevi kur. Blokları dizip çalıştırarak test edebilirsin.');
+    show();renderPath();
+  }else selectTask(task.id);
+};
+document.querySelectorAll('#tools .pill').forEach(b=>b.onclick=()=>{tool=b.dataset.tool;document.querySelectorAll('#tools .pill').forEach(x=>x.classList.toggle('on',x===b))});
+document.querySelectorAll('.dir').forEach(b=>b.onclick=()=>{draft.start[2]=+b.dataset.d;show()});
+function clampDraft(){
+  const inb=([x,y])=>x<draft.cols&&y<draft.rows;
+  if(!inb(draft.start))draft.start=[0,draft.rows-1,draft.start[2]];
+  draft.targets=draft.targets.filter(inb);draft.walls=draft.walls.filter(inb);
+}
+$('mapSel').onchange=e=>{draft.map=e.target.value;if(draft.map==='kasif'){draft.cols=6;draft.rows=6}clampDraft();syncEditor();show()};
+$('colsIn').onchange=e=>{draft.cols=+e.target.value;clampDraft();show()};
+$('rowsIn').onchange=e=>{draft.rows=+e.target.value;clampDraft();show()};
+$('rowDir').onchange=e=>{rowDir=e.target.value;store.set('kk-rowdir',rowDir);show()};
+$('saveTask').onclick=()=>{
+  if(!draft.targets[0]){say('Önce bir hedef kare seç (🎯 Hedef).','bad');return}
+  draft.name=$('tName').value.trim()||('Görev '+(custom.length+1));
+  draft.note=$('tNote').value.trim();
+  draft.maxMain=+$('tMax').value||0;draft.mustFn=$('tFn').checked;
+  if(!draft.id)draft.id='c'+Date.now();
+  const save={...draft};delete save.steps;
+  const i=custom.findIndex(c=>c.id===draft.id);
+  if(i>=0)custom[i]=save;else custom.push(save);
+  store.set('kk-custom3',custom);draft=norm(save);task=norm(save);
+  syncEditor();renderPath();say(`"${draft.name}" kaydedildi. Görev şeridinde "Diğer" altında.`,'ok');
+};
+$('delTask').onclick=()=>{
+  const b=$('delTask');
+  if(b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='Emin misin?';setTimeout(()=>{b.dataset.sure='';b.textContent='Sil'},2500);return}
+  custom=custom.filter(c=>c.id!==draft.id);store.set('kk-custom3',custom);
+  b.dataset.sure='';b.textContent='Sil';
+  task=builtins[0];editing=false;$('editToggle').classList.remove('on');selectTask(task.id);say('Görev silindi.');
+};
+
+$('go').onclick=run;
+$('stop').onclick=()=>{stopFlag=true};
+$('reset').onclick=()=>{if(!running){resetRobot();hideTry()}};
+$('clear').onclick=()=>{if(running)return;if(locked()){resetRobot();return}
+  prog={main:Array(12).fill(null),fn:Array(4).fill(null)};cursor={main:0,fn:0};active='main';renderLines();resetRobot();hideTry()};
+
+const last=store.get('kk-last','1a');
+selectTask(allTasks().some(t=>t.id===last)||last==='free'?last:'1a');
+</script>
+
+</template>
 
 <!-- LEGO ATÖLYESİ -->
 <section id="lego" hidden>
@@ -1545,7 +2274,7 @@ function benCiz(){
   const inc=!!S.inceleme, sinif=inc?S.inceleme.sinif:S.sinif, ad=inc?S.inceleme.ogrenci:S.ogrenci;
   if(!sinif||!ad) return;
   const yil=inc&&S.inceleme.puan?' · '+'★'.repeat(S.inceleme.puan)+'☆'.repeat(3-S.inceleme.puan):'';
-  ['','r','y','l'].forEach(function(p){
+  ['','r','y','l','k'].forEach(function(p){
     const av=$(p+'kimAv'); av.innerHTML=''; av.appendChild(yuzEl(sinif,ad));
     $(p+'kimAd').textContent=gorunenAd(sinif,ad);
     $(p+'kimAlt').textContent=inc?(sinif+' · '+tarihYazi(S.inceleme.tarih)+' · '+S.inceleme.saat+yil):(sinif+' · '+tarihYazi(S.bugun));
@@ -2540,7 +3269,7 @@ $('eCalismalarim').onclick=calismalarimAc;
 $('benBtn').onclick=profilAc;
 $('yeniBtn').onclick=function(){ onayla({e:'✨'},'Yeni boş proje açılsın mı? Ekrandaki çalışma silinir. Göndermediysen önce gönder.',function(){ projeYukle(yeniProje()); taslakKaydet(true); bildir('Yeni proje hazır'); }); };
 function tamEkranMi(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
-function tamEkranGuncelle(){ const a=tamEkranMi(); setIc('tamEkranBtn',a?'tamkapa':'tamac'); setIc('rTamEkran',a?'tamkapa':'tamac'); setIc('yTamEkran',a?'tamkapa':'tamac'); setIc('lTamEkran',a?'tamkapa':'tamac'); $('tamEkranBtn').title=a?'Tam ekrandan çık':'Tam ekran'; $('tamEkranBtn').setAttribute('aria-label',$('tamEkranBtn').title);
+function tamEkranGuncelle(){ const a=tamEkranMi(); setIc('tamEkranBtn',a?'tamkapa':'tamac'); setIc('rTamEkran',a?'tamkapa':'tamac'); setIc('yTamEkran',a?'tamkapa':'tamac'); setIc('lTamEkran',a?'tamkapa':'tamac'); setIc('kTamEkran',a?'tamkapa':'tamac'); $('tamEkranBtn').title=a?'Tam ekrandan çık':'Tam ekran'; $('tamEkranBtn').setAttribute('aria-label',$('tamEkranBtn').title);
   $('tamEkranGiris').innerHTML=ic(a?'tamkapa':'tamac')+(a?'Tam ekrandan çık':'Tam ekran'); setTimeout(sahneBoyut,150); }
 function tamEkran(){
   const d=document, e=d.documentElement;
@@ -2584,7 +3313,7 @@ $('arkaBtn').onclick=arkaSecici;
 $('izgaraBtn').onclick=function(){ S.izgara=!S.izgara; this.setAttribute('aria-pressed',String(S.izgara)); this.classList.toggle('on',S.izgara); };
 
 /* ================= giriş ================= */
-function goster(e){ S.ekran=e; ['giris','etkinlik','editor','robot','yuru','lego','panel'].forEach(function(x){ $(x).hidden=x!==e; }); document.body.classList.toggle('duzen-y',e==='yuru'); document.body.classList.toggle('duzen-l',e==='lego'); document.body.classList.remove('sunum'); document.body.classList.toggle('duzen',e==='editor'); document.body.classList.toggle('duzen-r',e==='robot'); window.scrollTo(0,0); if(e==='editor') requestAnimationFrame(sahneBoyut); }
+function goster(e){ S.ekran=e; ['giris','etkinlik','editor','robot','yuru','lego','kasif','panel'].forEach(function(x){ $(x).hidden=x!==e; }); document.body.classList.toggle('duzen-y',e==='yuru'); document.body.classList.toggle('duzen-l',e==='lego'); document.body.classList.remove('sunum'); document.body.classList.toggle('duzen',e==='editor'); document.body.classList.toggle('duzen-r',e==='robot'); window.scrollTo(0,0); if(e==='editor') requestAnimationFrame(sahneBoyut); }
 function sahneBoyut(){ const k=document.querySelector('.sahne-kutu'), c=document.querySelector('.cerceve'); if(!k||!c) return;
   if(!document.body.classList.contains('duzen')||document.body.classList.contains('sunum')||getComputedStyle(k).overflow!=='hidden'){ c.style.width=''; return; }
   const w=k.clientWidth, h=k.clientHeight; c.style.width=Math.max(240,Math.min(w,(h-34)*4/3+28))+'px'; }
@@ -2998,7 +3727,8 @@ const ETKINLIKLER=[
   {id:'kod',ad:'Kodlama',varsayilan:true,simge:function(){ return '<span class="mini-blk">'+ic('flag')+'</span>'; },renk:'#4a86e8',koyu:'#2f62b8',zemin:'#e7efff',resim:function(){ return kodKartResim(); },ac:function(){ kodGir(); }},
   {id:'robot',ad:'Robot Yarat',varsayilan:true,simge:function(){ return parcaSVG(VITRIN,'80 15 240 220',{anim:false}); },renk:'#ff7a59',koyu:'#d4502f',zemin:'#fff0e8',resim:function(){ return '<div class="etk-robot">'+parcaSVG(VITRIN,'20 -10 360 480')+'</div>'; },ac:function(){ robotGir(); }},
   {id:'yuru',ad:'Robotumu Yürüt',varsayilan:false,simge:function(){ return yHucreSVG('pil'); },renk:'#3fb56a',koyu:'#2b8a4c',zemin:'#e6f8ec',resim:function(){ return yuruKartResim(); },ac:function(){ yuruGir(); }},
-  {id:'lego',ad:'Lego Atölyesi',varsayilan:false,simge:function(){ return legoOzetSVG({bricks:[lS(-1,-1,2,2,0,"Kırmızı"),lS(-1,-1,2,2,1,"Sarı")]}); },renk:'#e3242b',koyu:'#b5181d',zemin:'#ffecec',resim:function(){ return legoKartResim(); },ac:function(){ legoGir(); }}
+  {id:'lego',ad:'Lego Atölyesi',varsayilan:false,simge:function(){ return legoOzetSVG({bricks:[lS(-1,-1,2,2,0,"Kırmızı"),lS(-1,-1,2,2,1,"Sarı")]}); },renk:'#e3242b',koyu:'#b5181d',zemin:'#ffecec',resim:function(){ return legoKartResim(); },ac:function(){ legoGir(); }},
+  {id:'kasif',ad:'Küçük Kâşif',varsayilan:false,simge:function(){ return '<svg viewBox="0 0 96 96"><rect x="6" y="6" width="84" height="84" rx="12" fill="#9fd17a"/><rect x="34" y="34" width="28" height="28" rx="6" fill="#c98a4b"/><path d="M48 22l9 10H39z" fill="#ff7a1a"/></svg>'; },renk:'#c98a4b',koyu:'#8c5e30',zemin:'#fbefdf',resim:function(){ return kasifKartResim(); },ac:function(){ kasifGir(); }}
 ];
 function kodKartResim(){
   return '<div class="etk-blok"><span class="blk tetik c-bas">'+ic('flag')+'</span><span class="blk c-har">'+ic('right')+'</span><span class="blk c-har">'+ic('up')+'</span><span class="blk son c-bit">'+ic('end')+'</span></div>';
@@ -4955,6 +5685,24 @@ $('lTamEkran').onclick=tamEkran;
 $('lPanelDon').onclick=function(){ S.inceleme=null; $('lego').classList.remove('l-inceleme'); panelGoster(); };
 $('lGorev').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Görevler';
 IC.kamera='<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>';
+/* ================= KÜÇÜK KÂŞİF =================
+   Mat üzerinde giden robotun görevleri. Uygulama #kasifKaynak şablonundan çerçeveye yüklenir;
+   her öğrencinin ilerlemesi bu bilgisayarda kendi adıyla ayrı saklanır. */
+function kasifKartResim(){
+  const m=['#9fd17a','#8cc56a','#7cc4e8','#f0d99a'], e=['⛰️','','🌲','🏠','🐄','','','','','🌻','','🏫','🏰','','🍎',''], c=[0,1,0,1,1,0,2,0,0,1,2,1,3,0,1,0];
+  const ok={F:['#3fa34d','<path d="M20 5 L33 20 H25 V35 H15 V20 H7 Z" fill="#fff"/>'],R:['#e05a4b','<path d="M8 35 V20 Q8 12 16 12 H23 V5 L35 15 L23 25 V18 H16 Q14 18 14 20 V35 Z" fill="#fff"/>'],L:['#f2b632','<path d="M32 35 V20 Q32 12 24 12 H17 V5 L5 15 L17 25 V18 H24 Q26 18 26 20 V35 Z" fill="#fff"/>']};
+  return '<div class="etk-kasif">'+e.map(function(x,i){ return '<i style="background:'+m[c[i]]+'">'+x+'</i>'; }).join('')+'<div class="kbl">'+['F','F','R','F','L'].map(function(k){ return '<b style="background:'+ok[k][0]+'"><svg viewBox="0 0 40 40">'+ok[k][1]+'</svg></b>'; }).join('')+'</div></div>';
+}
+function kasifGir(){
+  goster('kasif'); benCiz();
+  const ayar={anahtar:'kat3:kasif:'+S.sinif+':'+S.ogrenci,ogrenci:true};
+  $('kasifCerceve').srcdoc='<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>window.KK='+JSON.stringify(ayar).replace(/</g,'\\u003c')+'<\/script></head><body>'+$('kasifKaynak').innerHTML+'</body></html>';
+}
+$('kEtk').onclick=function(){ $('kasifCerceve').srcdoc=''; etkinlikAc(); };
+$('kCikis').onclick=function(){ onayla({e:'👋'},'Çıkış yapılsın mı? Görevlerdeki ilerlemen bu bilgisayarda saklı kalır.',function(){ $('kasifCerceve').srcdoc=''; cikisYap(); }); };
+$('kTamEkran').onclick=tamEkran;
+$('kBen').onclick=profilAc;
+setIc('kEtk','apps'); setIc('kCikis','exit'); setIc('kbenKalem','pencil');
 setIc('lEtk','apps'); setIc('lGeri','undo'); setIc('lKamera','kamera'); setIc('lYeni','newp'); setIc('lCalismalarim','folder'); setIc('lGonderIc','mail'); setIc('lCikis','exit'); setIc('lbenKalem','pencil');
 $('lBittiGonder').innerHTML='<span class="z">'+ic('mail')+'</span>Gönder';
 document.addEventListener('keydown',function(e){
