@@ -358,6 +358,25 @@ function yuruIlerleme(veri) {
   return { tamam: true, saat: saat, tarih: tarih };
 }
 
+/* Öğretmen paneli: bir sınıftaki öğrencilerin Robotumu Yürüt ilerlemesi (yıldız sıralaması için). */
+function yuruSiralama(sifre, sinif) {
+  sifreKontrol_(sifre);
+  sinif = String(sinif || '').trim();
+  const c = siniflariGetir().filter(function (x) { return x.ad === sinif; })[0];
+  if (!c) throw new Error('Sınıf bulunamadı.');
+  const p = PropertiesService.getScriptProperties(), veri = {};
+  c.ogrenciler.forEach(function (o) {
+    const id = p.getProperty('YURU|' + sinif + '|' + o);
+    if (!id) return;
+    try {
+      const f = DriveApp.getFileById(id); if (f.isTrashed()) return;
+      const v = JSON.parse(f.getBlob().getDataAsString());
+      veri[o] = { seviye: v.seviye || {}, istat: v.istat || {}, guncel: Utilities.formatDate(f.getLastUpdated(), SAAT_DILIMI, 'yyyy-MM-dd HH:mm') };
+    } catch (e) {}
+  });
+  return { ogrenciler: c.ogrenciler, veri: veri };
+}
+
 /* Öğrenci Robotumu Yürüt'ü açınca kendi kayıtlı ilerlemesini geri alır (başka tablette ya da hafıza silinince). */
 function yuruIlerlemem(sinif, ogrenci) {
   sinif = String(sinif || '').trim(); ogrenci = String(ogrenci || '').trim();

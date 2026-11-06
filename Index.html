@@ -804,6 +804,25 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
 .nokta i{width:16px;height:16px;border-radius:50%;background:var(--turuncu);animation:r-parla 1.2s infinite}
 .nokta i:nth-child(2){animation-delay:.3s;background:var(--mor)}.nokta i:nth-child(3){animation-delay:.6s;background:var(--yesil)}
 @media (prefers-reduced-motion:reduce){.zzz i,.nokta i,.etk-kart.yeni-acildi{animation:none;opacity:1}}
+.sira-uniteler{display:flex;flex-wrap:wrap;gap:8px}
+.sira-ub{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px 0 8px;border-radius:999px;background:#fff;border:3px solid var(--cizgi);font-family:var(--f-d);font-size:15px;color:var(--ink)}
+.sira-ub[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,#fff)}
+.sira-ub-res{display:inline-grid;width:28px;height:28px}.sira-ub-res svg{width:100%;height:100%}
+.sira-kap{overflow-x:auto;background:#fff;border:3px solid var(--cizgi);border-radius:18px}
+.sira-tablo{width:100%;border-collapse:collapse;font-size:15px}
+.sira-tablo th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 8px;text-align:center;border-bottom:2px solid var(--cizgi);white-space:nowrap}
+.sira-tablo th:nth-child(2){text-align:left}
+.sira-ut{min-width:74px}.sira-ut .sira-ub-res{display:grid;margin:0 auto 2px}.sira-ut small{display:block;font-size:10.5px;text-transform:none;letter-spacing:0;color:var(--c);font-weight:900}
+.sira-tablo td{padding:9px 8px;border-bottom:1px solid #f0e9dd;text-align:center}
+.sira-tablo tbody tr:nth-child(-n+3):not(.sira-bos){background:#fffaea}
+.sira-no{font-family:var(--f-d);font-size:20px;width:52px}
+.sira-ad{text-align:left!important;font-weight:900;white-space:nowrap}.sira-ad small{display:block;font-weight:700;font-size:11.5px;color:var(--muted)}
+.sira-u b{display:block;font-family:var(--f-d);font-size:17px}.sira-u small{font-size:11.5px;color:var(--muted)}
+.sira-yok{color:#cfc6b6;font-size:22px}
+.sira-top{min-width:150px}
+.sira-yz{display:block;font-family:var(--f-d);font-size:19px;color:#c98a00}
+.sira-bar{display:block;height:8px;border-radius:99px;background:#f1eadf;overflow:hidden;margin-top:4px}.sira-bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd23f,#ff9f1c);border-radius:99px}
+.sira-bos td{color:#b3a996}
 .etk-siniflar{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .ekutu{display:grid;gap:10px;align-content:start}
 .ekutu-bas{display:flex;align-items:baseline;gap:10px}
@@ -2029,7 +2048,7 @@ selectTask(allTasks().some(t=>t.id===last)||last==='free'?last:'1a');
     <div id="loginHata" style="color:var(--kirmizi-k)" hidden></div>
   </form>
   <div id="panelIc" hidden style="display:grid;gap:14px">
-    <div class="psekme"><button class="cb beyaz hap on" id="tCal">Çalışmalar</button><button class="cb beyaz hap" id="tSin">Sınıf listeleri</button><button class="cb beyaz hap" id="tEtk">Etkinlikler</button></div>
+    <div class="psekme"><button class="cb beyaz hap on" id="tCal">Çalışmalar</button><button class="cb beyaz hap" id="tSin">Sınıf listeleri</button><button class="cb beyaz hap" id="tEtk">Etkinlikler</button><button class="cb beyaz hap" id="tSira">Yıldız sıralaması</button></div>
     <div id="calBolum" style="display:grid;gap:14px">
       <div class="filtre">
         <label for="fSinif">Sınıf<select id="fSinif"></select></label>
@@ -2046,6 +2065,15 @@ selectTask(allTasks().some(t=>t.id===last)||last==='free'?last:'1a');
     <div id="etkBolum" hidden style="display:grid;gap:12px">
       <p class="not">Kilitli etkinlikleri o sınıfın öğrencileri hiç görmez. Kilidi açtığınızda birkaç saniye içinde ekranlarında belirir. O sırada etkinliğin içinde olan öğrenci çalışmasına devam edebilir; etkinlikler ekranına dönünce kilitli kart görünmez.</p>
       <div class="etk-siniflar" id="etkSiniflar"></div>
+    </div>
+    <div id="siraBolum" hidden style="display:grid;gap:12px">
+      <div class="filtre">
+        <label for="sSinif">Sınıf<select id="sSinif"></select></label>
+        <button class="cb beyaz k" id="sYenile">Yenile</button>
+      </div>
+      <div class="sira-uniteler" id="sUniteler" role="group" aria-label="Bölüm"></div>
+      <p class="not">Robotumu Yürüt'te öğrenciler toplam yıldıza göre sıralanır. Eşitlikte daha çok seviye geçen, o da eşitse daha kısa sürede çözen öne geçer. Bir bölüme dokunursanız sıralama o bölüme göre yapılır.</p>
+      <div id="sTablo"></div>
     </div>
     <div id="sinBolum" hidden style="display:grid;gap:12px">
       <p class="not">Her satıra bir öğrenci yazın. Çocuklar giriş ekranında adlarını bu listeden seçer, böylece dosya adları hep doğru olur.</p>
@@ -2335,6 +2363,9 @@ const DEMO=(function(){
     profilKaydet:function(s,o,l,y){ profil[s+'|'+o]={lakap:String(l||'').slice(0,20),yuz:y}; ls('kat3:demo:profil',profil); return kopya(profil[s+'|'+o]); },
     calismaGonder:function(v){ ornekler(); const d=new Date(); const saat=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
       kayit.push({tarih:yerelTarih(d),saat:saat,sinif:v.sinif,ogrenci:v.ogrenci,id:'d'+Date.now(),proje:v.proje,kucuk:v.kucuk,puan:v.puan||0}); ls('kat3:demo:kayit',kayit); return {tamam:true,saat:saat}; },
+    yuruSiralama:function(sf,s){ ornekler(); const c=siniflar.find(function(x){ return x.ad===s; })||{ogrenciler:[]}; const veri={};
+      kayit.forEach(function(k){ if(k.sinif===s&&String(k.id).indexOf('yuru|')===0){ try{ const v=JSON.parse(k.proje); veri[k.ogrenci]={seviye:v.seviye||{},istat:v.istat||{},guncel:k.tarih+' '+k.saat}; }catch(e){} } });
+      return {ogrenciler:c.ogrenciler,veri:veri}; },
     yuruIlerlemem:function(s,o){ ornekler(); const k=kayit.find(function(x){ return x.id==='yuru|'+s+'|'+o; }); return k?k.proje:null; },
     yuruIlerleme:function(v){ ornekler(); const d=new Date(); const saat=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); const id='yuru|'+v.sinif+'|'+v.ogrenci;
       kayit=kayit.filter(function(k){ return k.id!==id; }); kayit.push({tarih:yerelTarih(d),saat:saat,sinif:v.sinif,ogrenci:v.ogrenci,id:id,proje:v.proje,kucuk:v.kucuk,puan:0}); ls('kat3:demo:kayit',kayit); return {tamam:true,saat:saat}; },
@@ -3392,10 +3423,52 @@ $('loginForm').addEventListener('submit',async function(e){
   }catch(err){ $('loginHata').textContent=hataMetni(err); $('loginHata').hidden=false; }
 });
 function sekme(ad){
-  [['cal','tCal'],['sin','tSin'],['etk','tEtk']].forEach(function(x){ $(x[0]+'Bolum').hidden=x[0]!==ad; $(x[1]).classList.toggle('on',x[0]===ad); });
-  if(ad==='sin') siniflariDuzenle(); if(ad==='etk') kilitleriYukle();
+  [['cal','tCal'],['sin','tSin'],['etk','tEtk'],['sira','tSira']].forEach(function(x){ $(x[0]+'Bolum').hidden=x[0]!==ad; $(x[1]).classList.toggle('on',x[0]===ad); });
+  if(ad==='sin') siniflariDuzenle(); if(ad==='etk') kilitleriYukle(); if(ad==='sira') siraAc();
 }
-$('tCal').onclick=function(){ sekme('cal'); calismalariYukle(); }; $('tSin').onclick=function(){ sekme('sin'); }; $('tEtk').onclick=function(){ sekme('etk'); };
+$('tCal').onclick=function(){ sekme('cal'); calismalariYukle(); }; $('tSin').onclick=function(){ sekme('sin'); }; $('tEtk').onclick=function(){ sekme('etk'); }; $('tSira').onclick=function(){ sekme('sira'); };
+/* ---- Robotumu Yürüt yıldız sıralaması ---- */
+const SIRA={unite:'',veri:null,sinif:''};
+function siraAc(){
+  const sel=$('sSinif'), once=SIRA.sinif||(S.siniflar[0]&&S.siniflar[0].ad)||'';
+  sel.innerHTML=''; S.siniflar.forEach(function(c){ const o=el('option',null,c.ad); o.value=c.ad; sel.appendChild(o); }); sel.value=once;
+  if(!S.siniflar.length){ $('sTablo').innerHTML=''; $('sTablo').appendChild(el('div','bos','Önce "Sınıf listeleri" sekmesinden sınıf ekleyin.')); return; }
+  siraUniteCiz(); siraYukle();
+}
+$('sSinif').onchange=siraYukle; $('sYenile').onclick=siraYukle;
+function siraUniteCiz(){ const k=$('sUniteler'); k.innerHTML='';
+  [{id:'',ad:'Tüm bölümler',renk:'#2a2d34'}].concat(Y_UNITE).forEach(function(u){ const b=el('button','sira-ub'); b.setAttribute('aria-pressed',SIRA.unite===u.id); b.style.setProperty('--c',u.renk);
+    b.innerHTML=(u.id?'<span class="sira-ub-res">'+yUniteSVG(u.id)+'</span>':'')+'<span>'+u.ad+'</span>'; b.onclick=function(){ SIRA.unite=u.id; siraUniteCiz(); siraCiz(); }; k.appendChild(b); }); }
+async function siraYukle(){
+  const t=$('sTablo'), sinif=$('sSinif').value; SIRA.sinif=sinif; t.innerHTML='<span class="spin"></span>';
+  try{ SIRA.veri=await sunucu('yuruSiralama',S.sifre,sinif); if(SIRA.sinif!==sinif) return; siraCiz(); }
+  catch(e){ t.innerHTML=''; const m=hataMetni(e); t.appendChild(el('div','bos',/yuruSiralama/.test(m)?'Bu bölümün çalışması için Apps Script\'teki Code.gs güncellenmeli ve yeni sürüm dağıtılmalı.':m)); }
+}
+function siraOzet(v,u){ let y=0,b=0,sn=0,d=0; (u?[u]:Y_UNITE).forEach(function(un){ un.seviyeler.forEach(function(_,i){ const k=un.id+'-'+i, s=v&&v.seviye[k], st=v&&v.istat&&v.istat[k];
+  if(s){ y+=s.y||0; b++; } if(st){ d+=st.d||0; if(st.ok) sn+=st.sn||0; } }); }); return {y:y,b:b,sn:sn,d:d}; }
+function siraCiz(){
+  const t=$('sTablo'); t.innerHTML=''; const V=SIRA.veri; if(!V) return;
+  const u=SIRA.unite?yUniteBul(SIRA.unite):null, enY=(u?u.seviyeler.length:Y_UNITE.reduce(function(a,x){ return a+x.seviyeler.length; },0))*3;
+  const satir=V.ogrenciler.map(function(o){ const v=V.veri[o]; return {ad:o,v:v,oz:siraOzet(v,u),un:Y_UNITE.map(function(x){ return siraOzet(v,x); })}; });
+  satir.sort(function(a,b){ return (b.oz.y-a.oz.y)||(b.oz.b-a.oz.b)||((a.oz.sn||1e9)-(b.oz.sn||1e9))||a.ad.localeCompare(b.ad,'tr'); });
+  if(!satir.some(function(s){ return s.v; })){ t.appendChild(el('div','bos','Bu sınıftan henüz Robotumu Yürüt ilerlemesi kaydedilmedi. Öğrenciler bir seviye geçince burada görünür.')); return; }
+  const kap=el('div','sira-kap'), tb=el('table','sira-tablo');
+  let bas='<thead><tr><th>Sıra</th><th>Öğrenci</th>';
+  if(!u) Y_UNITE.forEach(function(x){ bas+='<th class="sira-ut" style="--c:'+x.renk+'" title="'+x.ad+'"><span class="sira-ub-res">'+yUniteSVG(x.id)+'</span><small>'+x.ad+'</small></th>'; });
+  else bas+='<th>Geçilen seviye</th><th>Deneme</th><th>Süre</th>';
+  bas+='<th>Yıldız</th></tr></thead>'; tb.innerHTML=bas;
+  const g=el('tbody'); let sira=0, onceki=null;
+  satir.forEach(function(s,i){ const tr=el('tr', s.v&&s.oz.b?null:'sira-bos');
+    if(s.v&&s.oz.b){ const anah=s.oz.y+'|'+s.oz.b; if(anah!==onceki){ sira=i+1; onceki=anah; } }
+    const no=el('td','sira-no'); no.textContent=s.v&&s.oz.b?(['🥇','🥈','🥉'][sira-1]||String(sira)):'—'; tr.appendChild(no);
+    const ad=el('td','sira-ad'); ad.textContent=s.ad; if(s.v&&s.v.guncel){ const m=/^(\d{4})-(\d{2})-(\d{2})\s*(.*)$/.exec(s.v.guncel), sm=el('small',null,'Son: '+(m?m[3]+'.'+m[2]+(m[4]?' · '+m[4]:''):s.v.guncel)); ad.appendChild(sm); } tr.appendChild(ad);
+    if(!u) s.un.forEach(function(x,j){ const td=el('td','sira-u'); td.innerHTML=x.b?'<b>'+x.y+'</b><small>'+x.b+'/'+Y_UNITE[j].seviyeler.length+'</small>':'<span class="sira-yok">·</span>'; tr.appendChild(td); });
+    else { tr.append(el('td','sira-u',s.oz.b?s.oz.b+'/'+u.seviyeler.length:'—'),el('td','sira-u',s.oz.d?String(s.oz.d):'—'),el('td','sira-u',s.oz.sn?ySure(s.oz.sn):'—')); }
+    const top=el('td','sira-top'); const yuz=Math.round(s.oz.y/enY*100);
+    top.innerHTML='<span class="sira-yz">★ '+s.oz.y+'</span><span class="sira-bar"><i style="width:'+yuz+'%"></i></span>'; tr.appendChild(top);
+    g.appendChild(tr); });
+  tb.appendChild(g); kap.appendChild(tb); t.appendChild(kap);
+}
 async function kilitleriYukle(){
   const w=$('etkSiniflar'); w.innerHTML='<span class="spin"></span>';
   try{ S.kilit=(await sunucu('etkinlikleriGetir',S.sifre))||{}; }
