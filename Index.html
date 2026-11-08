@@ -2340,7 +2340,9 @@ function benCiz(){
 const GAS = !!(window.google && google.script && google.script.run);
 function sunucu(fn){
   const args=Array.prototype.slice.call(arguments,1);
-  if(GAS) return new Promise(function(res,rej){ const r=google.script.run.withSuccessHandler(res).withFailureHandler(function(e){ rej(e); }); r[fn].apply(r,args); });
+  if(GAS) return new Promise(function(res,rej){ const r=google.script.run.withSuccessHandler(res).withFailureHandler(function(e){ rej(e); });
+    if(typeof r[fn]!=='function'){ rej(new Error('Script function not found: '+fn+'. Apps Script\'teki Code.gs güncel değil: yeni Code.gs\'yi yapıştırıp Dağıt → Dağıtımları yönet → Yeni sürüm ile dağıtın.')); return; }
+    r[fn].apply(r,args); });
   return new Promise(function(res,rej){ setTimeout(function(){ try{ res(DEMO[fn].apply(null,args)); }catch(e){ rej(e); } },220); });
 }
 const DEMO=(function(){
