@@ -825,6 +825,15 @@ body.y-oynuyor .y-pk,body.y-oynuyor .y-sil,body.y-oynuyor .y-dongu-bas,body.y-oy
 .sira-bos td{color:#b3a996}
 .etk-siniflar{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
 .ekutu{display:grid;gap:10px;align-content:start}
+.kbolum{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 4px 18px;padding:8px 10px;border-left:3px dashed #cfeedb}
+.kbolum.soluk{opacity:.55}
+.kbolum-bas{font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+.kbolum-btn{display:flex;align-items:center;gap:5px;height:36px;padding:0 10px 0 5px;border-radius:999px;border:2.5px solid #e2d9cb;background:#f4f0ea;color:#8b8172;font-weight:900;font-size:13px}
+.kbolum-btn .kbolum-res{display:inline-grid;width:24px;height:24px;filter:grayscale(1);opacity:.6}.kbolum-btn .kbolum-res svg{width:100%;height:100%}
+.kbolum-btn svg:last-child{font-size:14px}
+.kbolum-btn.acik{border-color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);color:var(--ink)}
+.kbolum-btn.acik .kbolum-res{filter:none;opacity:1}
+.y-harita-bos{display:grid;justify-items:center;gap:8px;padding:50px 16px;text-align:center;font-family:var(--f-d);font-size:22px;color:var(--muted)}
 .ekutu-bas{display:flex;align-items:baseline;gap:10px}
 .ekutu-bas h3{font-size:30px;color:var(--mor)}
 .ekutu .eylem .cb svg{font-size:16px}
@@ -3496,6 +3505,13 @@ function kilitKartlari(){
       an.innerHTML='<span class="ray"></span><span class="dur">'+ic(acik?'kilitAcik':'kilit')+(acik?'Açık':'Kilitli')+'</span>';
       an.onclick=function(){ const d={}; d[e.id]=!acik; kilitKaydet(c.ad,d,c.ad+' · '+e.ad+(acik?' kilitlendi':' açıldı')); };
       sat.appendChild(an); kart.appendChild(sat);
+      if(e.id==='yuru'){ const bl=el('div','kbolum'+(acik?'':' soluk')); bl.appendChild(el('span','kbolum-bas','Bölümler'));
+        Y_UNITE.forEach(function(u){ const k=yUniteKilitAnahtar(u.id), ua=durum[k]!==false, ub=el('button','kbolum-btn'+(ua?' acik':''));
+          ub.style.setProperty('--c',u.renk); ub.setAttribute('aria-pressed',String(ua)); ub.setAttribute('aria-label',c.ad+' · Robotumu Yürüt · '+u.ad+(ua?' açık':' kilitli'));
+          ub.innerHTML='<span class="kbolum-res">'+yUniteSVG(u.id)+'</span><span>'+u.ad+'</span>'+ic(ua?'kilitAcik':'kilit');
+          ub.onclick=function(){ const d={}; d[k]=!ua; kilitKaydet(c.ad,d,c.ad+' · '+u.ad+(ua?' kilitlendi':' açıldı')); };
+          bl.appendChild(ub); });
+        kart.appendChild(bl); }
     });
     w.appendChild(kart);
   });
@@ -4884,6 +4900,7 @@ function yuruAc(v){
   yHaritaGoster();
   if(!S.yuru.robot) robotSecici(true);
   if(!inc&&S.ogrenci&&ls(yBekleyenAnahtar())) yOtoKaydet();
+  if(!inc) yKilitTazele();
 }
 function yRobotDugme(){ const rb=$('yRobot'); rb.innerHTML=S.yuru.robot?parcaSVG(S.yuru.robot,'60 20 280 220',{anim:false}):ic('plus'); }
 function yHaritaGoster(){ yTik(); Y.j.v++; Y.calisiyor=false; Y.ekran='harita'; $('yHarita').hidden=false; $('yOyun').hidden=true; $('yBolumBtn').hidden=true; document.body.classList.remove('y-oynuyor'); yHaritaCiz(); }
@@ -4893,9 +4910,10 @@ function yHaritaCiz(){
   const bas=el('div','y-harita-bas'), rob=el('div','y-harita-robot'); rob.innerHTML=S.yuru.robot?parcaSVG(S.yuru.robot,'20 -10 360 480'):'';
   const bb=el('div'); bb.append(el('h1',null,'Bir bölüm seç!'),el('p',null,'Her bölümde robotun yeni bir şey öğreniyor.'));
   bas.append(rob,bb); k.appendChild(bas);
-  const izg=el('div','y-uniteler');
-  Y_UNITE.forEach(function(u,ui){
-    const oz=yUniteOzet(S.yuru,u), n=u.seviyeler.length, acik=yUniteAcikMi(u), b=el('button','y-ukart'+(acik?'':' kilitli')), kap=el('div','y-ukart-kap');
+  const izg=el('div','y-uniteler'), gorunen=Y_UNITE.filter(yUniteAcikMi);
+  if(!gorunen.length){ const b=el('div','y-harita-bos'); b.innerHTML='<div class="buyuk">🔒</div><b>Öğretmenin bölümleri birazdan açacak</b>'; k.appendChild(b); return; }
+  gorunen.forEach(function(u,ui){
+    const oz=yUniteOzet(S.yuru,u), n=u.seviyeler.length, acik=true, b=el('button','y-ukart'), kap=el('div','y-ukart-kap');
     b.style.setProperty('--c',u.renk); b.style.setProperty('--d',u.koyu); b.style.animationDelay=(ui*0.06)+'s';
     b.setAttribute('aria-label',u.ad+', '+oz.bitti+' / '+n+' seviye');
     const res=el('div','y-ukart-res'); res.innerHTML=yUniteSVG(u.id);
@@ -4905,8 +4923,6 @@ function yHaritaCiz(){
     const say=el('div','y-ukart-say'); say.append(el('span',null,oz.bitti+' / '+n)); const yz=el('span','y-ukart-yz'); yz.innerHTML=yildizSVG(true)+'<b>'+oz.yildiz+'</b>'; say.appendChild(yz);
     ic2.append(bar,say); b.append(no,res,ic2);
     if(oz.bitti>=n) b.insertAdjacentHTML('beforeend','<span class="y-ukart-kupa">'+ic('check')+'</span>');
-    if(!acik){ b.insertAdjacentHTML('beforeend','<span class="y-ukart-kilit">'+ic('kilit')+'</span>'); b.setAttribute('aria-label',u.ad+', kilitli. Önce '+Y_UNITE[ui-1].ad+' bölümünü bitir.');
-      ic2.appendChild(el('small','y-ukart-not','Önce “'+Y_UNITE[ui-1].ad+'” bölümünü bitir')); }
     b.onclick=function(){ if(acik){ ton(523,90); setTimeout(function(){ ton(784,120); },90); } yUniteAc(u.id); };
     kap.appendChild(b);
     if(acik){ const tn=el('button','y-ukart-tanit'); tn.innerHTML=ic('oyna')+'Tanıtım'; tn.setAttribute('aria-label',u.ad+' tanıtımını izle');
@@ -4915,11 +4931,22 @@ function yHaritaCiz(){
   });
   k.appendChild(izg);
 }
-/* Bölümler sırayla açılır: bir önceki bölümün bütün seviyeleri bitmeden sonraki açılmaz. */
-function yUniteAcikMi(u){ const ui=Y_UNITE.indexOf(u); if(ui<=0||S.inceleme) return true; const on=Y_UNITE[ui-1]; return yUniteOzet(S.yuru,on).bitti>=on.seviyeler.length; }
+/* Bölümleri öğretmen sınıf sınıf açar/kilitler (Etkinlikler sekmesi). Kilitli bölüm öğrenciye hiç görünmez. Varsayılan: açık. */
+function yUniteKilitAnahtar(id){ return 'yuru-'+id; }
+function yUniteAcikMi(u){ if(S.inceleme) return true; const d=ls('kat3:etk:'+S.sinif)||{}; return d[yUniteKilitAnahtar(u.id)]!==false; }
+/* Robotumu Yürüt açıkken öğretmenin yaptığı değişiklik birkaç saniyede gelsin */
+let yKilitZ=null;
+async function yKilitTazele(){
+  clearTimeout(yKilitZ); if(S.ekran!=='yuru'||S.inceleme||!S.sinif) return;
+  const sinif=S.sinif, once=JSON.stringify(Y_UNITE.map(yUniteAcikMi));
+  try{ const d=(await sunucu('etkinlikDurumu',sinif))||{}; if(S.sinif!==sinif) return; ls('kat3:etk:'+sinif,d); }catch(e){}
+  if(S.ekran!=='yuru') return;
+  if(JSON.stringify(Y_UNITE.map(yUniteAcikMi))!==once&&Y.ekran==='harita') yHaritaCiz();
+  yKilitZ=setTimeout(yKilitTazele,15000);
+}
 function yUniteAc(id){
   const u=yUniteBul(id); if(!u) return;
-  if(!yUniteAcikMi(u)){ const on=Y_UNITE[Y_UNITE.indexOf(u)-1]; bildir('Önce “'+on.ad+'” bölümünü bitir!'); ton(300,160,'sine',200); return; }
+  if(!yUniteAcikMi(u)){ bildir('Bu bölüm şu an kilitli.'); ton(300,160,'sine',200); if(Y.ekran!=='harita') yHaritaGoster(); else yHaritaCiz(); return; }
   S.yuru.unite=id; if(S.yuru.sec[id]==null) S.yuru.sec[id]=yIlkCozulmemis(u);
   if(!yAcik(u,S.yuru.sec[id])) S.yuru.sec[id]=yIlkCozulmemis(u);
   yuruKaydet(); yOyunGoster();
@@ -5290,8 +5317,8 @@ function yKazandi(n,eksik,adim){
     const sr=el('div','sira'); const tk=icBtn('cb beyaz yuvarlak','reset','Tekrar oyna'); tk.onclick=function(){ kapat(); ySeviyeBasla(); };
     sr.appendChild(tk);
     if(!son){ const ss=icBtn('cb yesil yuvarlak','fwd','Sonraki seviye'); ss.onclick=function(){ kapat(); S.yuru.sec[u.id]=i+1; yuruKaydet(); ySeviyeBasla(); yHikaye(); }; sr.appendChild(ss); }
-    else { const sn=Y_UNITE[Y_UNITE.indexOf(u)+1], yeniAcik=sn&&yUniteOzet(S.yuru,u).bitti>=u.seviyeler.length;
-      d.appendChild(el('p',null,u.ad+' bölümünün bütün seviyelerini bitirdin!'+(yeniAcik?' Yeni bölüm açıldı: '+sn.ad+'!':' Başka bir bölüm seç ya da öğretmenine gönder.')));
+    else { const sn=Y_UNITE.slice(Y_UNITE.indexOf(u)+1).find(function(x){ return yUniteAcikMi(x)&&yUniteOzet(S.yuru,x).bitti<x.seviyeler.length; }), yeniAcik=!!sn&&yUniteOzet(S.yuru,u).bitti>=u.seviyeler.length;
+      d.appendChild(el('p',null,u.ad+' bölümünün bütün seviyelerini bitirdin!'+(yeniAcik?' Sıradaki bölüm: '+sn.ad+'!':' Başka bir bölüm seç ya da öğretmenine gönder.')));
       const hb=el('button','cb '+(yeniAcik?'beyaz':'yesil')+' hap'); hb.innerHTML=ic('harita')+'Bölümler'; hb.onclick=function(){ kapat(); yHaritaGoster(); }; sr.appendChild(hb);
       if(yeniAcik){ const yb=el('button','cb yesil hap'); yb.innerHTML=ic('fwd')+sn.ad; yb.onclick=function(){ kapat(); yUniteAc(sn.id); }; sr.appendChild(yb); } }
     if(kayitSoz){ const kd=el('p','y-kayit-durum'); kd.innerHTML='<span class="spin"></span> Öğretmenine kaydediliyor…'; d.appendChild(kd);
