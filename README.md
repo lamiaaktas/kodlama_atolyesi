@@ -4,10 +4,11 @@
 
 - `Index.html` – sitenin ekranı. Apps Script bu dosyayı buradan okur; buraya gönderilen her güncelleme en geç 5 dakikada siteye yansır.
 - `Code.gs` – Apps Script'teki sunucu kodunun kopyası (öğretmen şifresi burada değil, yalnızca Apps Script'te yazılıdır).
+- `CanliDers.gs` – Canlı Ders etkinliğinin sunucu kodu. Apps Script projesine "CanliDers" adlı ayrı bir dosya olarak eklenir; kurulum adımları dosyanın başında.
 - `LegoSes.gs` – Lego Atölyesi'nin Google seslendirmesi. Apps Script projesine ayrı bir dosya olarak eklenir; kurulum adımları dosyanın başında.
 - `lego-ses/liste.json` – Lego Atölyesi'nde sesli okunan cümlelerin listesi (Index.html'deki `legoSesMetinleri()` ile üretilir).
 
-Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt, Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları) ve Küçük Kâşif (kulüpteki mat üzerinde giden robot için 5 seviyeli 12 görev; öğrenci önce dijitalde çözer, sonra gerçek robotta dener). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
+Etkinlikler: Kodlama, Robot Yarat, Robotumu Yürüt, Lego Atölyesi (1-2. sınıflar için 3B lego tasarımı; sesli, adım adım görev kartları) ve Küçük Kâşif (kulüpteki mat üzerinde giden robot için 5 seviyeli 12 görev; öğrenci önce dijitalde çözer, sonra gerçek robotta dener) ve Canlı Ders (öğretmen PowerPoint/PDF yükler, slaytların arasına çoktan seçmeli, doğru/yanlış, kısa cevap, anket ve çizim soruları ekler; öğretmen panelinin Canlı Ders sekmesinden dersi başlatınca öğrenciler tabletlerinde canlı takip eder. Öğrenci yalnızca kendi cevabını görür; sınıfın cevaplarını yalnızca öğretmen görür). Lego Atölyesi ilk açıldığında three.js kütüphanesini internetten yükler. Yeni etkinlikler öğretmen panelindeki Etkinlikler sekmesinden sınıf sınıf açılır.
 
 Çocukların çalışmaları, sınıf listeleri ve profiller bu depoda değil, öğretmenin Google Drive'ında tutulur.
 
