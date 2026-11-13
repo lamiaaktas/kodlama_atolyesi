@@ -296,7 +296,7 @@ function tebrik_(s, liste) {
 function saveReading(id, sifre, veri) {
   const s = ogrenciDogrula_(id, sifre);
   const tarih = String(veri.tarih);
-  if (tarih !== bugun_() && tarih !== dun_()) throw new Error('Sadece bugün ya da dün için kayıt girebilirsin.');
+  if (tarih !== bugun_()) throw new Error('Sadece bugünün okumasını girebilirsin. Sayfayı yenileyip tekrar dene.');
   const sayfa = Math.round(Number(veri.sayfa));
   if (!(sayfa >= 1 && sayfa <= 1000)) throw new Error('Sayfa sayısı 1 ile 1000 arasında olmalı.');
   const kitap = nfc_(veri.kitap).slice(0, 120);
