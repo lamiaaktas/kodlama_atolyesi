@@ -97,12 +97,36 @@ label.etiket{font-weight:800;font-size:.95rem;display:block;margin-bottom:6px}
 .not{background:var(--yaprak-acik);border-radius:12px;padding:10px 14px;font-weight:700;font-size:.95rem}
 .ipucu{font-size:.88rem;color:var(--soluk);display:flex;justify-content:space-between;gap:10px;margin-top:6px}
 .gecmis{display:flex;flex-direction:column;gap:10px}
-.gecmis-satir{display:grid;grid-template-columns:92px 1fr;gap:14px;padding:12px 0;border-top:1px solid var(--cizgi)}
+.gecmis-satir{display:grid;grid-template-columns:78px 1fr;gap:16px;padding:14px 0;border-top:1px solid var(--cizgi)}
 .gecmis-satir:first-child{border-top:0}
-.tarih-kutu{font-family:var(--f-baslik);text-align:center;background:var(--zemin);border-radius:12px;padding:6px;line-height:1.1}
-.tarih-kutu b{font-size:1.5rem;display:block}
-.tarih-kutu small{font-size:.75rem;color:var(--soluk);font-weight:700}
-.gecmis-satir div{min-width:0}
+.gecmis-satir > div{min-width:0}
+/* takvim yaprağı: kırmızı başlık, iki halka, kıvrık köşe */
+.yaprak{position:relative;align-self:start;text-align:center;line-height:1.05;padding-bottom:8px;border:1px solid var(--cizgi);border-radius:10px;overflow:hidden;
+  background:linear-gradient(315deg,var(--zemin) 0 11px,var(--cizgi) 11px 12px,var(--kagit) 12px);box-shadow:0 3px 0 var(--cizgi)}
+.yaprak::before,.yaprak::after{content:"";position:absolute;top:4px;width:8px;height:8px;border-radius:50%;background:var(--kagit);box-shadow:inset 0 1px 2px rgba(0,0,0,.45)}
+.yaprak::before{left:15px}.yaprak::after{right:15px}
+.yaprak-ay{display:block;background:var(--domates);color:#fff;font-size:.78rem;font-weight:800;padding:13px 2px 4px;letter-spacing:.02em}
+.yaprak b{display:block;font-family:var(--f-baslik);font-size:2rem;font-weight:800;margin-top:5px;color:var(--murekkep)}
+.yaprak small{display:block;font-size:.72rem;color:var(--soluk);font-weight:800}
+/* takvim görünümü */
+.gecmis-ust{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.takvim-ust{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;max-width:520px;margin-inline:auto}
+.takvim-ust h4{font-family:var(--f-baslik);font-size:1.35rem;margin:0}
+.takvim-ust button{width:46px;height:46px;border-radius:12px;background:var(--zemin);font-size:1.4rem;font-weight:800}
+.takvim-ust button[disabled]{opacity:.3;cursor:default}
+.takvim{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%;max-width:520px;margin-inline:auto}
+.takvim .hg{text-align:center;font-size:.8rem;font-weight:800;color:var(--soluk);padding-bottom:2px}
+.tg{position:relative;aspect-ratio:1/1;max-width:100%;min-width:0;border-radius:12px;border:2px solid transparent;background:var(--zemin);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px}
+.tg .n{font-weight:800;font-size:1.05rem;line-height:1}
+.tg .s{font-size:.72rem;font-weight:800;line-height:1;background:var(--kagit);border-radius:999px;padding:2px 6px;white-space:nowrap}
+.tg .bt{position:absolute;top:3px;right:5px;font-size:.75rem;font-weight:800;color:var(--yaprak)}
+.tg.bos-gun{background:transparent}
+.tg.bugun{outline:3px solid var(--muz);outline-offset:-1px}
+.tg.gelecek{opacity:.35;cursor:default}
+.tg[aria-pressed="true"]{box-shadow:0 0 0 3px var(--murekkep)}
+.takvim-detay{display:grid;grid-template-columns:78px 1fr;gap:16px;background:var(--zemin);border-radius:16px;padding:14px}
+.takvim-detay > div{min-width:0}
+.takvim-detay .yaprak{background:linear-gradient(315deg,var(--cizgi) 0 11px,var(--soluk) 11px 12px,var(--kagit) 12px)}
 .sayfa-pill{display:inline-block;background:var(--yaprak-acik);border-radius:999px;padding:1px 10px;font-weight:800;font-size:.85rem}
 
 .kutlama{text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 22px}
@@ -221,7 +245,9 @@ td.top{font-weight:800}
   h1{font-size:1.7rem}
   .slot{width:88px;height:88px;font-size:2.4rem}
   .meyve span.e{font-size:2rem}
-  .gecmis-satir{grid-template-columns:70px 1fr}
+  .gecmis-satir,.takvim-detay{grid-template-columns:68px 1fr;gap:12px}
+  .tg .s{font-size:.62rem;padding:1px 4px}
+  .tg .n{font-size:.92rem}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -313,7 +339,9 @@ td.top{font-weight:800}
       <button class="btn buyuk" id="kaydet" type="submit">Kaydet</button>
     </form>
     <div class="kart kap" id="raf-kart" hidden><h3>Bitirdiğim kitaplar</h3><div class="raf" id="raf"></div></div>
-    <div class="kart kap"><h3>Okuma geçmişim</h3><div id="gecmis" class="gecmis"></div></div>
+    <div class="kart kap"><div class="gecmis-ust"><h3>Okuma geçmişim</h3>
+        <div class="gun-sec" role="group" aria-label="Görünüm"><button type="button" id="gor-liste" aria-pressed="true">Liste</button><button type="button" id="gor-takvim" aria-pressed="false">Takvim</button></div></div>
+      <div id="gecmis" class="gecmis"></div></div>
   </section>
 
   <!-- 5. Tamam -->
@@ -568,7 +596,7 @@ function konfeti(){
 
 /* ---------- 4. günlük ---------- */
 function gunlukAc(){
-  const v=S.veri;S.gun='bugun';
+  const v=S.veri;S.gun='bugun';S.gorunum='liste';S.takvimAy=null;S.takvimGun=null;
   $('#g-ad').textContent=nfc(v.ogrenci.ad);$('#g-sinif').textContent=nfc(v.ogrenci.sinif)+' sınıfı';
   istatistikCiz();formDoldur();gecmisCiz();goster('s-gunluk');
 }
@@ -664,17 +692,68 @@ function tamamGoster(veri){
   goster('s-tamam');
   if(veri.bitti)konfeti();
 }
+/* ---------- okuma geçmişi: liste ya da takvim ---------- */
+const HAFTA=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+function yaprakEl(t){const[,m,d]=t.split('-').map(Number);const y=el('div','yaprak');y.setAttribute('aria-label',trTarih(t));
+  y.append(el('span','yaprak-ay',AYLAR[m-1]),el('b',null,d),el('small',null,gunAdi(t)));return y;}
+function kayitIcerik(g){
+  const sag=el('div');const ust=el('p');ust.append(el('strong',null,g.kitap+' '),el('span','sayfa-pill',g.sayfa+' sayfa'));
+  if(g.bitti)ust.append(document.createTextNode(' '),el('span','cip bitti','Bitirdi'));
+  sag.append(ust);if(g.anladiklarim)sag.append(el('p','soluk',g.anladiklarim));return sag;}
 function gecmisCiz(){
+  const takvim=S.gorunum==='takvim';
+  $('#gor-liste').setAttribute('aria-pressed',!takvim);$('#gor-takvim').setAttribute('aria-pressed',takvim);
+  if(takvim)takvimCiz();else listeCiz();
+}
+$('#gor-liste').onclick=()=>{S.gorunum='liste';gecmisCiz();};
+$('#gor-takvim').onclick=()=>{S.gorunum='takvim';S.takvimAy=null;S.takvimGun=null;gecmisCiz();};
+function listeCiz(){
   const k=$('#gecmis');k.innerHTML='';
   if(!S.veri.gecmis.length){k.append(el('p','soluk','İlk kaydını yukarıdan girebilirsin.'));return;}
-  S.veri.gecmis.forEach(g=>{
-    const[y,m,d]=g.tarih.split('-').map(Number);
-    const r=el('div','gecmis-satir');
-    const t=el('div','tarih-kutu');t.append(el('b',null,d),el('small',null,AYLAR[m-1]+' '+gunAdi(g.tarih).slice(0,3)));
-    const sag=el('div');const ust=el('p');ust.append(el('strong',null,g.kitap+' '),el('span','sayfa-pill',g.sayfa+' sayfa'));
-    if(g.bitti)ust.append(document.createTextNode(' '),el('span','cip bitti','Bitirdi'));
-    sag.append(ust);if(g.anladiklarim)sag.append(el('p','soluk',g.anladiklarim));r.append(t,sag);k.append(r);
-  });
+  S.veri.gecmis.forEach(g=>{const r=el('div','gecmis-satir');r.append(yaprakEl(g.tarih),kayitIcerik(g));k.append(r);});
+  if(S.veri.liste.length>S.veri.gecmis.length)k.append(el('p','soluk','Daha eski günlerin için Takvim görünümüne geç.'));
+}
+const hexRgba=(h,a)=>{const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;};
+function takvimCiz(){
+  const k=$('#gecmis');k.innerHTML='';
+  const v=S.veri,buAy=v.bugun.slice(0,7),ilkAy=(v.liste[0]?v.liste[0][0]:v.bugun).slice(0,7);
+  const ay=S.takvimAy||buAy;const[Y,M]=ay.split('-').map(Number);
+  const harita={};v.liste.forEach(x=>harita[x[0]]=x);
+  const ayKayit=v.liste.filter(x=>x[0].startsWith(ay));
+  if(!S.takvimGun||!S.takvimGun.startsWith(ay))S.takvimGun=ay===buAy?v.bugun:(ayKayit.length?ayKayit[ayKayit.length-1][0]:ay+'-01');
+  const ayKaydir=n=>{const d=new Date(Date.UTC(Y,M-1+n,1));S.takvimAy=d.toISOString().slice(0,7);S.takvimGun=null;takvimCiz();};
+  // üst: ay adı ve oklar
+  const ust=el('div','takvim-ust');
+  const geri=el('button',null,'‹');geri.type='button';geri.setAttribute('aria-label','Önceki ay');geri.disabled=ay<=ilkAy;geri.onclick=()=>ayKaydir(-1);
+  const ileri=el('button',null,'›');ileri.type='button';ileri.setAttribute('aria-label','Sonraki ay');ileri.disabled=ay>=buAy;ileri.onclick=()=>ayKaydir(1);
+  ust.append(geri,el('h4',null,AYLAR[M-1]+' '+Y),ileri);
+  const oz=el('div','ozet-cubuk');
+  const sayfa=ayKayit.reduce((a,x)=>a+x[1],0),biten=ayKayit.filter(x=>x[3]).length;
+  oz.append(el('span','cip',ayKayit.length+' gün okudun'),el('span','cip',sayfa+' sayfa'));oz.append(el('span','soluk','Kutudaki sayı o gün okuduğun sayfa.'));
+  if(biten)oz.append(el('span','cip bitti',biten+' kitap bitirdin'));
+  // ızgara: hafta pazartesi başlar
+  const iz=el('div','takvim');HAFTA.forEach(h=>iz.append(el('div','hg',h)));
+  const bosluk=(new Date(Date.UTC(Y,M-1,1)).getUTCDay()+6)%7,gunSay=new Date(Date.UTC(Y,M,0)).getUTCDate();
+  for(let i=0;i<bosluk;i++)iz.append(el('div','tg bos-gun'));
+  for(let d=1;d<=gunSay;d++){
+    const t=ay+'-'+String(d).padStart(2,'0'),x=harita[t],gelecek=t>v.bugun;
+    const b=el('button','tg'+(t===v.bugun?' bugun':'')+(gelecek?' gelecek':''));b.type='button';
+    b.append(el('span','n',d));
+    if(x){const c=kitapRengi(x[2]);b.style.background=hexRgba(c,.28);b.style.borderColor=c;b.append(el('span','s',x[1]));if(x[3])b.append(el('span','bt','✓'));
+      b.setAttribute('aria-label',trTarih(t)+', '+x[2]+', '+x[1]+' sayfa'+(x[3]?', kitabı bitirdin':''));}
+    else b.setAttribute('aria-label',trTarih(t)+(gelecek?'':', okuma yok'));
+    if(gelecek)b.disabled=true;else{b.setAttribute('aria-pressed',t===S.takvimGun);b.onclick=()=>{S.takvimGun=t;takvimCiz();};}
+    iz.append(b);
+  }
+  // seçili günün yaprağı
+  const det=el('div','takvim-detay'),x=harita[S.takvimGun];
+  det.append(yaprakEl(S.takvimGun));
+  if(x)det.append(kayitIcerik({kitap:x[2],sayfa:x[1],bitti:x[3],anladiklarim:x[4]||''}));
+  else{const bos=el('div');bos.append(el('p',null,S.takvimGun===v.bugun?'Bugün henüz okuma kaydın yok.':'Bu gün okuma kaydın yok.'));
+    if(S.takvimGun===v.bugun||S.takvimGun===v.dun){const g=el('button','btn kucuk','Bu günün okumasını gir');g.type='button';g.style.marginTop='8px';
+      g.onclick=()=>{S.gun=S.takvimGun===v.bugun?'bugun':'dun';formDoldur();$('#okuma-form').scrollIntoView({behavior:'smooth'});};bos.append(g);}
+    det.append(bos);}
+  k.append(ust,oz,iz,det);
 }
 $('#bitir').onclick=()=>{if(S.kaydediliyor)return;S.ogr=null;S.veri=null;goster('s-sinif');};
 
@@ -1007,7 +1086,7 @@ const Mock=(()=>{
   const tr=(a,b)=>a.localeCompare(b,'tr');
   const rs=()=>{const a=MEYVELER[Math.floor(Math.random()*16)][0];let b;do{b=MEYVELER[Math.floor(Math.random()*16)][0];}while(b===a);return a+'-'+b;};
   const pinK=p=>{if(String(p)!==pin)throw new Error('Öğretmen şifresi yanlış.');};
-  const liste=id=>{const k=ok.filter(r=>r.ogrenciId===id).sort((a,b)=>a.tarih.localeCompare(b.tarih));const sinir=k.length-14;return k.map((r,i)=>i>=sinir?[r.tarih,r.sayfa,r.kitap,r.bitti,r.anl]:[r.tarih,r.sayfa,r.kitap,r.bitti]);};
+  const liste=id=>{const k=ok.filter(r=>r.ogrenciId===id).sort((a,b)=>a.tarih.localeCompare(b.tarih));return k.map(r=>[r.tarih,r.sayfa,r.kitap,r.bitti,r.anl]);};
   const ozet=s=>({ogrenci:{id:s.id,ad:s.ad,sinif:s.sinif},bugun:T(),dun:gunEkle(T(),-1),liste:liste(s.id)});
   const dogrula=(id,p)=>{const s=og.find(x=>x.id===id);if(!s)throw new Error('Öğrenci bulunamadı.');if(s.sifre!==p)throw new Error('Şifre yanlış, tekrar dene.');return s;};
   const cls=()=>{const m={};og.forEach(s=>(m[s.sinif]=m[s.sinif]||[]).push({id:s.id,ad:s.ad,sifre:s.sifre}));return Object.keys(m).sort(tr).map(k=>({sinif:k,ogrenciler:m[k].sort((a,b)=>tr(a.ad,b.ad))}));};

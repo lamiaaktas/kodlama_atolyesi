@@ -26,7 +26,7 @@ const TEBRIKLER = ['Harika gidiyorsun!', 'Gayet güzel!', 'Müthiş!', 'Çabanı
 const SAYFA_URL = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/okuma-gunlugu/Index.html';
 const ON = 'og:';            // önbellek anahtarı öneki
 const SURE = 21600;          // önbellek süresi (6 saat, en fazlası)
-const GECMIS_METIN = 14;     // öğrenci ekranında yazısıyla gösterilen son kayıt sayısı
+const GECMIS_METIN = 62;     // yazısıyla birlikte öğrenciye gönderilen son kayıt sayısı (takvimde yaklaşık 2 ay)
 const PANEL_METIN_GUN = 92;  // öğretmen paneline yazısıyla gönderilen gün sayısı
 
 /* ================= sayfa ================= */
@@ -197,8 +197,19 @@ function okumalar_() {
 /* Öğrenci önbelleği: [tarih, sayfa, kitap, bitti, (son kayıtlarda) yazı], eskiden yeniye. */
 function kompakt_(liste) {
   liste.sort((a, b) => a.tarih.localeCompare(b.tarih));
-  const sinir = liste.length - GECMIS_METIN;
-  return liste.map((r, i) => i >= sinir ? [r.tarih, r.sayfa, r.kitap, r.bitti, r.anl] : [r.tarih, r.sayfa, r.kitap, r.bitti]);
+  return metinKirp_(liste.map(r => [r.tarih, r.sayfa, r.kitap, r.bitti, r.anl]));
+}
+
+/** Yazıları en yeniden başlayarak tutar (en çok GECMIS_METIN kayıt ve 60.000 harf); önbellek sınırını aşmamak için. */
+function metinKirp_(liste) {
+  let harf = 0, adet = 0;
+  for (let i = liste.length - 1; i >= 0; i--) {
+    const r = liste[i];
+    const n = r[4] ? String(r[4]).length : 0;
+    if (r.length > 4 && adet < GECMIS_METIN && harf + n <= 60000) { harf += n; adet++; }
+    else liste[i] = r.slice(0, 4);
+  }
+  return liste;
 }
 
 function ogrenciKayitlari_(id) {
@@ -318,8 +329,7 @@ function saveReading(id, sifre, veri) {
     const liste = ogrenciKayitlari_(s.id).filter(r => r[0] !== tarih);
     liste.push([tarih, sayfa, kitap, bitti, anl]);
     liste.sort((a, b) => a[0].localeCompare(b[0]));
-    const sinir = liste.length - GECMIS_METIN;
-    const yeni = liste.map((r, i) => i >= sinir ? r : r.slice(0, 4));
+    const yeni = metinKirp_(liste);
     kayitlariYaz_(s.id, yeni);
     return ozet_(s, yeni);
   });
