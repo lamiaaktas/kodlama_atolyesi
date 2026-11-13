@@ -243,6 +243,19 @@ td.top{font-weight:800}
 @keyframes dalga{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 @keyframes dogus{0%{transform:scale(0)}100%{transform:scale(1)}}
 .kurt-alt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* ödül boğumu: biten kitabın birleşmiş, süslü boğumu */
+.kurt-kap .kodul-dis{fill:#ffd23f;stroke:#2b2a4c;stroke-width:2.5}
+.kurt-kap .kodul-ic{stroke:#fff7d1;stroke-width:2}
+.kurt-kap .kodul-nokta{fill:#fff;opacity:.85;stroke:none}
+.kurt-kap .kodul-yildiz{fill:#ffd23f;stroke:#2b2a4c;stroke-width:2;stroke-linejoin:round}
+.kurt-kap .kpirilti{fill:#ffd23f;stroke:#2b2a4c;stroke-width:1;animation:pirilti 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.kurt-kap .kodul.yorgun .kodul-dis{fill:#c9b77a}
+.kurt-kap .kodul.yorgun .kodul-yildiz{fill:#c9b77a}
+.kurt-kap .kbirles{animation:titres .25s ease-in-out infinite!important;transform-box:fill-box;transform-origin:center}
+.kurt-kap .kyeni-odul{animation:odul-dogus 1.1s cubic-bezier(.3,1.7,.5,1) both;transform-box:fill-box;transform-origin:center}
+@keyframes pirilti{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes titres{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(-1.5px,1px) scale(.92)}75%{transform:translate(1.5px,-1px) scale(.92)}}
+@keyframes odul-dogus{0%{transform:scale(0) rotate(-120deg)}70%{transform:scale(1.25) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
 .kitap-cip{display:inline-flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;background:var(--zemin);border-radius:999px;padding:3px 10px}
 .kitap-cip i{width:12px;height:12px;border-radius:50%;display:inline-block}
 /* grafik */
@@ -717,7 +730,7 @@ function hesapla(r){
   liste.forEach(x=>{const k=kitapAnahtari(x[2]);son[k]={kitap:x[2],tarih:x[0]};if(x[3])biten[k]={kitap:x[2],tarih:x[0]};});
   v.aktifKitaplar=Object.keys(son).filter(k=>!biten[k]).sort((a,b)=>son[b].tarih.localeCompare(son[a].tarih)).map(k=>son[k].kitap);
   v.bitenKitaplar=Object.values(biten).sort((a,b)=>b.tarih.localeCompare(a.tarih));
-  v.kurt=liste.map(x=>[x[0],x[1],x[2]]);
+  v.kurt=liste.map(x=>[x[0],x[1],x[2],x[3]]);
   // en son okuduğu günden bugüne kadar okumadığı gün sayısı (bugün sayılmaz; hiç kaydı yoksa 0)
   const sonGun=[...gunler].sort().pop();
   v.okumadigiGun=0;
@@ -779,7 +792,7 @@ function gunlukAc(){
   istatistikCiz();formDoldur();gecmisCiz();goster('s-gunluk');
 }
 function istatistikCiz(){const v=S.veri;$('#g-seri').textContent=v.seri;$('#g-toplam').textContent=v.toplamSayfa;$('#g-biten').textContent=v.bitenKitaplar.length;
-  $('#g-bogum').textContent=v.kurt.length+' boğum';kurtCiz($('#g-kurt'),v.kurt,null,{bitkin:v.eksik,enerji:v.enerji});
+  $('#g-bogum').textContent=bogumSayisi(v.kurt)+' boğum';kurtCiz($('#g-kurt'),v.kurt,null,{bitkin:v.eksik,enerji:v.enerji});
   const en=$('#g-enerji');en.hidden=!v.eksik;
   if(v.okumadigiGun)en.textContent='🪫 '+okumadinYazisi(v.okumadigiGun)+' Bugün okuyup kaydedersen kurdun enerjisi dolmaya başlar.';
   else if(v.eksik)en.textContent='🔋 Kurdun toparlanıyor: enerjisi 4 çizginin '+v.enerji+'. çizgisinde. Her gün okudukça bir çizgi daha dolacak.';
@@ -865,10 +878,18 @@ function tamamGoster(veri){
   $('#t-mesaj').textContent='sayfa okudun, '+ilkAd(v.ogrenci.ad)+'. Harika!';
   const doldu=v.enerji>S.oncekiEnerji,en=$('#t-enerji');en.hidden=!doldu;
   if(doldu)en.textContent=v.eksik?'🔋 Kitap kurdunun enerjisi yerine gelmeye başladı!':'🔋 Kitap kurdunun enerjisi tamamen yerine geldi!';
-  $('#t-seri').textContent=(v.seri>1?v.seri+' gündür üst üste okuyorsun. ':'')+'Kitap kurdun artık '+v.kurt.length+' boğum!';
+  $('#t-seri').textContent=(v.seri>1?v.seri+' gündür üst üste okuyorsun. ':'')+(veri.bitti?'':'Kitap kurdun artık '+bogumSayisi(v.kurt)+' boğum!');
   const kb=$('#t-kitap-bitti');kb.hidden=!veri.bitti;
-  if(veri.bitti)kb.textContent='«'+veri.kitap+'» kitabını bitirdin! Bu senin '+v.bitenKitaplar.length+'. kitabın.';
-  kurtCiz($('#t-kurt'),v.kurt,veri.tarih,{bitkin:v.eksik,enerji:v.enerji,yeniBar:doldu?v.enerji-1:-1});
+  const kOps={bitkin:v.eksik,enerji:v.enerji,yeniBar:doldu?v.enerji-1:-1};
+  clearTimeout(S.birlesmeZaman);
+  if(veri.bitti){
+    const gun=v.kurt.filter(x=>kitapAnahtari(x[2])===kitapAnahtari(veri.kitap)&&!x[3]).length+1;
+    kb.textContent='«'+veri.kitap+'» kitabını bitirdin! Bu senin '+v.bitenKitaplar.length+'. kitabın. '+(gun>1?'Bu kitabın '+gun+' boğumu birleşip süslü tek bir boğum oldu!':'Kurduna süslü bir boğum eklendi!');
+    // önce birleşmemiş hali (boğumlar titreşir), sonra süslü tek boğum
+    const once=v.kurt.map(x=>x[0]===veri.tarih?[x[0],x[1],x[2],0]:x);
+    kurtCiz($('#t-kurt'),once,null,Object.assign({},kOps,{birlesecek:veri.kitap,yeniBar:-1}));
+    S.birlesmeZaman=setTimeout(()=>{if(!$('#s-tamam').hidden)kurtCiz($('#t-kurt'),v.kurt,veri.tarih,kOps);},1600);
+  }else kurtCiz($('#t-kurt'),v.kurt,veri.tarih,kOps);
   goster('s-tamam');
   if(veri.bitti)konfeti();
 }
@@ -944,7 +965,25 @@ const KURT_RENK=['#3fa36b','#f2a93b','#e86a52','#4f9fd6','#9b6fd0','#d4b62c','#e
 function kitapRengi(k){let h=0;for(const c of kitapAnahtari(k))h=(h*31+c.codePointAt(0))>>>0;return KURT_RENK[h%KURT_RENK.length];}
 function solgun(hex,oran){const n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255,gri=(r*.3+g*.59+b*.11);
   const m=c=>Math.round(c+(gri*0.9+20-c)*oran);return`rgb(${m(r)},${m(g)},${m(b)})`;}
-// kurtCiz(kap, kurt, yeniTarih, {bitkin: eksik enerji 0-4, enerji: dolu çizgi 0-4, yeniBar: yeni dolan çizgi, kitaplar, yakin})
+// Kurdun boğumları: biten bir kitabın (bittiği güne kadarki) tüm günleri, bittiği yerde tek bir süslü ödül boğumuna dönüşür.
+// kurt: [[tarih, sayfa, kitap, bitti], ...] eskiden yeniye
+function kurtParcalari(kurt){
+  const bitis={};kurt.forEach(([t,,k,b])=>{if(b)bitis[kitapAnahtari(k)]=t;}); // kitabın son "bitti" günü
+  const grup={},out=[];
+  kurt.forEach(([t,s,k,b])=>{
+    const key=kitapAnahtari(k),son=bitis[key];
+    if(son&&t<=son){
+      const g=grup[key]=grup[key]||{gun:0,sayfa:0,ilk:t};g.gun++;g.sayfa+=s;
+      if(t===son){out.push({odul:true,t,k,s:g.sayfa,gun:g.gun,ilk:g.ilk});delete grup[key];}
+    }else out.push({t,s,k});
+  });
+  return out;
+}
+function bogumSayisi(kurt){return kurtParcalari(kurt).length;}
+let kurtNo=0;
+function yildizYolu(cx,cy,R,r,n=5){let d='';for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,rr=i%2?r:R;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}return d+'Z';}
+function acik(hex,o){const n=parseInt(hex.slice(1),16),f=c=>Math.round(c+(255-c)*o);return`rgb(${f(n>>16&255)},${f(n>>8&255)},${f(n&255)})`;}
+// kurtCiz(kap, kurt, yeniTarih, {bitkin: eksik enerji 0-4, enerji: dolu çizgi 0-4, yeniBar: yeni dolan çizgi, kitaplar, yakin, birlesecek: kitap adı})
 function kurtCiz(kap,kurt,yeniTarih,ops={}){
   kap.innerHTML='';
   const bitkin=ops.bitkin||0,agir=bitkin>=3,sol=bitkin?Math.min(.75,.12+bitkin*.15):0;
@@ -952,20 +991,37 @@ function kurtCiz(kap,kurt,yeniTarih,ops={}){
   const nokta=s=>{const k=Math.floor(s/P),t=s-k*P,y0=ust+k*2*R,sag=k%2===0;
     if(t<S)return{x:sag?xL+t:xR-t,y:y0};
     const a=(t-S)/R;return{x:sag?xR+R*Math.sin(a):xL-R*Math.sin(a),y:y0+R-R*Math.cos(a)};};
-  const parca=[{r:7,renk:'#3fa36b'},...kurt.map(([t,s,k])=>({r:10+Math.min(s,40)/40*12,renk:kitapRengi(k),t,s,k}))];
+  const parca=[{r:7,renk:'#3fa36b'},...kurtParcalari(kurt).map(p=>Object.assign(p,{r:p.odul?24+Math.min(p.s,300)/300*8:10+Math.min(p.s,40)/40*12,renk:kitapRengi(p.k)}))];
   let d=0;parca.forEach((g,i)=>{if(i)d+=parca[i-1].r*0.72+g.r*0.72;g.d=d;Object.assign(g,nokta(d));});
   const bR=27,son=parca[parca.length-1],bd=d+son.r*0.72+bR*0.8,bas=nokta(bd),ileri=nokta(bd+1);
   const maxY=Math.max(bas.y,...parca.map(g=>g.y))+bR+pad+(bitkin?6:0);
-  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${Math.ceil(maxY)}`,role:'img','aria-label':'Kitap kurdu, '+kurt.length+' boğum'+(bitkin?', yorgun ve enerjisi düşük':'')});
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${Math.ceil(maxY)}`,role:'img','aria-label':'Kitap kurdu, '+(parca.length-1)+' boğum'+(bitkin?', yorgun ve enerjisi düşük':'')});
   const anim=parca.length<=120; // çok uzun kurtta dalga animasyonu tableti yormasın
+  const defs=svgEl('defs',{});svg.append(defs);const no=++kurtNo;
+  const birlesecek=ops.birlesecek?kitapAnahtari(ops.birlesecek):null;
   parca.forEach((g,i)=>{
     // bitkin kurt: renkler solar, boğumlar yere çöker
-    const cy=agir?g.y+Math.min(6,g.r*0.25):g.y;
-    const c=svgEl('circle',{cx:g.x.toFixed(1),cy:cy.toFixed(1),r:(agir?g.r*0.94:g.r).toFixed(1),fill:sol?solgun(g.renk,sol):g.renk,class:anim?(agir?'kseg yorgun':'kseg'):''});
-    if(!anim){c.setAttribute('stroke','var(--kagit)');c.setAttribute('stroke-width','2.5');}
-    else c.style.animationDelay=(-(parca.length-i)*(agir?0.25:0.12))+'s';
-    if(g.t)c.append(svgEl('title',{},trTarih(g.t)+' · '+g.k+' · '+g.s+' sayfa'));
-    if(yeniTarih&&i===parca.length-1&&g.t===yeniTarih){const w=svgEl('g',{class:'kyeni'});w.append(c);svg.append(w);}else svg.append(c);
+    const cy=agir?g.y+Math.min(6,g.r*0.25):g.y,r=agir?g.r*0.94:g.r,renk=sol?solgun(g.renk,sol):g.renk;
+    let c;
+    if(g.odul){
+      // süslü ödül boğumu: parlak degrade, altın halka, puantiyeler, ortada yıldız, etrafında pırıltılar
+      const gid='kod'+no+'-'+i,gr=svgEl('radialGradient',{id:gid,cx:'35%',cy:'30%',r:'75%'});
+      gr.append(svgEl('stop',{offset:'0%','stop-color':acik(g.renk,.7)}),svgEl('stop',{offset:'55%','stop-color':renk}),svgEl('stop',{offset:'100%','stop-color':solgun(g.renk,.25)}));
+      defs.append(gr);
+      c=svgEl('g',{class:anim?(agir?'kseg kodul yorgun':'kseg kodul'):'kodul'});
+      c.append(svgEl('circle',{cx:g.x,cy,r:r+3.5,class:'kodul-dis'}),svgEl('circle',{cx:g.x,cy,r,fill:`url(#${gid})`,class:'kodul-ic'}));
+      for(let j=0;j<8;j++){const a=j*Math.PI/4+Math.PI/8;c.append(svgEl('circle',{cx:(g.x+Math.cos(a)*r*0.7).toFixed(1),cy:(cy+Math.sin(a)*r*0.7).toFixed(1),r:2.4,class:'kodul-nokta'}));}
+      c.append(svgEl('path',{d:yildizYolu(g.x,cy,r*0.48,r*0.21),class:'kodul-yildiz'}));
+      if(!agir)[[-1,-1],[1,-1.1],[1.05,.9]].forEach(([dx,dy],j)=>{const p=svgEl('path',{d:yildizYolu(g.x+dx*(r+9),cy+dy*(r+5),6,1.8,4),class:'kpirilti'});p.style.animationDelay=(j*.5)+'s';c.append(p);});
+      c.append(svgEl('title',{},g.k+' · bitirdin · '+g.gun+' gün, '+g.s+' sayfa ('+trTarih(g.ilk,false)+' – '+trTarih(g.t,false)+')'));
+    }else{
+      c=svgEl('circle',{cx:g.x.toFixed(1),cy:cy.toFixed(1),r:r.toFixed(1),fill:renk,class:anim?(agir?'kseg yorgun':'kseg'):''});
+      if(!anim){c.setAttribute('stroke','var(--kagit)');c.setAttribute('stroke-width','2.5');}
+      if(g.t)c.append(svgEl('title',{},trTarih(g.t)+' · '+g.k+' · '+g.s+' sayfa'));
+      if(birlesecek&&g.k&&kitapAnahtari(g.k)===birlesecek)c.classList.add('kbirles'); // birleşmek üzere titreşen boğumlar
+    }
+    if(anim)c.style.animationDelay=(-(parca.length-i)*(agir?0.25:0.12))+'s';
+    if(yeniTarih&&i===parca.length-1&&g.t===yeniTarih){const w=svgEl('g',{class:g.odul?'kyeni kyeni-odul':'kyeni'});w.append(c);svg.append(w);}else svg.append(c);
   });
   let tx=ileri.x-bas.x,ty=ileri.y-bas.y;const L=Math.hypot(tx,ty)||1;tx/=L;ty/=L;
   if(Math.abs(ty)>0.9){tx=0;ty=1;}
@@ -1006,14 +1062,17 @@ function kurtCiz(kap,kurt,yeniTarih,ops={}){
     h.append(pil);
   }
   svg.append(h);kap.append(svg);
-  if(ops.yakin){ // yalnızca kurdun çizildiği bölgeyi göster: kurt büyük görünsün
-    const xs=parca.map(g=>[g.x-g.r,g.x+g.r]).flat().concat([bas.x-bR-30,bas.x+bR+34]);
-    const x0=Math.max(0,Math.min(...xs)-14),x1=Math.min(W,Math.max(...xs)+14),y0=Math.max(0,Math.min(...parca.map(g=>g.y))-bR-(bitkin?70:40));
+  const tekSira=parca.every(g=>g.y===ust)&&bas.y===ust; // kurt kısa: tek sıraya sığıyor
+  if(ops.yakin||tekSira){ // yalnızca kurdun çizildiği bölgeyi göster: kısa kurt da büyük görünsün
+    const xs=parca.map(g=>[g.x-g.r-14,g.x+g.r+14]).flat().concat([bas.x-bR-30,bas.x+bR+34]);
+    const x0=Math.max(0,Math.min(...xs)-14);let x1=Math.min(W,Math.max(...xs)+14);
+    if(x1-x0<460)x1=x0+460; // çok kısa kurt aşırı büyümesin
+    const y0=Math.max(0,Math.min(...parca.map(g=>g.y))-bR-(bitkin?70:40));
     svg.setAttribute('viewBox',`${x0} ${y0} ${x1-x0} ${Math.ceil(maxY-y0)}`);
   }
   if(ops.kitaplar===false)return;
   const kitaplar=[...new Map(kurt.map(k=>[kitapAnahtari(k[2]),k[2]])).values()];
-  if(kitaplar.length){const a=el('div','kurt-alt');kitaplar.slice(-8).forEach(k=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(k);c.append(i,document.createTextNode(nfc(k)));a.append(c);});kap.append(a);}
+  if(kitaplar.length){const a=el('div','kurt-alt');const bitenK=new Set(kurt.filter(x=>x[3]).map(x=>kitapAnahtari(x[2])));kitaplar.slice(-8).forEach(k=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(k);c.append(i,document.createTextNode(nfc(k)+(bitenK.has(kitapAnahtari(k))?' ⭐':'')));a.append(c);});kap.append(a);}
   else kap.append(el('p','soluk','İlk okumanı kaydettiğinde kurdun uzamaya başlayacak.'));
 }
 
@@ -1200,8 +1259,8 @@ async function ogrenciYukle(){
   const son=tum[tum.length-1];
   if(!son||son.tarih<gunEkle(r.bugun,-2))oz.append(el('span','cip uyari',son?'Son okuma: '+trTarih(son.tarih,false):'Hiç kayıt yok'));
   gr.append(barGrafik(gunlukDizi(donem,bas,gun)));
-  $('#po-bogum').textContent=tum.length+' boğum';
-  kurtCiz(kr,tum.map(o=>[o.tarih,o.sayfa,o.kitap]));
+  $('#po-bogum').textContent=bogumSayisi(tum.map(o=>[o.tarih,o.sayfa,o.kitap,o.bitti?1:0]))+' boğum';
+  kurtCiz(kr,tum.map(o=>[o.tarih,o.sayfa,o.kitap,o.bitti?1:0]));
   if(bitenler.length){const raf=el('div','raf');raf.append(el('strong',null,'Bitirdiği kitaplar: '));
     bitenler.slice().reverse().forEach(b=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(b.kitap);c.append(i,document.createTextNode(b.kitap+' · '+trTarih(b.tarih,false)));raf.append(c);});kr.append(raf);}
   if(!donem.length){ls.append(el('p','bos-durum','Bu dönemde kayıt yok.'));return;}
