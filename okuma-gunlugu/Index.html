@@ -1,7 +1,10 @@
 <title>Okuma Günlüğüm</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+<script>document.documentElement.lang='tr';/*ON_VERI*/</script>
 <style>
 /* Düzen: tek sütun "defter sayfası"; öğrenci ekranları büyük dokunma hedefleri, öğretmen paneli sekmeli. */
 :root{
@@ -147,9 +150,26 @@ td.top{font-weight:800}
 .yukleniyor{opacity:.6;pointer-events:none}
 .bos-durum{text-align:center;padding:30px 10px;color:var(--soluk)}
 
+/* kitap seçimi */
+.kitap-secenek{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.kitap-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;border:2px solid var(--cizgi);background:var(--kagit);font-weight:800;text-align:left;max-width:100%;box-shadow:var(--golge)}
+.kitap-btn i{width:14px;height:14px;border-radius:50%;flex:none}
+.kitap-btn span{min-width:0;overflow-wrap:anywhere}
+.kitap-btn[aria-checked="true"]{border-color:var(--yaprak);background:var(--yaprak-acik)}
+.kitap-btn[aria-checked="true"]::after{content:"✓";color:var(--yaprak);font-weight:800}
+.kitap-btn.yeni{border-style:dashed;color:var(--soluk);box-shadow:none}
+.bitti-sec{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--zemin);font-weight:800;cursor:pointer}
+.bitti-sec input{width:28px;height:28px;flex:none;accent-color:var(--yaprak);margin:0}
+.bitti-sec:has(input:checked){background:var(--yaprak-acik)}
+.raf{display:flex;flex-wrap:wrap;gap:8px}
+.raf .kitap-cip{background:var(--yaprak-acik)}
+.durum{font-weight:800;font-size:.95rem;color:var(--soluk);min-height:1.4em}
+.durum.ok{color:var(--yaprak)}
+.cip.bitti{background:var(--muz);color:#3a2c00}
+
 /* öğretmen mesajı */
 .mesaj-kart{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:34px 22px 28px;overflow:hidden}
-.zarf{font-weight:800;color:var(--soluk);font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.zarf{font-weight:800;color:var(--soluk);font-size:1.05rem}
 .mesaj-metin{font-family:var(--f-baslik);font-weight:800;font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.05;color:var(--yaprak);text-wrap:balance;animation:dogus .8s cubic-bezier(.3,1.6,.5,1) both .15s}
 .imza{font-family:var(--f-baslik);font-size:1.3rem;font-weight:700}
 .mesaj-not{background:var(--yaprak-acik);border-radius:14px;padding:10px 16px;font-weight:700}
@@ -206,8 +226,8 @@ td.top{font-weight:800}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
-<div class="kap" id="uygulama">
-  <div id="demo-serit" class="demo-serit" hidden>Önizleme modu: örnek sınıflar ve öğrenciler gösteriliyor. Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç, öğretmen şifresi 1234. 4-A'daki öğrenciler dün 15+ sayfa okudu, girişte öğretmen mesajını görürler.</div>
+<div class="kap" id="uygulama" lang="tr">
+  <div id="demo-serit" class="demo-serit" hidden>Önizleme modu: örnek sınıflar ve öğrenciler gösteriliyor. Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç, öğretmen şifresi 1234. 4-A'daki öğrenciler dün 15+ sayfa okudu, girişte öğretmen mesajını görürler; daha önce okudukları kitaplar seçenek olarak çıkar.</div>
 
   <!-- 1. Sınıf seçimi -->
   <section id="s-sinif" class="kap">
@@ -262,7 +282,7 @@ td.top{font-weight:800}
     <div class="istatistik">
       <div class="rozet"><b id="g-seri">0</b><span>gün üst üste<br>okudun</span></div>
       <div class="rozet"><b id="g-toplam">0</b><span>toplam<br>sayfa</span></div>
-      <div class="rozet"><b id="g-gun">0</b><span>günlük<br>kaydı</span></div>
+      <div class="rozet"><b id="g-biten">0</b><span>bitirdiğim<br>kitap</span></div>
     </div>
     <div class="kart kap"><div class="ust"><h3>Kitap kurdum</h3><span class="cip" id="g-bogum"></span></div>
       <div class="kurt-kap" id="g-kurt"></div>
@@ -277,7 +297,11 @@ td.top{font-weight:800}
       </div>
       <p class="soluk" id="secili-tarih"></p>
       <p class="not" id="var-notu" hidden>Bu gün için kaydın var. Değiştirip yeniden kaydedebilirsin.</p>
-      <div><label class="etiket" for="kitap">Hangi kitabı okudun?</label><input id="kitap" maxlength="120" autocomplete="off" placeholder="Kitabın adı"></div>
+      <div><p class="etiket" id="kitap-etiket">Hangi kitabı okudun?</p>
+        <div class="kitap-secenek" id="kitap-secenek" role="radiogroup" aria-labelledby="kitap-etiket"></div>
+        <div id="yeni-kitap-kutu"><label class="etiket" for="kitap" id="yeni-kitap-etiket" hidden>Yeni kitabın adı</label><input id="kitap" maxlength="120" autocomplete="off" autocapitalize="words" placeholder="Kitabın adını yaz"></div>
+        <label class="bitti-sec" for="bitti"><input type="checkbox" id="bitti"><span id="bitti-yazi">Bu kitabı bitirdim</span></label>
+      </div>
       <div><label class="etiket" for="sayfa">Kaç sayfa okudun?</label>
         <div class="sayac"><button type="button" data-ekle="-5">−5</button><button type="button" data-ekle="-1">−1</button><input id="sayfa" type="number" inputmode="numeric" min="1" max="1000" value="10"><button type="button" data-ekle="1">+1</button><button type="button" data-ekle="5">+5</button></div>
       </div>
@@ -288,6 +312,7 @@ td.top{font-weight:800}
       <p class="hata" id="form-hata"></p>
       <button class="btn buyuk" id="kaydet" type="submit">Kaydet</button>
     </form>
+    <div class="kart kap" id="raf-kart" hidden><h3>Bitirdiğim kitaplar</h3><div class="raf" id="raf"></div></div>
     <div class="kart kap"><h3>Okuma geçmişim</h3><div id="gecmis" class="gecmis"></div></div>
   </section>
 
@@ -297,7 +322,9 @@ td.top{font-weight:800}
       <div class="buyuk-sayi" id="t-sayfa">0</div>
       <h2 id="t-mesaj">sayfa okudun, harika!</h2>
       <p class="soluk" id="t-seri"></p>
+      <p class="mesaj-not" id="t-kitap-bitti" hidden></p>
       <div class="kurt-kap" id="t-kurt" style="width:100%"></div>
+      <p class="durum" id="t-durum" aria-live="polite"></p>
       <button class="btn buyuk" id="bitir" style="max-width:320px">Bitir</button>
     </div>
   </section>
@@ -315,7 +342,7 @@ td.top{font-weight:800}
 
   <!-- 7. Öğretmen paneli -->
   <section id="s-panel" class="kap" hidden>
-    <div class="ust"><h1>Öğretmen Paneli</h1><button class="geri" id="panel-cikis">Çıkış</button></div>
+    <div class="ust"><h1>Öğretmen Paneli</h1><div class="butonlar"><button class="geri" id="panel-yenile">↻ Yenile</button><button class="geri" id="panel-cikis">Çıkış</button></div></div>
     <div class="sekmeler" role="tablist">
       <button role="tab" data-sekme="gunluk" aria-selected="true">Günlük</button>
       <button role="tab" data-sekme="haftalik" aria-selected="false">Haftalık</button>
@@ -395,15 +422,17 @@ const EMOJI=Object.fromEntries(MEYVELER);
 const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const GUNLER=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const $=s=>document.querySelector(s);
-const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
-const S={sinif:null,ogr:null,sifre:[],veri:null,gun:'bugun',pin:'',pinGiris:'',siniflar:[]};
+const nfc=v=>String(v==null?'':v).normalize('NFC');
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=nfc(txt);return e;};
+const YENI='__yeni__';
+const S={sinif:null,ogr:null,sifre:[],veri:null,gun:'bugun',pin:'',pinGiris:'',siniflar:[],kitap:YENI,kaydediliyor:false};
 
 /* ---------- sunucu bağlantısı (Apps Script) ya da önizleme verisi ---------- */
 const GAS=!!(window.google&&google.script&&google.script.run);
 function api(fn,...args){
   return new Promise((ok,hata)=>{
     if(GAS){google.script.run.withSuccessHandler(ok).withFailureHandler(e=>hata(e&&e.message?e:new Error(String(e))))[fn](...args);}
-    else{setTimeout(()=>{try{ok(JSON.parse(JSON.stringify(Mock[fn](...args))));}catch(e){hata(e);}},180);}
+    else{setTimeout(()=>{try{ok(JSON.parse(JSON.stringify(Mock[fn](...args))));}catch(e){hata(e);}},60);}
   });
 }
 
@@ -412,6 +441,7 @@ function bugunIst(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Ist
 function gunEkle(s,n){const[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10);}
 function trTarih(s,uzun=true){const[y,m,d]=s.split('-').map(Number);const g=new Date(Date.UTC(y,m-1,d)).getUTCDay();return d+' '+AYLAR[m-1]+(uzun?' '+GUNLER[g]:'');}
 function gunAdi(s){const[y,m,d]=s.split('-').map(Number);return GUNLER[new Date(Date.UTC(y,m-1,d)).getUTCDay()];}
+const kitapAnahtari=k=>nfc(k).replace(/\s+/g,' ').trim().toLocaleLowerCase('tr');
 
 /* ---------- ekran geçişleri ---------- */
 const OGRENCI_EKRANLARI=['s-isim','s-sifre','s-mesaj','s-gunluk','s-tamam'];
@@ -420,41 +450,52 @@ function goster(id){
   document.querySelectorAll('#uygulama > section').forEach(s=>s.hidden=s.id!==id);
   window.scrollTo(0,0);
   bostaKur();
-  if(id==='s-sinif')siniflariYukle();
+  if(id==='s-sinif')siniflariCiz();
 }
 function bostaKur(){
   clearTimeout(bosta);
   const aktif=[...document.querySelectorAll('#uygulama > section')].find(s=>!s.hidden);
   if(!aktif)return;
   const sure=aktif.id==='s-tamam'?20000:aktif.id==='s-panel'?30*60000:OGRENCI_EKRANLARI.includes(aktif.id)?4*60000:0;
-  if(sure)bosta=setTimeout(()=>{S.ogr=null;S.sifre=[];S.pin='';goster('s-sinif');},sure);
+  if(sure)bosta=setTimeout(()=>{if(S.kaydediliyor){bostaKur();return;}S.ogr=null;S.sifre=[];S.veri=null;S.pin='';goster('s-sinif');},sure);
 }
 ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,bostaKur,{passive:true}));
 document.querySelectorAll('[data-git]').forEach(b=>b.onclick=()=>goster(b.dataset.git));
 
-function hataGoster(e,yer){const m=(e&&e.message)||String(e);if(yer){yer.textContent=m;}else{alert(m);}}
-
-/* ---------- 1. sınıflar ---------- */
-async function siniflariYukle(){
-  const kutu=$('#sinif-liste');kutu.innerHTML='';kutu.append(el('p','soluk','Yükleniyor…'));
-  try{
-    const sn=await api('getClasses');kutu.innerHTML='';
-    if(!sn.length){kutu.append(el('p','bos-durum','Henüz sınıf eklenmemiş. Öğretmeninin sınıf listesini eklemesi gerekiyor.'));return;}
-    sn.forEach(s=>{const b=el('button','secim sinif-btn',s);b.onclick=()=>isimleriAc(s);kutu.append(b);});
-  }catch(e){kutu.innerHTML='';kutu.append(el('p','hata',e.message||'Bağlantı sorunu. Sayfayı yenile.'));}
+/* ---------- 1-2. sınıf ve isim listesi (sayfayla birlikte gelir, arka planda tazelenir) ---------- */
+let ROSTER=Array.isArray(window.ON_VERI)?window.ON_VERI:null,rosterZaman=ROSTER?Date.now():0,rosterIstek=null;
+function rosterTazele(zorla){
+  if(rosterIstek)return rosterIstek;
+  if(!zorla&&ROSTER&&Date.now()-rosterZaman<60000)return Promise.resolve(ROSTER);
+  rosterIstek=api('getRoster').then(r=>{ROSTER=r;rosterZaman=Date.now();return r;})
+    .catch(async()=>{ // eski sunucu kodu: getRoster yok
+      const sn=await api('getClasses');const r=[];
+      for(const s of sn)r.push({sinif:s,ogrenciler:await api('getStudents',s)});
+      ROSTER=r;rosterZaman=Date.now();return r;})
+    .finally(()=>{rosterIstek=null;});
+  return rosterIstek;
 }
-
-/* ---------- 2. isimler ---------- */
-async function isimleriAc(sinif){
-  S.sinif=sinif;$('#isim-sinif').textContent=sinif;goster('s-isim');
-  const kutu=$('#isim-liste');kutu.innerHTML='';kutu.append(el('p','soluk','Yükleniyor…'));
-  const ogr=await api('getStudents',sinif);kutu.innerHTML='';
-  ogr.forEach(o=>{const b=el('button','secim',o.ad);b.onclick=()=>sifreAc(o);kutu.append(b);});
+function siniflariCiz(){
+  const kutu=$('#sinif-liste');
+  const ciz=()=>{kutu.innerHTML='';
+    if(!ROSTER.length){kutu.append(el('p','bos-durum','Henüz sınıf eklenmemiş. Öğretmeninin sınıf listesini eklemesi gerekiyor.'));return;}
+    ROSTER.forEach(c=>{const b=el('button','secim sinif-btn',c.sinif);b.onclick=()=>isimleriAc(c.sinif);kutu.append(b);});};
+  if(ROSTER)ciz();else{kutu.innerHTML='';kutu.append(el('p','soluk','Yükleniyor…'));}
+  const once=JSON.stringify(ROSTER);
+  rosterTazele().then(()=>{if(!$('#s-sinif').hidden&&JSON.stringify(ROSTER)!==once)ciz();})
+    .catch(e=>{if(!ROSTER){kutu.innerHTML='';kutu.append(el('p','hata','Bağlantı sorunu. Sayfayı yenile.'));}});
+}
+function isimleriAc(sinif){
+  S.sinif=sinif;$('#isim-sinif').textContent=nfc(sinif);goster('s-isim');
+  const kutu=$('#isim-liste');kutu.innerHTML='';
+  const c=(ROSTER||[]).find(x=>x.sinif===sinif);
+  (c?c.ogrenciler:[]).forEach(o=>{const b=el('button','secim',o.ad);b.onclick=()=>sifreAc(o);kutu.append(b);});
 }
 
 /* ---------- 3. şifre ---------- */
 (function(){const iz=$('#meyve-izgara');MEYVELER.forEach(([ad,e])=>{const b=el('button','secim meyve');b.type='button';b.setAttribute('aria-label',ad);b.append(el('span','e',e),el('span',null,ad));b.onclick=()=>meyveSec(ad);iz.append(b);});})();
-function sifreAc(o){S.ogr=o;S.sifre=[];$('#sifre-baslik').textContent='Merhaba, '+o.ad.split(' ')[0]+'!';$('#sifre-hata').textContent='';slotCiz();goster('s-sifre');}
+function ilkAd(ad){return nfc(ad).split(' ')[0];}
+function sifreAc(o){S.ogr=o;S.sifre=[];$('#sifre-baslik').textContent='Merhaba, '+ilkAd(o.ad)+'!';$('#sifre-hata').textContent='';slotCiz();goster('s-sifre');}
 function slotCiz(){$('#slotlar').querySelectorAll('.slot').forEach((s,i)=>{const ad=S.sifre[i];s.className='slot'+(ad?' dolu':'');s.innerHTML='';if(ad){s.append(el('span',null,EMOJI[ad]),el('small',null,ad));}});}
 $('#sifre-sil').onclick=()=>{S.sifre.pop();slotCiz();$('#sifre-hata').textContent='';};
 async function meyveSec(ad){
@@ -465,16 +506,40 @@ async function meyveSec(ad){
   try{
     const r=await api('studentLogin',S.ogr.id,S.sifre.join('-'));
     if(!r.ok){$('#sifre-hata').textContent=r.msg;kart.classList.remove('salla');void kart.offsetWidth;kart.classList.add('salla');S.sifre=[];setTimeout(slotCiz,500);return;}
-    S.veri=r;if(r.tebrik)mesajAc(r.tebrik);else gunlukAc();
+    S.veri=hesapla(r);if(r.tebrik)mesajAc(r.tebrik);else gunlukAc();
   }catch(e){$('#sifre-hata').textContent=e.message;S.sifre=[];slotCiz();}
   finally{kart.classList.remove('yukleniyor');}
 }
 
+/* ---------- öğrenci verisini hesapla: kayıt listesinden seri, toplam, kitaplar, kurt ---------- */
+// liste: [[tarih, sayfa, kitap, bitti, yazı?], ...] eskiden yeniye
+function hesapla(r){
+  let liste=r.liste;
+  if(!liste){ // eski sunucu kodu
+    const yazi={};(r.gecmis||[]).forEach(g=>yazi[g.tarih]=g.anladiklarim);
+    liste=(r.kurt||[]).map(([t,s,k])=>[t,s,k,0,yazi[t]]);
+  }
+  liste=liste.map(x=>[x[0],Number(x[1])||0,nfc(x[2]),x[3]?1:0,x[4]!=null?nfc(x[4]):undefined]).sort((a,b)=>a[0].localeCompare(b[0]));
+  const v={ogrenci:r.ogrenci,bugun:r.bugun,dun:r.dun,liste};
+  const gunler=new Set(liste.filter(x=>x[1]>0).map(x=>x[0]));
+  let seri=0,t=gunler.has(v.bugun)?v.bugun:gunEkle(v.bugun,-1);
+  while(gunler.has(t)){seri++;t=gunEkle(t,-1);}
+  v.seri=seri;
+  v.toplamSayfa=liste.reduce((a,x)=>a+x[1],0);
+  const son={},biten={};
+  liste.forEach(x=>{const k=kitapAnahtari(x[2]);son[k]={kitap:x[2],tarih:x[0]};if(x[3])biten[k]={kitap:x[2],tarih:x[0]};});
+  v.aktifKitaplar=Object.keys(son).filter(k=>!biten[k]).sort((a,b)=>son[b].tarih.localeCompare(son[a].tarih)).map(k=>son[k].kitap);
+  v.bitenKitaplar=Object.values(biten).sort((a,b)=>b.tarih.localeCompare(a.tarih));
+  v.kurt=liste.map(x=>[x[0],x[1],x[2]]);
+  v.gecmis=liste.slice(-14).reverse().map(x=>({tarih:x[0],sayfa:x[1],kitap:x[2],bitti:x[3],anladiklarim:x[4]||''}));
+  return v;
+}
+
 /* ---------- 3b. öğretmen mesajı + konfeti ---------- */
 function mesajAc(t){
-  $('#m-metin').textContent=t.mesaj;
-  $('#m-imza').textContent='— '+t.imza;
-  $('#m-not').textContent='Dün '+t.kitap+' kitabından '+t.sayfa+' sayfa okudun.';
+  $('#m-metin').textContent=nfc(t.mesaj);
+  $('#m-imza').textContent='— '+nfc(t.imza);
+  $('#m-not').textContent='Dün '+nfc(t.kitap)+' kitabından '+t.sayfa+' sayfa okudun.';
   goster('s-mesaj');konfeti();
 }
 $('#m-tamam').onclick=gunlukAc;
@@ -482,38 +547,142 @@ function konfeti(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const eski=$('#konfeti');if(eski)eski.remove();
   const c=document.createElement('canvas');c.id='konfeti';document.body.append(c);
-  const x=c.getContext('2d'),dpr=window.devicePixelRatio||1;
-  const boyut=()=>{c.width=innerWidth*dpr;c.height=innerHeight*dpr;};boyut();
-  const W=()=>c.width,H=()=>c.height,renk=['#2f8f5b','#e2553e','#f2c14e','#4f9fd6','#9b6fd0','#e07bb0','#3fa36b'];
+  const x=c.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1);
+  c.width=innerWidth*dpr;c.height=innerHeight*dpr;
+  const W=c.width,H=c.height,renk=['#2f8f5b','#e2553e','#f2c14e','#4f9fd6','#9b6fd0','#e07bb0','#3fa36b'];
   const p=[];
   const patla=(ox,adet)=>{for(let i=0;i<adet;i++){const a=-Math.PI/2+(Math.random()-.5)*1.6,v=(6+Math.random()*9)*dpr;
-    p.push({x:ox,y:H()*0.95,vx:Math.cos(a)*v,vy:Math.sin(a)*v*1.4,w:(6+Math.random()*7)*dpr,h:(9+Math.random()*9)*dpr,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:renk[i%renk.length],yuvarlak:Math.random()<.25});}};
-  patla(W()*0.15,90);patla(W()*0.85,90);setTimeout(()=>patla(W()*0.5,110),450);
+    p.push({x:ox,y:H*0.95,vx:Math.cos(a)*v,vy:Math.sin(a)*v*1.4,w:(6+Math.random()*7)*dpr,h:(9+Math.random()*9)*dpr,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:renk[i%renk.length],yuvarlak:Math.random()<.25});}};
+  patla(W*0.15,70);patla(W*0.85,70);setTimeout(()=>patla(W*0.5,80),450);
   const bas=performance.now();
   (function kare(t){
-    x.clearRect(0,0,W(),H());
+    x.clearRect(0,0,W,H);
     p.forEach(q=>{q.vy+=0.28*dpr;q.vx*=0.99;q.vy*=0.99;q.x+=q.vx;q.y+=q.vy;q.r+=q.vr;
+      if(q.y>H+40)return;
       x.save();x.translate(q.x,q.y);x.rotate(q.r);x.fillStyle=q.c;
       if(q.yuvarlak){x.beginPath();x.arc(0,0,q.w/2,0,7);x.fill();}else x.fillRect(-q.w/2,-q.h/2,q.w,q.h*Math.abs(Math.cos(q.r*2)));
       x.restore();});
-    if(t-bas<5000&&c.isConnected)requestAnimationFrame(kare);else c.remove();
+    if(t-bas<4500&&c.isConnected)requestAnimationFrame(kare);else c.remove();
   })(bas);
 }
 
 /* ---------- 4. günlük ---------- */
 function gunlukAc(){
   const v=S.veri;S.gun='bugun';
-  $('#g-ad').textContent=v.ogrenci.ad;$('#g-sinif').textContent=v.ogrenci.sinif+' sınıfı';
+  $('#g-ad').textContent=nfc(v.ogrenci.ad);$('#g-sinif').textContent=nfc(v.ogrenci.sinif)+' sınıfı';
   istatistikCiz();formDoldur();gecmisCiz();goster('s-gunluk');
 }
-function istatistikCiz(){const v=S.veri;$('#g-seri').textContent=v.seri;$('#g-toplam').textContent=v.toplamSayfa;$('#g-gun').textContent=v.kurt.length;
-  $('#g-bogum').textContent=v.kurt.length+' boğum';kurtCiz($('#g-kurt'),v.kurt);}
+function istatistikCiz(){const v=S.veri;$('#g-seri').textContent=v.seri;$('#g-toplam').textContent=v.toplamSayfa;$('#g-biten').textContent=v.bitenKitaplar.length;
+  $('#g-bogum').textContent=v.kurt.length+' boğum';kurtCiz($('#g-kurt'),v.kurt);
+  const raf=$('#raf');raf.innerHTML='';$('#raf-kart').hidden=!v.bitenKitaplar.length;
+  v.bitenKitaplar.forEach(b=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(b.kitap);c.append(i,document.createTextNode(b.kitap+' ✓'));c.title=trTarih(b.tarih)+' bitirdin';raf.append(c);});
+}
+
+/* ---------- kitap seçimi ---------- */
+function seciliTarih(){return S.gun==='bugun'?S.veri.bugun:S.veri.dun;}
+function mevcutKayit(){const t=seciliTarih();return S.veri.liste.find(x=>x[0]===t);}
+function kitapSecenekleri(){
+  const k=mevcutKayit();const liste=S.veri.aktifKitaplar.slice();
+  if(k&&!liste.some(x=>kitapAnahtari(x)===kitapAnahtari(k[2])))liste.unshift(k[2]); // bugünkü kayıttaki kitap bitmiş olsa da seçilebilsin
+  return liste;
+}
+function kitapCiz(){
+  const kutu=$('#kitap-secenek');kutu.innerHTML='';
+  const liste=kitapSecenekleri();
+  kutu.hidden=!liste.length;
+  liste.forEach(ad=>{const b=el('button','kitap-btn');b.type='button';b.setAttribute('role','radio');b.setAttribute('aria-checked',S.kitap===ad);
+    const i=el('i');i.style.background=kitapRengi(ad);b.append(i,el('span',null,ad));b.onclick=()=>{S.kitap=ad;kitapCiz();};kutu.append(b);});
+  if(liste.length){const y=el('button','kitap-btn yeni','+ Yeni kitap');y.type='button';y.setAttribute('role','radio');y.setAttribute('aria-checked',S.kitap===YENI);
+    y.onclick=()=>{S.kitap=YENI;kitapCiz();$('#kitap').focus();};kutu.append(y);}
+  const yeni=S.kitap===YENI;
+  $('#yeni-kitap-kutu').hidden=!yeni;
+  $('#yeni-kitap-etiket').hidden=!liste.length;
+  bittiYazisi();
+}
+function seciliKitap(){return S.kitap===YENI?nfc($('#kitap').value).replace(/\s+/g,' ').trim():S.kitap;}
+function bittiYazisi(){const k=seciliKitap();$('#bitti-yazi').textContent=k?'«'+k+'» kitabını bitirdim':'Bu kitabı bitirdim';}
+$('#kitap').addEventListener('input',bittiYazisi);
+
+function formDoldur(){
+  const t=seciliTarih();
+  $('#gun-bugun').setAttribute('aria-pressed',S.gun==='bugun');$('#gun-dun').setAttribute('aria-pressed',S.gun==='dun');
+  $('#secili-tarih').textContent=trTarih(t);
+  const k=mevcutKayit();
+  $('#var-notu').hidden=!k;
+  S.kitap=k?k[2]:(S.veri.aktifKitaplar[0]||YENI);
+  $('#kitap').value='';
+  $('#sayfa').value=k?k[1]:10;
+  $('#anlam').value=k?(k[4]||''):'';
+  $('#bitti').checked=!!(k&&k[3]);
+  $('#form-hata').textContent='';anlamSay();kitapCiz();
+}
+$('#gun-bugun').onclick=()=>{S.gun='bugun';formDoldur();};
+$('#gun-dun').onclick=()=>{S.gun='dun';formDoldur();};
+document.querySelectorAll('[data-ekle]').forEach(b=>b.onclick=()=>{const i=$('#sayfa');i.value=Math.min(1000,Math.max(1,(parseInt(i.value)||0)+Number(b.dataset.ekle)));});
+function anlamSay(){const n=$('#anlam').value.trim().length;$('#anlam-sayac').textContent=n+' harf';}
+$('#anlam').addEventListener('input',anlamSay);
+$('#cikis').onclick=()=>{S.ogr=null;S.veri=null;goster('s-sinif');};
+
+$('#okuma-form').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  if(S.kaydediliyor)return;
+  const veri={tarih:seciliTarih(),kitap:seciliKitap(),sayfa:parseInt($('#sayfa').value),anladiklarim:nfc($('#anlam').value).trim(),bitti:$('#bitti').checked};
+  const h=$('#form-hata');h.textContent='';
+  if(!veri.kitap){h.textContent=S.kitap===YENI&&kitapSecenekleri().length?'Yeni kitabının adını yaz ya da yukarıdan bir kitap seç.':'Kitabının adını yazmayı unutma.';return;}
+  if(!(veri.sayfa>=1&&veri.sayfa<=1000)){h.textContent='Sayfa sayısını kontrol et.';return;}
+  if(veri.anladiklarim.length<15){h.textContent='Ne anladığını biraz daha anlatır mısın? En az bir iki cümle yaz.';return;}
+  // Aynı adı farklı yazdıysa önceki yazılışı kullan
+  const ayni=S.veri.liste.slice().reverse().find(x=>kitapAnahtari(x[2])===kitapAnahtari(veri.kitap));if(ayni)veri.kitap=ayni[2];
+
+  // Kutlama ekranını hemen göster, kayıt arka planda gitsin.
+  const onceki=S.veri;
+  const yeniListe=onceki.liste.filter(x=>x[0]!==veri.tarih).concat([[veri.tarih,veri.sayfa,veri.kitap,veri.bitti?1:0,veri.anladiklarim]]);
+  S.veri=hesapla(Object.assign({},onceki,{liste:yeniListe}));
+  tamamGoster(veri);
+  S.kaydediliyor=true;
+  const durum=$('#t-durum'),bitir=$('#bitir');
+  durum.className='durum';durum.textContent='Kaydediliyor…';bitir.disabled=true;
+  api('saveReading',S.ogr.id,S.sifre.join('-'),veri).then(r=>{
+    S.kaydediliyor=false;
+    if(r&&(r.liste||r.kurt))S.veri=hesapla(r);
+    durum.className='durum ok';durum.textContent='Kaydedildi ✓';bitir.disabled=false;bostaKur();
+  }).catch(e=>{
+    S.kaydediliyor=false;S.veri=onceki;bitir.disabled=false;
+    goster('s-gunluk');
+    h.textContent='Kaydedilemedi: '+e.message+' Kaydet\'e tekrar bas.';
+    h.scrollIntoView({block:'center'});
+  });
+});
+function tamamGoster(veri){
+  const v=S.veri;
+  $('#t-sayfa').textContent=veri.sayfa;
+  $('#t-mesaj').textContent='sayfa okudun, '+ilkAd(v.ogrenci.ad)+'. Harika!';
+  $('#t-seri').textContent=(v.seri>1?v.seri+' gündür üst üste okuyorsun. ':'')+'Kitap kurdun artık '+v.kurt.length+' boğum!';
+  const kb=$('#t-kitap-bitti');kb.hidden=!veri.bitti;
+  if(veri.bitti)kb.textContent='«'+veri.kitap+'» kitabını bitirdin! Bu senin '+v.bitenKitaplar.length+'. kitabın.';
+  kurtCiz($('#t-kurt'),v.kurt,veri.tarih);
+  goster('s-tamam');
+  if(veri.bitti)konfeti();
+}
+function gecmisCiz(){
+  const k=$('#gecmis');k.innerHTML='';
+  if(!S.veri.gecmis.length){k.append(el('p','soluk','İlk kaydını yukarıdan girebilirsin.'));return;}
+  S.veri.gecmis.forEach(g=>{
+    const[y,m,d]=g.tarih.split('-').map(Number);
+    const r=el('div','gecmis-satir');
+    const t=el('div','tarih-kutu');t.append(el('b',null,d),el('small',null,AYLAR[m-1]+' '+gunAdi(g.tarih).slice(0,3)));
+    const sag=el('div');const ust=el('p');ust.append(el('strong',null,g.kitap+' '),el('span','sayfa-pill',g.sayfa+' sayfa'));
+    if(g.bitti)ust.append(document.createTextNode(' '),el('span','cip bitti','Bitirdi'));
+    sag.append(ust);if(g.anladiklarim)sag.append(el('p','soluk',g.anladiklarim));r.append(t,sag);k.append(r);
+  });
+}
+$('#bitir').onclick=()=>{if(S.kaydediliyor)return;S.ogr=null;S.veri=null;goster('s-sinif');};
 
 /* ---------- kitap kurdu ---------- */
 const SVGNS='http://www.w3.org/2000/svg';
-function svgEl(t,a,txt){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+function svgEl(t,a,txt){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=nfc(txt);return e;}
 const KURT_RENK=['#3fa36b','#f2a93b','#e86a52','#4f9fd6','#9b6fd0','#d4b62c','#e07bb0','#36b5a5'];
-function kitapRengi(k){let h=0;for(const c of String(k||'').toLocaleLowerCase('tr'))h=(h*31+c.codePointAt(0))>>>0;return KURT_RENK[h%KURT_RENK.length];}
+function kitapRengi(k){let h=0;for(const c of kitapAnahtari(k))h=(h*31+c.codePointAt(0))>>>0;return KURT_RENK[h%KURT_RENK.length];}
 function kurtCiz(kap,kurt,yeniTarih){
   kap.innerHTML='';
   const W=800,pad=20,R=42,xL=pad+R,xR=W-pad-R,S=xR-xL,P=S+Math.PI*R,ust=pad+30;
@@ -525,13 +694,14 @@ function kurtCiz(kap,kurt,yeniTarih){
   const bR=27,son=parca[parca.length-1],bd=d+son.r*0.72+bR*0.8,bas=nokta(bd),ileri=nokta(bd+1);
   const maxY=Math.max(bas.y,...parca.map(g=>g.y))+bR+pad;
   const svg=svgEl('svg',{viewBox:`0 0 ${W} ${Math.ceil(maxY)}`,role:'img','aria-label':'Kitap kurdu, '+kurt.length+' boğum'});
+  const anim=parca.length<=120; // çok uzun kurtta dalga animasyonu tableti yormasın
   parca.forEach((g,i)=>{
-    const c=svgEl('circle',{cx:g.x.toFixed(1),cy:g.y.toFixed(1),r:g.r.toFixed(1),fill:g.renk,class:'kseg'});
-    c.style.animationDelay=(-(parca.length-i)*0.12)+'s';
+    const c=svgEl('circle',{cx:g.x.toFixed(1),cy:g.y.toFixed(1),r:g.r.toFixed(1),fill:g.renk,class:anim?'kseg':''});
+    if(!anim){c.setAttribute('stroke','var(--kagit)');c.setAttribute('stroke-width','2.5');}
+    else c.style.animationDelay=(-(parca.length-i)*0.12)+'s';
     if(g.t)c.append(svgEl('title',{},trTarih(g.t)+' · '+g.k+' · '+g.s+' sayfa'));
     if(yeniTarih&&i===parca.length-1&&g.t===yeniTarih){const w=svgEl('g',{class:'kyeni'});w.append(c);svg.append(w);}else svg.append(c);
   });
-  // baş
   let tx=ileri.x-bas.x,ty=ileri.y-bas.y;const L=Math.hypot(tx,ty)||1;tx/=L;ty/=L;
   if(Math.abs(ty)>0.9){tx=0;ty=1;}
   const yon=tx>=0?1:-1,h=svgEl('g',{});
@@ -543,8 +713,8 @@ function kurtCiz(kap,kurt,yeniTarih){
   h.append(svgEl('path',{d:`M${gx-2} ${gy} h4`,class:'kgozluk'}));
   h.append(svgEl('path',{d:`M${gx-7} ${bas.y+10} Q${gx} ${bas.y+16} ${gx+7} ${bas.y+10}`,class:'kagiz'}));
   svg.append(h);kap.append(svg);
-  const kitaplar=[...new Set(kurt.map(k=>k[2]))];
-  if(kitaplar.length){const a=el('div','kurt-alt');kitaplar.slice(-8).forEach(k=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(k);c.append(i,document.createTextNode(k));a.append(c);});kap.append(a);}
+  const kitaplar=[...new Map(kurt.map(k=>[kitapAnahtari(k[2]),k[2]])).values()];
+  if(kitaplar.length){const a=el('div','kurt-alt');kitaplar.slice(-8).forEach(k=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(k);c.append(i,document.createTextNode(nfc(k)));a.append(c);});kap.append(a);}
   else kap.append(el('p','soluk','İlk okumanı kaydettiğinde kurdun uzamaya başlayacak.'));
 }
 
@@ -566,77 +736,59 @@ function barGrafik(veri,{yukseklik=230,ortalama=true}={}){
 }
 function gunlukDizi(okumalar,bas,gun){const m={};okumalar.forEach(o=>m[o.tarih]=(m[o.tarih]||0)+o.sayfa);
   return[...Array(gun)].map((_,i)=>{const t=gunEkle(bas,i),[,mm,dd]=t.split('-').map(Number);return{tarih:t,deger:m[t]||0,etiket:gun<=7?gunAdi(t).slice(0,3)+' '+dd:dd+'.'+String(mm).padStart(2,'0'),ipucu:trTarih(t)+': '+(m[t]||0)+' sayfa'};});}
-function seciliTarih(){return S.gun==='bugun'?S.veri.bugun:S.veri.dun;}
-function formDoldur(){
-  const t=seciliTarih();
-  $('#gun-bugun').setAttribute('aria-pressed',S.gun==='bugun');$('#gun-dun').setAttribute('aria-pressed',S.gun==='dun');
-  $('#secili-tarih').textContent=trTarih(t);
-  const k=S.veri.gecmis.find(g=>g.tarih===t);
-  $('#var-notu').hidden=!k;
-  $('#kitap').value=k?k.kitap:S.veri.sonKitap||'';
-  $('#sayfa').value=k?k.sayfa:10;
-  $('#anlam').value=k?k.anladiklarim:'';
-  $('#form-hata').textContent='';anlamSay();
-}
-$('#gun-bugun').onclick=()=>{S.gun='bugun';formDoldur();};
-$('#gun-dun').onclick=()=>{S.gun='dun';formDoldur();};
-document.querySelectorAll('[data-ekle]').forEach(b=>b.onclick=()=>{const i=$('#sayfa');i.value=Math.min(1000,Math.max(1,(parseInt(i.value)||0)+Number(b.dataset.ekle)));});
-function anlamSay(){const n=$('#anlam').value.trim().length;$('#anlam-sayac').textContent=n+' harf';}
-$('#anlam').addEventListener('input',anlamSay);
-$('#cikis').onclick=()=>{S.ogr=null;S.veri=null;goster('s-sinif');};
-$('#okuma-form').addEventListener('submit',async ev=>{
-  ev.preventDefault();
-  const veri={tarih:seciliTarih(),kitap:$('#kitap').value.trim(),sayfa:parseInt($('#sayfa').value),anladiklarim:$('#anlam').value.trim()};
-  const h=$('#form-hata');
-  if(!veri.kitap)return h.textContent='Kitabının adını yazmayı unutma.';
-  if(!(veri.sayfa>=1&&veri.sayfa<=1000))return h.textContent='Sayfa sayısını kontrol et.';
-  if(veri.anladiklarim.length<15)return h.textContent='Ne anladığını biraz daha anlatır mısın? En az bir iki cümle yaz.';
-  const b=$('#kaydet');b.disabled=true;b.textContent='Kaydediliyor…';
-  try{
-    S.veri=Object.assign({ok:true},await api('saveReading',S.ogr.id,S.sifre.join('-'),veri));
-    $('#t-sayfa').textContent=veri.sayfa;
-    $('#t-mesaj').textContent='sayfa okudun, '+S.veri.ogrenci.ad.split(' ')[0]+'. Harika!';
-    $('#t-seri').textContent=(S.veri.seri>1?S.veri.seri+' gündür üst üste okuyorsun. ':'')+'Kitap kurdun artık '+S.veri.kurt.length+' boğum!';
-    kurtCiz($('#t-kurt'),S.veri.kurt,veri.tarih);
-    goster('s-tamam');
-  }catch(e){h.textContent=e.message;}
-  finally{b.disabled=false;b.textContent='Kaydet';}
-});
-function gecmisCiz(){
-  const k=$('#gecmis');k.innerHTML='';
-  if(!S.veri.gecmis.length){k.append(el('p','soluk','İlk kaydını yukarıdan girebilirsin.'));return;}
-  S.veri.gecmis.forEach(g=>{
-    const[y,m,d]=g.tarih.split('-').map(Number);
-    const r=el('div','gecmis-satir');
-    const t=el('div','tarih-kutu');t.append(el('b',null,d),el('small',null,AYLAR[m-1]+' '+gunAdi(g.tarih).slice(0,3)));
-    const sag=el('div');const ust=el('p');ust.append(el('strong',null,g.kitap+' '),el('span','sayfa-pill',g.sayfa+' sayfa'));
-    sag.append(ust,el('p','soluk',g.anladiklarim));r.append(t,sag);k.append(r);
-  });
-}
-$('#bitir').onclick=()=>{S.ogr=null;S.veri=null;goster('s-sinif');};
 
 /* ---------- 6. öğretmen PIN ---------- */
 (function(){const tt=$('#tus-takimi');['1','2','3','4','5','6','7','8','9','Sil','0','Gir'].forEach(k=>{const b=el('button','secim',k);b.type='button';if(k==='Gir')b.style.background='var(--yaprak-acik)';b.onclick=()=>pinTus(k);tt.append(b);});})();
 function pinCiz(){const n=$('#pin-noktalar');n.innerHTML='';const len=Math.max(4,S.pinGiris.length);for(let i=0;i<len;i++){n.append(el('i',i<S.pinGiris.length?'d':''));}}
 $('#ogretmen-git').onclick=()=>{S.pinGiris='';$('#pin-hata').textContent='';pinCiz();goster('s-pin');};
+let pinBekle=false;
 async function pinTus(k){
+  if(pinBekle)return;
   if(k==='Sil'){S.pinGiris=S.pinGiris.slice(0,-1);}
   else if(k==='Gir'){
-    const r=await api('teacherLogin',S.pinGiris);
-    if(!r.ok){$('#pin-hata').textContent=r.msg;S.pinGiris='';pinCiz();return;}
-    S.pin=S.pinGiris;S.pinGiris='';$('#ogretmen-adi').value=r.ogretmenAdi||'';panelAc(r.bugun);return;
+    pinBekle=true;$('#tus-takimi').classList.add('yukleniyor');
+    try{
+      const r=await api('teacherLogin',S.pinGiris);
+      if(!r.ok){$('#pin-hata').textContent=r.msg;S.pinGiris='';pinCiz();return;}
+      S.pin=S.pinGiris;S.pinGiris='';$('#ogretmen-adi').value=nfc(r.ogretmenAdi||'');panelAc(r.bugun,r.siniflar);
+    }catch(e){$('#pin-hata').textContent=e.message;}
+    finally{pinBekle=false;$('#tus-takimi').classList.remove('yukleniyor');}
+    return;
   } else if(S.pinGiris.length<8){S.pinGiris+=k;}
   $('#pin-hata').textContent='';pinCiz();
 }
 document.addEventListener('keydown',e=>{if($('#s-pin').hidden)return;if(/^\d$/.test(e.key))pinTus(e.key);else if(e.key==='Backspace')pinTus('Sil');else if(e.key==='Enter')pinTus('Gir');});
 
-/* ---------- 7. panel ---------- */
+/* ---------- 7. panel: her sınıfın verisi bir kez alınır, sekmeler bunu kullanır ---------- */
 let BUGUN=bugunIst();
-async function panelAc(bugun){
-  BUGUN=bugun||BUGUN;$('#pg-tarih').value=BUGUN;$('#ph-tarih').value=BUGUN;
-  goster('s-panel');await siniflarYenile();sekme('gunluk');
+const SINIF_VERI={};
+async function sinifVeri(sinif,zorla){
+  const v=SINIF_VERI[sinif];
+  if(!zorla&&v&&(v.yukleniyor||Date.now()-v.zaman<120000))return v.yukleniyor||v;
+  const yuk=api('tClassData',S.pin,sinif).then(r=>{
+    const adlar={};r.ogrenciler.forEach(o=>adlar[o.id]=nfc(o.ad));
+    const okumalar=r.okumalar.map(x=>({tarih:x[0],ogrenciId:x[1],ad:adlar[x[1]]||'(listeden çıkarılan öğrenci)',sayfa:Number(x[2])||0,kitap:nfc(x[3]),bitti:!!x[4],anladiklarim:nfc(x[5]||'')}));
+    const d={zaman:Date.now(),bugun:r.bugun,ogrenciler:r.ogrenciler.map(o=>({id:o.id,ad:nfc(o.ad)})),okumalar};
+    BUGUN=r.bugun||BUGUN;SINIF_VERI[sinif]=d;return d;
+  }).catch(e=>{delete SINIF_VERI[sinif];
+    if(/tClassData/.test(e.message))throw new Error('Sunucu kodu eski. Apps Script\'teki Code.gs dosyasını güncelleyip yeni sürüm olarak dağıtın.');
+    throw e;});
+  SINIF_VERI[sinif]={yukleniyor:yuk,zaman:0};
+  return yuk;
 }
-$('#panel-cikis').onclick=()=>{S.pin='';goster('s-sinif');};
+function hataKutusu(kap,e){kap.innerHTML='';kap.append(el('p','hata',e.message||String(e)));}
+async function panelAc(bugun,siniflar){
+  BUGUN=bugun||BUGUN;$('#pg-tarih').value=BUGUN;$('#ph-tarih').value=BUGUN;
+  goster('s-panel');
+  try{await siniflarYenile(siniflar);}catch(e){hataKutusu($('#pg-liste'),e);return;}
+  sekme('gunluk');
+}
+$('#panel-cikis').onclick=()=>{S.pin='';Object.keys(SINIF_VERI).forEach(k=>delete SINIF_VERI[k]);goster('s-sinif');};
+$('#panel-yenile').onclick=async()=>{
+  Object.keys(SINIF_VERI).forEach(k=>delete SINIF_VERI[k]);
+  await siniflarYenile();
+  const aktif=document.querySelector('[data-sekme][aria-selected="true"]');sekme(aktif?aktif.dataset.sekme:'gunluk');
+};
 document.querySelectorAll('[data-sekme]').forEach(b=>b.onclick=()=>sekme(b.dataset.sekme));
 function sekme(ad){
   document.querySelectorAll('[data-sekme]').forEach(b=>b.setAttribute('aria-selected',b.dataset.sekme===ad));
@@ -645,46 +797,63 @@ function sekme(ad){
 }
 async function siniflarYenile(veri){
   S.siniflar=veri||await api('tGetClasses',S.pin);
+  ROSTER=S.siniflar.map(c=>({sinif:c.sinif,ogrenciler:c.ogrenciler.map(o=>({id:o.id,ad:o.ad}))}));rosterZaman=Date.now();
   ['#pg-sinif','#ph-sinif','#po-sinif'].forEach(sel=>{const s=$(sel);const onceki=s.value;s.innerHTML='';
     S.siniflar.forEach(c=>{const o=el('option',null,c.sinif);o.value=c.sinif;s.append(o);});
     if(S.siniflar.some(c=>c.sinif===onceki))s.value=onceki;});
   const dl=$('#sinif-oneri');dl.innerHTML='';S.siniflar.forEach(c=>{const o=el('option');o.value=c.sinif;dl.append(o);});
+  // seçili sınıfın verisini hemen çekmeye başla
+  if(S.siniflar.length)sinifVeri($('#pg-sinif').value).catch(()=>{});
 }
+// Sınıf seçimleri sekmeler arasında aynı kalsın
+['#pg-sinif','#ph-sinif','#po-sinif'].forEach(sel=>$(sel).addEventListener('change',e=>{
+  ['#pg-sinif','#ph-sinif','#po-sinif'].forEach(o=>{if(o!==sel)$(o).value=e.target.value;});
+}));
 ['#pg-sinif','#pg-tarih'].forEach(s=>$(s).addEventListener('change',gunlukYukle));
 ['#ph-sinif','#ph-tarih'].forEach(s=>$(s).addEventListener('change',haftalikYukle));
+function bittiCip(o){return o.bitti?el('span','cip bitti','Kitabı bitirdi'):null;}
 
+let pgIstek=0;
 async function gunlukYukle(){
   const sinif=$('#pg-sinif').value,t=$('#pg-tarih').value||BUGUN;
   const liste=$('#pg-liste'),oz=$('#pg-ozet'),eks=$('#pg-eksik');
   if(!sinif){liste.innerHTML='';liste.append(el('p','bos-durum','Önce "Sınıf listeleri" sekmesinden bir sınıf ekleyin.'));oz.innerHTML='';$('#pg-eksik-kart').hidden=true;return;}
-  liste.classList.add('yukleniyor');
-  const r=await api('tGetReadings',S.pin,sinif,t,t);liste.classList.remove('yukleniyor');
-  const girdi=new Set(r.okumalar.map(o=>o.ogrenciId));
-  const toplam=r.okumalar.reduce((a,o)=>a+o.sayfa,0);
+  const no=++pgIstek;liste.classList.add('yukleniyor');
+  let r;try{r=await sinifVeri(sinif);}catch(e){if(no===pgIstek){liste.classList.remove('yukleniyor');hataKutusu(liste,e);}return;}
+  if(no!==pgIstek)return;liste.classList.remove('yukleniyor');
+  const gunun=r.okumalar.filter(o=>o.tarih===t);
+  const girdi=new Set(gunun.map(o=>o.ogrenciId));
+  const toplam=gunun.reduce((a,o)=>a+o.sayfa,0);
   oz.innerHTML='';
-  oz.append(el('span','cip',trTarih(t)),el('span','cip',r.okumalar.length+' / '+r.ogrenciler.length+' öğrenci girdi'),el('span','cip',toplam+' sayfa'));
+  oz.append(el('span','cip',trTarih(t)),el('span','cip',gunun.length+' / '+r.ogrenciler.length+' öğrenci girdi'),el('span','cip',toplam+' sayfa'));
+  const biten=gunun.filter(o=>o.bitti).length;if(biten)oz.append(el('span','cip bitti',biten+' kitap bitti'));
   const eksikler=r.ogrenciler.filter(o=>!girdi.has(o.id));
   if(eksikler.length)oz.append(el('span','cip uyari',eksikler.length+' öğrenci girmedi'));
   liste.innerHTML='';
-  if(!r.okumalar.length)liste.append(el('p','bos-durum','Bu gün için henüz kayıt yok.'));
-  r.okumalar.sort((a,b)=>a.ad.localeCompare(b.ad,'tr')).forEach(o=>{
+  if(!gunun.length)liste.append(el('p','bos-durum','Bu gün için henüz kayıt yok.'));
+  gunun.sort((a,b)=>a.ad.localeCompare(b.ad,'tr')).forEach(o=>{
     const k=el('div','okuma-kart');
-    const sol=el('div');const ad=el('button','ad-link ad',o.ad);ad.onclick=()=>ogrenciGoster(sinif,o.ogrenciId);sol.append(ad,el('div','soluk',o.kitap));
+    const sol=el('div');const ad=el('button','ad-link ad',o.ad);ad.onclick=()=>ogrenciGoster(sinif,o.ogrenciId);
+    const kit=el('div','soluk',o.kitap+' ');const bc=bittiCip(o);if(bc)kit.append(bc);sol.append(ad,kit);
     const sag=el('div','sag');sag.append(el('b',null,o.sayfa),el('span','soluk','sayfa'));
-    k.append(sol,sag,el('div','anl',o.anladiklarim));liste.append(k);
+    k.append(sol,sag,el('div','anl',o.anladiklarim||'(yazı 3 aydan eski)'));liste.append(k);
   });
   $('#pg-eksik-kart').hidden=!eksikler.length;eks.innerHTML='';
   eksikler.forEach(o=>{const b=el('button','cip uyari ad-link',o.ad);b.onclick=()=>ogrenciGoster(sinif,o.id);eks.append(b);});
 }
 
+let phIstek=0;
 async function haftalikYukle(){
   const sinif=$('#ph-sinif').value,son=$('#ph-tarih').value||BUGUN,bas=gunEkle(son,-6);
-  const kap=$('#ph-tablo');kap.innerHTML='';$('#ph-grafik').innerHTML='';
-  if(!sinif){kap.append(el('p','bos-durum','Henüz sınıf yok.'));return;}
-  const r=await api('tGetReadings',S.pin,sinif,bas,son);
-  $('#ph-grafik').append(barGrafik(gunlukDizi(r.okumalar,bas,7)));
+  const kap=$('#ph-tablo');
+  if(!sinif){kap.innerHTML='';$('#ph-grafik').innerHTML='';kap.append(el('p','bos-durum','Henüz sınıf yok.'));return;}
+  const no=++phIstek;kap.classList.add('yukleniyor');
+  let r;try{r=await sinifVeri(sinif);}catch(e){if(no===phIstek){kap.classList.remove('yukleniyor');hataKutusu(kap,e);}return;}
+  if(no!==phIstek)return;kap.classList.remove('yukleniyor');kap.innerHTML='';$('#ph-grafik').innerHTML='';
+  const hafta=r.okumalar.filter(o=>o.tarih>=bas&&o.tarih<=son);
+  $('#ph-grafik').append(barGrafik(gunlukDizi(hafta,bas,7)));
   const gunler=[...Array(7)].map((_,i)=>gunEkle(bas,i));
-  const idx={};r.okumalar.forEach(o=>idx[o.ogrenciId+'|'+o.tarih]=o);
+  const idx={};hafta.forEach(o=>idx[o.ogrenciId+'|'+o.tarih]=o);
   const tb=el('table');const th=el('thead');const hr=el('tr');hr.append(el('th',null,'Öğrenci'));
   gunler.forEach(g=>{const c=el('th');c.append(document.createTextNode(gunAdi(g).slice(0,3)),el('br'),document.createTextNode(trTarih(g,false)));hr.append(c);});
   hr.append(el('th',null,'Toplam'),el('th',null,'Gün'));th.append(hr);tb.append(th);
@@ -692,7 +861,7 @@ async function haftalikYukle(){
   r.ogrenciler.forEach(o=>{
     const tr=el('tr');const ad=el('td');const ab=el('button','ad-link',o.ad);ab.onclick=()=>ogrenciGoster(sinif,o.id);ad.append(ab);tr.append(ad);let top=0,say=0;
     gunler.forEach((g,i)=>{const k=idx[o.id+'|'+g];const td=el('td',k?'hucre':'bos');
-      if(k){const b=el('button',null,k.sayfa);b.title='Ne anladığını oku';b.onclick=()=>detayGoster(k);td.append(b);top+=k.sayfa;say++;gunToplam[i]+=k.sayfa;}else td.textContent='·';tr.append(td);});
+      if(k){const b=el('button',null,k.sayfa+(k.bitti?' ✓':''));b.title=k.bitti?'Kitabı bitirdi · ne anladığını oku':'Ne anladığını oku';b.onclick=()=>detayGoster(k);td.append(b);top+=k.sayfa;say++;gunToplam[i]+=k.sayfa;}else td.textContent='·';tr.append(td);});
     tr.append(el('td','top',top),el('td','top',say+'/7'));bd.append(tr);
   });
   const ft=el('tr');ft.append(el('td','top','Sınıf toplamı'));gunToplam.forEach(t=>ft.append(el('td','top',t||'')));
@@ -708,33 +877,41 @@ function ogrenciSecenekleri(secili){
   if(c&&c.ogrenciler.some(o=>o.id===onceki))s.value=onceki;
   ogrenciYukle();
 }
-function ogrenciGoster(sinif,id){$('#po-sinif').value=sinif;sekme('ogrenci');ogrenciSecenekleri(id);}
+function ogrenciGoster(sinif,id){['#pg-sinif','#ph-sinif','#po-sinif'].forEach(o=>$(o).value=sinif);sekme('ogrenci');ogrenciSecenekleri(id);}
 $('#po-sinif').addEventListener('change',()=>ogrenciSecenekleri());
 $('#po-ogr').addEventListener('change',ogrenciYukle);
 $('#po-donem').addEventListener('change',ogrenciYukle);
 let poIstek=0;
 async function ogrenciYukle(){
-  const id=$('#po-ogr').value,oz=$('#po-ozet'),gr=$('#po-grafik'),ls=$('#po-liste'),kr=$('#po-kurt');
-  [oz,gr,ls,kr].forEach(x=>x.innerHTML='');$('#po-bogum').textContent='';
-  if(!id){ls.append(el('p','bos-durum','Bu sınıfta öğrenci yok.'));return;}
-  const no=++poIstek;const r=await api('tStudentReadings',S.pin,id);if(no!==poIstek)return;
+  const id=$('#po-ogr').value,sinif=$('#po-sinif').value,oz=$('#po-ozet'),gr=$('#po-grafik'),ls=$('#po-liste'),kr=$('#po-kurt');
+  if(!id){[oz,gr,ls,kr].forEach(x=>x.innerHTML='');ls.append(el('p','bos-durum','Bu sınıfta öğrenci yok.'));return;}
+  const no=++poIstek;ls.classList.add('yukleniyor');
+  let r;try{r=await sinifVeri(sinif);}catch(e){if(no===poIstek){ls.classList.remove('yukleniyor');hataKutusu(ls,e);}return;}
+  if(no!==poIstek)return;ls.classList.remove('yukleniyor');
+  [oz,gr,ls,kr].forEach(x=>x.innerHTML='');
+  const tum=r.okumalar.filter(o=>o.ogrenciId===id);
   const gun=Number($('#po-donem').value),bas=gunEkle(r.bugun,-(gun-1));
-  const donem=r.okumalar.filter(o=>o.tarih>=bas);
+  const donem=tum.filter(o=>o.tarih>=bas);
   const top=donem.reduce((a,o)=>a+o.sayfa,0);
+  const bitenler=tum.filter(o=>o.bitti);
   oz.append(el('span','cip',donem.length+' / '+gun+' gün okudu'),el('span','cip',top+' sayfa'),
     el('span','cip','günde ort. '+(donem.length?Math.round(top/donem.length):0)+' sayfa'),
-    el('span','cip','tüm zamanlar: '+r.okumalar.reduce((a,o)=>a+o.sayfa,0)+' sayfa'));
-  const son=r.okumalar[r.okumalar.length-1];
+    el('span','cip','tüm zamanlar: '+tum.reduce((a,o)=>a+o.sayfa,0)+' sayfa'),
+    el('span','cip bitti',bitenler.length+' kitap bitirdi'));
+  const son=tum[tum.length-1];
   if(!son||son.tarih<gunEkle(r.bugun,-2))oz.append(el('span','cip uyari',son?'Son okuma: '+trTarih(son.tarih,false):'Hiç kayıt yok'));
   gr.append(barGrafik(gunlukDizi(donem,bas,gun)));
-  $('#po-bogum').textContent=r.okumalar.length+' boğum';
-  kurtCiz(kr,r.okumalar.map(o=>[o.tarih,o.sayfa,o.kitap]));
+  $('#po-bogum').textContent=tum.length+' boğum';
+  kurtCiz(kr,tum.map(o=>[o.tarih,o.sayfa,o.kitap]));
+  if(bitenler.length){const raf=el('div','raf');raf.append(el('strong',null,'Bitirdiği kitaplar: '));
+    bitenler.slice().reverse().forEach(b=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(b.kitap);c.append(i,document.createTextNode(b.kitap+' · '+trTarih(b.tarih,false)));raf.append(c);});kr.append(raf);}
   if(!donem.length){ls.append(el('p','bos-durum','Bu dönemde kayıt yok.'));return;}
   donem.slice().reverse().forEach(o=>{
     const k=el('div','okuma-kart');
-    const sol=el('div');sol.append(el('div','ad',trTarih(o.tarih)),el('div','soluk',o.kitap));
+    const kit=el('div','soluk',o.kitap+' ');const bc=bittiCip(o);if(bc)kit.append(bc);
+    const sol=el('div');sol.append(el('div','ad',trTarih(o.tarih)),kit);
     const sag=el('div','sag');sag.append(el('b',null,o.sayfa),el('span','soluk','sayfa'));
-    k.append(sol,sag,el('div','anl',o.anladiklarim));ls.append(k);
+    k.append(sol,sag,el('div','anl',o.anladiklarim||'(yazı 3 aydan eski)'));ls.append(k);
   });
 }
 
@@ -744,18 +921,19 @@ function modal(icerik){
   m.append(kapat,...icerik);z.append(m);z.onclick=e=>{if(e.target===z)z.remove();};$('#modal-yer').append(z);return z;
 }
 function detayGoster(k){
-  const p=el('p');p.style.whiteSpace='pre-wrap';p.textContent=k.anladiklarim;
-  modal([el('h3',null,k.ad),el('p','soluk',trTarih(k.tarih)+' · '+k.kitap+' · '+k.sayfa+' sayfa'),p]);
+  const p=el('p',null,k.anladiklarim||'(yazı 3 aydan eski)');p.style.whiteSpace='pre-wrap';
+  modal([el('h3',null,k.ad),el('p','soluk',trTarih(k.tarih)+' · '+k.kitap+' · '+k.sayfa+' sayfa'+(k.bitti?' · kitabı bitirdi':'')),p]);
 }
 
 /* sınıf listeleri */
-function sifreEl(s){const w=el('span','sifre-goster');const p=(s||'').split('-');w.append(document.createTextNode(p.map(x=>EMOJI[x]||'?').join(' ')),el('small',null,p.join(' + ')));return w;}
+function sifreEl(s){const w=el('span','sifre-goster');const p=nfc(s).split('-');w.append(document.createTextNode(p.map(x=>EMOJI[x]||'?').join(' ')),el('small',null,p.join(' + ')));return w;}
 function onayButon(metin,onayMetin,fn,cls='btn ikincil kucuk'){
   const b=el('button',cls,metin);let bekle=false,t;
   b.onclick=async()=>{if(!bekle){bekle=true;b.textContent=onayMetin;b.classList.add('tehlike');b.classList.remove('ikincil');t=setTimeout(()=>{bekle=false;b.textContent=metin;b.classList.remove('tehlike');b.classList.add('ikincil');},4000);return;}
-    clearTimeout(t);b.disabled=true;try{await fn();}catch(e){alert(e.message);}};
+    clearTimeout(t);b.disabled=true;try{await fn();}catch(e){b.disabled=false;b.textContent=e.message;}};
   return b;
 }
+async function listeIslem(fn,...args){Object.keys(SINIF_VERI).forEach(k=>delete SINIF_VERI[k]);await siniflarYenile(await api(fn,S.pin,...args));sinifBloklariCiz();}
 function sinifBloklariCiz(){
   const k=$('#sinif-bloklar');k.innerHTML='';
   if(!S.siniflar.length){k.append(el('p','bos-durum','Henüz sınıf yok. Yukarıdaki formdan ilk sınıfınızı ekleyin.'));return;}
@@ -766,42 +944,42 @@ function sinifBloklariCiz(){
     const kartBtn=el('button','btn kucuk','Şifre kartları');kartBtn.onclick=()=>sifreKartlari(c);
     const ekleBtn=el('button','btn ikincil kucuk','Öğrenci ekle');ekleBtn.onclick=()=>{$('#ek-sinif').value=c.sinif;$('#ek-adlar').focus();window.scrollTo({top:0,behavior:'smooth'});};
     const adBtn=el('button','btn ikincil kucuk','Adını değiştir');adBtn.onclick=()=>adDegistir(c.sinif,bas);
-    bt.append(kartBtn,ekleBtn,adBtn,onayButon('Sınıfı sil','Silmek için tekrar dokunun',async()=>siniflarYenile(await api('tDeleteClass',S.pin,c.sinif)).then(sinifBloklariCiz)));
+    bt.append(kartBtn,ekleBtn,adBtn,onayButon('Sınıfı sil','Silmek için tekrar dokunun',()=>listeIslem('tDeleteClass',c.sinif)));
     bas.append(bl,bt);b.append(bas);
     c.ogrenciler.forEach(o=>{
       const r=el('div','ogr-satir');r.append(el('span','ad',o.ad),sifreEl(o.sifre));
-      const yb=el('button','btn ikincil kucuk','Yeni şifre');yb.onclick=async()=>{yb.disabled=true;await siniflarYenile(await api('tResetPassword',S.pin,o.id));sinifBloklariCiz();};
-      const bb=el('div','butonlar');bb.append(yb,onayButon('Çıkar','Emin misiniz?',async()=>{await siniflarYenile(await api('tRemoveStudent',S.pin,o.id));sinifBloklariCiz();}));
+      const yb=el('button','btn ikincil kucuk','Yeni şifre');yb.onclick=async()=>{yb.disabled=true;try{await listeIslem('tResetPassword',o.id);}catch(e){yb.disabled=false;yb.textContent=e.message;}};
+      const bb=el('div','butonlar');bb.append(yb,onayButon('Çıkar','Emin misiniz?',()=>listeIslem('tRemoveStudent',o.id)));
       r.append(bb);b.append(r);
     });
     k.append(b);
   });
 }
 function adDegistir(eski,bas){
-  const f=el('form','filtre');const d=el('div');const i=el('input');i.value=eski;i.id='yeni-sinif-adi';i.maxLength=30;d.append(i);
+  const f=el('form','filtre');const d=el('div');const i=el('input');i.value=nfc(eski);i.id='yeni-sinif-adi';i.maxLength=30;d.append(i);
   const kay=el('button','btn kucuk','Kaydet');const ip=el('button','btn ikincil kucuk','Vazgeç');ip.type='button';ip.onclick=sinifBloklariCiz;
-  f.append(d,kay,ip);f.onsubmit=async e=>{e.preventDefault();if(!i.value.trim())return;kay.disabled=true;await siniflarYenile(await api('tRenameClass',S.pin,eski,i.value.trim()));sinifBloklariCiz();};
+  f.append(d,kay,ip);f.onsubmit=async e=>{e.preventDefault();if(!i.value.trim())return;kay.disabled=true;await listeIslem('tRenameClass',eski,nfc(i.value).trim());};
   bas.replaceWith(f);i.focus();
 }
 $('#ekle-form').addEventListener('submit',async e=>{
   e.preventDefault();const h=$('#ek-hata');h.textContent='';
-  const s=$('#ek-sinif').value.trim(),a=$('#ek-adlar').value;
-  if(!s)return h.textContent='Sınıf adını yazın.';
-  if(!a.trim())return h.textContent='En az bir öğrenci adı yazın.';
-  try{await siniflarYenile(await api('tAddStudents',S.pin,s,a));$('#ek-adlar').value='';sinifBloklariCiz();
+  const s=nfc($('#ek-sinif').value).trim(),a=nfc($('#ek-adlar').value);
+  if(!s){h.textContent='Sınıf adını yazın.';return;}
+  if(!a.trim()){h.textContent='En az bir öğrenci adı yazın.';return;}
+  try{await listeIslem('tAddStudents',s,a);$('#ek-adlar').value='';
     const c=S.siniflar.find(x=>x.sinif===s);h.style.color='var(--yaprak)';h.textContent=s+' sınıfında artık '+(c?c.ogrenciler.length:0)+' öğrenci var.';setTimeout(()=>{h.textContent='';h.style.color='';},4000);}
   catch(err){h.textContent=err.message;}
 });
 function sifreKartlari(c){
   const g=el('div','kartlar');
-  c.ogrenciler.forEach(o=>{const k=el('div','sifre-karti');const p=o.sifre.split('-');k.append(el('b',null,o.ad),el('div','em',p.map(x=>EMOJI[x]).join(' ')),el('small',null,p.join(' + ')));g.append(k);});
+  c.ogrenciler.forEach(o=>{const k=el('div','sifre-karti');const p=nfc(o.sifre).split('-');k.append(el('b',null,o.ad),el('div','em',p.map(x=>EMOJI[x]||'?').join(' ')),el('small',null,p.join(' + ')));g.append(k);});
   const ic=[el('h3',null,c.sinif+' şifre kartları'),el('p','soluk','Kesip öğrencilere dağıtabilirsiniz. Şifreyi unutan öğrenciye buradan bakabilir ya da "Yeni şifre" verebilirsiniz.'),g];
   if(GAS){const y=el('button','btn','Yazdır');y.onclick=()=>{const a=$('#yazdir-alani');a.innerHTML='';const h=el('h2',null,c.sinif+' — Okuma Günlüğüm şifreleri');a.append(h,g.cloneNode(true));document.body.classList.add('yazdir');window.print();setTimeout(()=>document.body.classList.remove('yazdir'),500);};ic.splice(2,0,y);}
   modal(ic);
 }
 $('#ad-form').addEventListener('submit',async e=>{
   e.preventDefault();const m=$('#ad-form-mesaj');
-  try{await api('tSetTeacherName',S.pin,$('#ogretmen-adi').value.trim());m.style.color='var(--yaprak)';m.textContent='Kaydedildi.';}
+  try{await api('tSetTeacherName',S.pin,nfc($('#ogretmen-adi').value).trim());m.style.color='var(--yaprak)';m.textContent='Kaydedildi.';}
   catch(err){m.style.color='';m.textContent=err.message;}
 });
 $('#pin-form').addEventListener('submit',async e=>{
@@ -816,38 +994,42 @@ const Mock=(()=>{
   const og=[];let n=0;
   const ekle=(s,ad)=>og.push({id:'o'+(++n),sinif:s,ad,sifre:'Elma-Havuç'});
   ['Ada Yılmaz','Can Demir','Defne Kaya','Efe Şahin','Elif Çelik','Mert Arslan','Nehir Aksoy','Yusuf Kılıç'].forEach(a=>ekle('4-A',a));
-  ['Zeynep Koç','Kerem Aydın','Ela Öztürk','Ömer Polat'].forEach(a=>ekle('4-B',a));
+  ['Zeynep Koç','Kerem Aydın','Ela Öztürk','Ömer Polat','İpek Güneş','Işıl Doğan'].forEach(a=>ekle('4-B',a));
   const kitaplar=['Küçük Prens','Pal Sokağı Çocukları','Charlie\'nin Çikolata Fabrikası','Şeker Portakalı'];
   const cumleler=['Bugün kahramanımız yeni bir gezegene gitti ve orada yalnız yaşayan bir kralla tanıştı. Kral herkese emir vermek istiyordu.','Çocuklar oyun alanlarını korumak için plan yaptılar. Nemeçek çok cesurdu ama hastalandı, buna üzüldüm.','Fabrikaya giren çocuklardan biri kurallara uymadı ve başına ilginç bir şey geldi. Kurallara uymanın önemini anladım.','Zeze ağacıyla konuşuyordu. Ailesi onu anlamadığı için üzülüyordu. Hayal gücünün insanı mutlu edebileceğini düşündüm.'];
   const ok=[];
-  og.filter(o=>o.sinif==='4-A').forEach((o,i)=>{for(let d=1;d<=45;d++){if((i+d)%4===0||(d>7&&(i*3+d)%5===0))continue;ok.push({tarih:gunEkle(T(),-d),sinif:o.sinif,ogrenciId:o.id,ad:o.ad,kitap:kitaplar[(i+Math.floor(d/12))%4],sayfa:d===1?15+i:6+((i*7+d*3)%18),anladiklarim:cumleler[(i+d)%4],kayit:''});}});
-  [0,1,2,4].forEach(i=>{const o=og[i];ok.push({tarih:T(),sinif:o.sinif,ogrenciId:o.id,ad:o.ad,kitap:kitaplar[i%4],sayfa:8+i*3,anladiklarim:cumleler[i%4],kayit:''});});
+  // Her öğrenci 16 günde bir kitap bitirir; 4-A'dakiler dün 15+ sayfa okudu.
+  og.filter(o=>o.sinif==='4-A').forEach((o,i)=>{for(let d=45;d>=1;d--){if((i+d)%4===0||(d>7&&(i*3+d)%5===0))continue;const blok=Math.floor((d+i)/16);
+    ok.push({tarih:gunEkle(T(),-d),sinif:o.sinif,ogrenciId:o.id,kitap:kitaplar[(i+blok)%4],sayfa:d===1?15+i:6+((i*7+d*3)%18),anl:cumleler[(i+d)%4],bitti:0});}});
+  // her kitap bloğunun son kaydını "bitti" yap (en yeni blok hariç)
+  og.forEach(o=>{const k=ok.filter(r=>r.ogrenciId===o.id);for(let j=0;j<k.length-1;j++){if(k[j].kitap!==k[j+1].kitap)k[j].bitti=1;}});
+  [0,1,2,4].forEach(i=>{const o=og[i];const k=ok.filter(r=>r.ogrenciId===o.id);const sonKitap=k.length?k[k.length-1].kitap:kitaplar[0];ok.push({tarih:T(),sinif:o.sinif,ogrenciId:o.id,kitap:sonKitap,sayfa:8+i*3,anl:cumleler[i%4],bitti:0});});
   const tr=(a,b)=>a.localeCompare(b,'tr');
   const rs=()=>{const a=MEYVELER[Math.floor(Math.random()*16)][0];let b;do{b=MEYVELER[Math.floor(Math.random()*16)][0];}while(b===a);return a+'-'+b;};
   const pinK=p=>{if(String(p)!==pin)throw new Error('Öğretmen şifresi yanlış.');};
-  const ozet=s=>{const k=ok.filter(r=>r.ogrenciId===s.id).sort((a,b)=>b.tarih.localeCompare(a.tarih));const g=new Set(k.map(r=>r.tarih));let seri=0,t=T();if(!g.has(t))t=gunEkle(t,-1);while(g.has(t)){seri++;t=gunEkle(t,-1);}
-    return{ogrenci:{id:s.id,ad:s.ad,sinif:s.sinif},bugun:T(),dun:gunEkle(T(),-1),seri,toplamSayfa:k.reduce((a,r)=>a+r.sayfa,0),sonKitap:k[0]?k[0].kitap:'',gecmis:k.slice(0,30),kurt:k.slice().reverse().map(r=>[r.tarih,r.sayfa,r.kitap])};};
+  const liste=id=>{const k=ok.filter(r=>r.ogrenciId===id).sort((a,b)=>a.tarih.localeCompare(b.tarih));const sinir=k.length-14;return k.map((r,i)=>i>=sinir?[r.tarih,r.sayfa,r.kitap,r.bitti,r.anl]:[r.tarih,r.sayfa,r.kitap,r.bitti]);};
+  const ozet=s=>({ogrenci:{id:s.id,ad:s.ad,sinif:s.sinif},bugun:T(),dun:gunEkle(T(),-1),liste:liste(s.id)});
   const dogrula=(id,p)=>{const s=og.find(x=>x.id===id);if(!s)throw new Error('Öğrenci bulunamadı.');if(s.sifre!==p)throw new Error('Şifre yanlış, tekrar dene.');return s;};
   const cls=()=>{const m={};og.forEach(s=>(m[s.sinif]=m[s.sinif]||[]).push({id:s.id,ad:s.ad,sifre:s.sifre}));return Object.keys(m).sort(tr).map(k=>({sinif:k,ogrenciler:m[k].sort((a,b)=>tr(a.ad,b.ad))}));};
+  const roster=()=>cls().map(c=>({sinif:c.sinif,ogrenciler:c.ogrenciler.map(o=>({id:o.id,ad:o.ad}))}));
   return{
-    getClasses:()=>[...new Set(og.map(s=>s.sinif))].sort(tr),
-    getStudents:s=>og.filter(o=>o.sinif===s).map(o=>({id:o.id,ad:o.ad})).sort((a,b)=>tr(a.ad,b.ad)),
+    getRoster:roster,
     studentLogin:(id,p)=>{try{const s=dogrula(id,p),dn=gunEkle(T(),-1);let tebrik=null;const r=ok.find(x=>x.ogrenciId===id&&x.tarih===dn);if(r&&r.sayfa>=15&&goruldu[id]!==dn){goruldu[id]=dn;tebrik={mesaj:TEB[(Number(id.slice(1))+r.sayfa)%TEB.length],sayfa:r.sayfa,kitap:r.kitap,imza:imza||'Öğretmenin'};}return Object.assign({ok:true,tebrik},ozet(s));}catch(e){return{ok:false,msg:e.message};}},
-    saveReading:(id,p,v)=>{const s=dogrula(id,p);const i=ok.findIndex(r=>r.ogrenciId===id&&r.tarih===v.tarih);const r={tarih:v.tarih,sinif:s.sinif,ogrenciId:id,ad:s.ad,kitap:v.kitap,sayfa:v.sayfa,anladiklarim:v.anladiklarim,kayit:''};if(i>=0)ok[i]=r;else ok.push(r);return ozet(s);},
-    teacherLogin:p=>String(p)===pin?{ok:true,bugun:T(),ogretmenAdi:imza}:{ok:false,msg:'Öğretmen şifresi yanlış.'},
+    saveReading:(id,p,v)=>{const s=dogrula(id,p);const i=ok.findIndex(r=>r.ogrenciId===id&&r.tarih===v.tarih);const r={tarih:v.tarih,sinif:s.sinif,ogrenciId:id,kitap:v.kitap,sayfa:v.sayfa,anl:v.anladiklarim,bitti:v.bitti?1:0};if(i>=0)ok[i]=r;else ok.push(r);return ozet(s);},
+    teacherLogin:p=>String(p)===pin?{ok:true,bugun:T(),ogretmenAdi:imza,siniflar:cls()}:{ok:false,msg:'Öğretmen şifresi yanlış.'},
     tGetClasses:p=>{pinK(p);return cls();},
     tAddStudents:(p,s,t)=>{pinK(p);const var_=new Set(og.filter(o=>o.sinif===s).map(o=>o.ad.toLocaleLowerCase('tr')));t.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[.)-]?\s*/,'').trim()).filter(Boolean).forEach(a=>{if(var_.has(a.toLocaleLowerCase('tr')))return;var_.add(a.toLocaleLowerCase('tr'));og.push({id:'o'+(++n),sinif:s,ad:a,sifre:rs()});});return cls();},
     tRemoveStudent:(p,id)=>{pinK(p);const i=og.findIndex(o=>o.id===id);if(i>=0)og.splice(i,1);return cls();},
     tResetPassword:(p,id)=>{pinK(p);const o=og.find(x=>x.id===id);if(o)o.sifre=rs();return cls();},
     tRenameClass:(p,e,y)=>{pinK(p);og.forEach(o=>{if(o.sinif===e)o.sinif=y;});ok.forEach(r=>{if(r.sinif===e)r.sinif=y;});return cls();},
     tDeleteClass:(p,s)=>{pinK(p);for(let i=og.length-1;i>=0;i--)if(og[i].sinif===s)og.splice(i,1);return cls();},
-    tGetReadings:(p,s,b,e)=>{pinK(p);return{bugun:T(),ogrenciler:og.filter(o=>o.sinif===s).map(o=>({id:o.id,ad:o.ad})),okumalar:ok.filter(r=>r.sinif===s&&r.tarih>=b&&r.tarih<=e)};},
-    tStudentReadings:(p,id)=>{pinK(p);const s=og.find(o=>o.id===id);if(!s)throw new Error('Öğrenci bulunamadı.');return{bugun:T(),ogrenci:{id,ad:s.ad,sinif:s.sinif},okumalar:ok.filter(r=>r.ogrenciId===id).sort((a,b)=>a.tarih.localeCompare(b.tarih))};},
+    tClassData:(p,s)=>{pinK(p);const o=og.filter(x=>x.sinif===s).sort((a,b)=>tr(a.ad,b.ad));const ids=new Set(o.map(x=>x.id));
+      return{bugun:T(),ogrenciler:o.map(x=>({id:x.id,ad:x.ad})),okumalar:ok.filter(r=>ids.has(r.ogrenciId)).sort((a,b)=>a.tarih.localeCompare(b.tarih)).map(r=>[r.tarih,r.ogrenciId,r.sayfa,r.kitap,r.bitti,r.anl])};},
     tSetTeacherName:(p,a)=>{pinK(p);imza=String(a||'').trim();return{ok:true};},
     tChangePin:(p,y)=>{pinK(p);if(!/^\d{4,8}$/.test(y))throw new Error('Yeni şifre 4-8 haneli bir sayı olmalı.');pin=y;return{ok:true};}
   };
 })();
 
-if(!GAS)$('#demo-serit').hidden=false;
+if(!GAS){$('#demo-serit').hidden=false;ROSTER=Mock.getRoster();rosterZaman=Date.now();}
 goster('s-sinif');
 </script>
