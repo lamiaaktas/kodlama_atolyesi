@@ -279,16 +279,136 @@ td.top{font-weight:800}
   .tg .n{font-size:.92rem}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ================= ÇOCUK DOSTU GÖRÜNÜM (öğrenci ekranları) =================
+   Güneşli gökyüzü zemini, şeker renkleri, tombul "basılabilir" düğmeler. Öğretmen paneli sade kalır. */
+:root{
+  --gok:#d9f0ff; --gok2:#fff6dc;          /* gündüz gökyüzü → güneşli alt */
+  --murekkep2:#2b2a4c;                    /* çocuk ekranlarında yazı rengi */
+  --kalin:#2b2a4c;                        /* tombul kenar rengi */
+  --c1:#3d8ef0;--c1g:#2466c4; --c2:#f27a24;--c2g:#c2560b; --c3:#8a5cf5;--c3g:#6338c9;
+  --c4:#22a861;--c4g:#167a45; --c5:#ec4c7f;--c5g:#bf2b5c; --c6:#0fa3a3;--c6g:#087575;
+  --gunes:#ffd23f; --nane:#e3f8ec; --limon:#fff6cf; --bulut:#e4f2ff; --pembe:#ffe6ee;
+  --kagit-c:#ffffff; --zemin-c:#eef6ff; --bulut-renk:rgba(255,255,255,.75); --nokta:rgba(255,255,255,.55);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --gok:#16204a;--gok2:#241c3d;--murekkep2:#f3f1ff;--kalin:#0b0f24;
+  --nane:#18392a;--limon:#3a3216;--bulut:#17304d;--pembe:#3d1a28;--kagit-c:#24285a;--zemin-c:#1b1f48;--bulut-renk:rgba(255,255,255,.1);--nokta:rgba(255,255,255,.35)}}
+:root[data-theme="dark"]{
+  --gok:#16204a;--gok2:#241c3d;--murekkep2:#f3f1ff;--kalin:#0b0f24;
+  --nane:#18392a;--limon:#3a3216;--bulut:#17304d;--pembe:#3d1a28;--kagit-c:#24285a;--zemin-c:#1b1f48;--bulut-renk:rgba(255,255,255,.1);--nokta:rgba(255,255,255,.35)}
+
+body[data-mod="cocuk"]{
+  background-color:var(--gok);
+  background-image:
+    radial-gradient(circle at 12% 8%,var(--bulut-renk) 0 38px,transparent 39px),
+    radial-gradient(circle at 18% 6%,var(--bulut-renk) 0 30px,transparent 31px),
+    radial-gradient(circle at 86% 14%,var(--bulut-renk) 0 34px,transparent 35px),
+    radial-gradient(circle at 92% 12%,var(--bulut-renk) 0 26px,transparent 27px),
+    radial-gradient(var(--nokta) 1.5px,transparent 2px),
+    linear-gradient(180deg,var(--gok) 0%,var(--gok2) 100%);
+  background-size:auto,auto,auto,auto,28px 28px,auto;
+  background-attachment:fixed;
+}
+.cocuk{color:var(--murekkep2);--kagit:var(--kagit-c);--zemin:var(--zemin-c)}
+.cocuk h1,.cocuk h2,.cocuk h3{font-family:var(--f-baslik);font-weight:800;letter-spacing:.01em}
+.cocuk h2{font-size:1.75rem}
+.cocuk .kart{border:3px solid var(--kalin);border-radius:26px;box-shadow:0 6px 0 var(--kalin);padding:24px}
+.cocuk .btn{font-family:var(--f-baslik);font-size:1.15rem;border-radius:18px;border:3px solid var(--kalin);box-shadow:0 5px 0 var(--kalin);transition:transform .08s}
+.cocuk .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--kalin)}
+.cocuk .btn.buyuk{font-size:1.45rem;padding:16px 28px;background:var(--c2)}
+.cocuk .btn.ikincil{background:var(--kagit);color:var(--murekkep2)}
+.cocuk .geri{font-family:var(--f-baslik);font-size:1.05rem;border:3px solid var(--kalin);box-shadow:0 4px 0 var(--kalin);color:var(--murekkep2);padding:6px 16px}
+.cocuk .geri:active{transform:translateY(3px);box-shadow:0 1px 0 var(--kalin)}
+.cocuk .secim{border:3px solid var(--kalin);box-shadow:0 5px 0 var(--kalin);border-radius:20px;font-family:var(--f-baslik);transition:transform .1s}
+.cocuk .secim:hover{transform:translateY(-2px) rotate(-1deg)}
+.cocuk .secim:active{transform:translateY(4px);box-shadow:0 1px 0 var(--kalin)}
+.cocuk .cip{font-family:var(--f-baslik);font-weight:700;border:2px solid var(--kalin)}
+.cocuk input,.cocuk textarea{border:3px solid var(--kalin);border-radius:16px;font-size:1.1rem;padding:12px 14px}
+.cocuk input:focus,.cocuk textarea:focus{outline:none;box-shadow:0 0 0 4px var(--gunes)}
+.cocuk .soluk{color:color-mix(in srgb,var(--murekkep2) 70%,transparent)}
+
+/* ana ekran: maskot + konuşma balonu */
+.karsilama{display:grid;grid-template-columns:minmax(0,260px) 1fr;align-items:center;gap:10px 18px}
+.karsilama h1{font-size:clamp(2.3rem,7vw,3.4rem);line-height:1;color:var(--murekkep2);text-shadow:3px 3px 0 var(--gunes)}
+.balon{position:relative;display:inline-block;background:var(--kagit);border:3px solid var(--kalin);border-radius:20px;padding:10px 16px;font-family:var(--f-baslik);font-weight:700;font-size:1.25rem;box-shadow:0 4px 0 var(--kalin);margin-top:10px}
+.balon::before{content:"";position:absolute;left:-14px;top:18px;border:8px solid transparent;border-right:12px solid var(--kalin)}
+.balon::after{content:"";position:absolute;left:-8px;top:20px;border:6px solid transparent;border-right:9px solid var(--kagit)}
+.maskot{animation:zipla 2.8s ease-in-out infinite}
+@keyframes zipla{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@media (max-width:520px){.karsilama{grid-template-columns:1fr;text-align:center;justify-items:center}.balon::before,.balon::after{display:none}}
+
+/* sınıf düğmeleri: renkli kitap kapakları */
+.cocuk .sinif-btn{position:relative;color:#fff;font-size:2.3rem;padding:30px 10px 30px 26px;border-radius:12px 22px 22px 12px;background:var(--r);box-shadow:0 6px 0 var(--kalin),inset 14px 0 0 var(--rg);text-shadow:0 2px 0 rgba(0,0,0,.25)}
+.cocuk .sinif-btn::after{content:"";position:absolute;left:20px;top:10px;bottom:10px;width:3px;border-radius:2px;background:rgba(255,255,255,.45)}
+/* isim düğmeleri: baş harfli renkli rozet */
+.cocuk #isim-liste .secim{display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;font-size:1.2rem;background:var(--kagit)}
+.ad-rozet{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--r);color:#fff;font-size:1.4rem;border:3px solid var(--kalin);text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.r1{--r:var(--c1);--rg:var(--c1g)}.r2{--r:var(--c2);--rg:var(--c2g)}.r3{--r:var(--c3);--rg:var(--c3g)}
+.r4{--r:var(--c4);--rg:var(--c4g)}.r5{--r:var(--c5);--rg:var(--c5g)}.r6{--r:var(--c6);--rg:var(--c6g)}
+
+/* şifre: her meyve kendi renginde */
+.cocuk .slot{border:4px dashed var(--kalin);border-radius:26px;background:var(--kagit);color:var(--murekkep2)}
+.cocuk .slot.dolu{border-style:solid;background:var(--limon);animation:dogus .35s cubic-bezier(.3,1.6,.5,1)}
+.cocuk .meyve{background:var(--mr);color:#2b2a4c;font-family:var(--f-govde);font-weight:800}
+.cocuk .meyve span.e{font-size:2.8rem}
+.cocuk .meyve:active span.e{transform:scale(1.25)}
+
+/* günlük: renkli çıkartma sayaçlar */
+.cocuk .istatistik{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cocuk .rozet{flex-direction:column;align-items:flex-start;gap:2px;border:3px solid var(--kalin);border-radius:20px;box-shadow:0 5px 0 var(--kalin);padding:12px 14px;background:var(--r);color:#fff;position:relative;overflow:hidden}
+.cocuk .rozet b{font-size:2.3rem;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.cocuk .rozet span{color:#fff;font-size:.95rem;font-weight:800;opacity:.95}
+.cocuk .rozet .ikon{position:absolute;right:8px;top:6px;font-size:2rem;opacity:.95}
+@media (max-width:520px){.cocuk .istatistik{gap:8px}.cocuk .rozet{padding:10px}.cocuk .rozet b{font-size:1.8rem}.cocuk .rozet span{font-size:.78rem}.cocuk .rozet .ikon{font-size:1.4rem}}
+.kart-nane{background:var(--nane)!important}
+.kart-gunes{background:var(--limon)!important}
+.kart-gok{background:var(--bulut)!important}
+.cocuk .etiket{font-family:var(--f-baslik);font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.adim{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--r);color:#fff;border:3px solid var(--kalin);font-size:1.05rem}
+.cocuk .sayac button{width:60px;height:60px;border-radius:50%;border:3px solid var(--kalin);box-shadow:0 4px 0 var(--kalin);font-family:var(--f-baslik);font-size:1.25rem;background:var(--kagit);color:var(--murekkep2)}
+.cocuk .sayac button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--kalin)}
+.cocuk .sayac input{width:120px;height:68px;font-size:2.4rem;border-radius:20px}
+.cocuk .kitap-btn{border:3px solid var(--kalin);box-shadow:0 4px 0 var(--kalin);border-radius:16px;font-family:var(--f-baslik);font-size:1.1rem}
+.cocuk .kitap-btn[aria-checked="true"]{background:var(--gunes);color:#2b2a4c}
+.cocuk .kitap-btn.yeni{box-shadow:0 4px 0 var(--kalin)}
+.cocuk .bitti-sec{border:3px dashed var(--kalin);background:var(--kagit);font-family:var(--f-baslik);font-size:1.1rem}
+.cocuk .bitti-sec:has(input:checked){border-style:solid;background:var(--gunes);color:#2b2a4c}
+.cocuk .not{background:var(--kagit);border:2px dashed var(--kalin)}
+.cocuk .gun-sec{border:3px solid var(--kalin);background:var(--kagit);padding:4px}
+.cocuk .gun-sec button{font-family:var(--f-baslik);font-size:1.05rem}
+.cocuk .gun-sec button[aria-pressed="true"]{background:var(--c1);color:#fff;box-shadow:none}
+.cocuk .gecmis-satir{border-top:2px dashed color-mix(in srgb,var(--kalin) 30%,transparent)}
+.cocuk .sayfa-pill{background:var(--gunes);color:#2b2a4c;border:2px solid var(--kalin)}
+.cocuk .tg{border-color:color-mix(in srgb,var(--kalin) 15%,transparent);background:var(--kagit)}
+.cocuk .tg.bos-gun{background:transparent;border:0}
+.cocuk .takvim-ust button{border:3px solid var(--kalin);box-shadow:0 3px 0 var(--kalin);background:var(--kagit)}
+.cocuk .takvim-detay{background:var(--kagit);border:3px solid var(--kalin)}
+.cocuk .kitap-cip{border:2px solid var(--kalin);background:var(--kagit);font-family:var(--f-baslik)}
+.cocuk .enerji-not{border:3px solid var(--kalin)}
+.cocuk .mesaj-not{border:3px solid var(--kalin);background:var(--nane)}
+
+/* kutlama: güneş ışınları */
+.cocuk .kutlama{position:relative;overflow:hidden;background:var(--limon)}
+.cocuk .kutlama::before{content:"";position:absolute;left:50%;top:90px;width:900px;height:900px;margin:-450px 0 0 -450px;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,210,63,.35) 0 10deg,transparent 10deg 20deg);animation:don 30s linear infinite;z-index:0}
+.cocuk .kutlama > *{position:relative;z-index:1}
+.cocuk .kutlama .buyuk-sayi{font-size:6rem;color:var(--c2);text-shadow:4px 4px 0 var(--kalin);animation:dogus .7s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes don{to{transform:rotate(360deg)}}
+.cocuk .mesaj-kart{background:var(--kagit)}
+.cocuk .mesaj-metin{text-shadow:3px 3px 0 var(--gunes)}
+.cocuk .yorgun-metin{text-shadow:none}
+@media (prefers-reduced-motion:reduce){.maskot,.cocuk .kutlama::before{animation:none}}
+
 </style>
 
 <div class="kap" id="uygulama" lang="tr">
   <div id="demo-serit" class="demo-serit" hidden>Önizleme modu: örnek sınıflar ve öğrenciler gösteriliyor. Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç, öğretmen şifresi 1234. 4-A'daki öğrenciler dün 15+ sayfa okudu, girişte öğretmen mesajını görürler; daha önce okudukları kitaplar seçenek olarak çıkar. 4-B'deki Zeynep Koç 3 gündür okumadı, bitkin kitap kurdunu görür.</div>
 
   <!-- 1. Sınıf seçimi -->
-  <section id="s-sinif" class="kap">
-    <div class="logo">
-      <svg width="54" height="54" viewBox="0 0 54 54" aria-hidden="true"><rect x="4" y="10" width="22" height="34" rx="4" fill="var(--yaprak)"/><rect x="28" y="10" width="22" height="34" rx="4" fill="var(--domates)"/><path d="M27 12v32" stroke="var(--murekkep)" stroke-width="3"/><circle cx="40" cy="8" r="5" fill="var(--muz)"/></svg>
-      <div><h1>Okuma Günlüğüm</h1><p class="soluk">Her gün biraz oku, ne anladığını yaz.</p></div>
+  <section id="s-sinif" class="kap cocuk">
+    <div class="karsilama">
+      <div class="kurt-kap maskot" id="maskot" aria-hidden="true" style="width:100%"></div>
+      <div><h1>Okuma Günlüğüm</h1><p class="balon">Merhaba! Bugün hangi maceraya daldın?</p></div>
     </div>
     <div class="kart kap">
       <h2>Sınıfını seç</h2>
@@ -298,13 +418,13 @@ td.top{font-weight:800}
   </section>
 
   <!-- 2. İsim seçimi -->
-  <section id="s-isim" class="kap" hidden>
+  <section id="s-isim" class="kap cocuk" hidden>
     <div class="ust"><button class="geri" data-git="s-sinif">← Sınıflar</button><span class="cip" id="isim-sinif"></span></div>
     <div class="kart kap"><h2>Adını bul ve dokun</h2><div id="isim-liste" class="izgara"></div></div>
   </section>
 
   <!-- 3. Şifre -->
-  <section id="s-sifre" class="kap" hidden>
+  <section id="s-sifre" class="kap cocuk" hidden>
     <div class="ust"><button class="geri" data-git="s-isim">← İsimler</button></div>
     <div class="kart kap" style="text-align:center">
       <h2 id="sifre-baslik">Merhaba!</h2>
@@ -317,7 +437,7 @@ td.top{font-weight:800}
   </section>
 
   <!-- 3b. Öğretmenden mesaj -->
-  <section id="s-mesaj" class="kap" hidden>
+  <section id="s-mesaj" class="kap cocuk" hidden>
     <div class="kart mesaj-kart">
       <p class="zarf">Öğretmeninden sana bir mesaj var</p>
       <div class="yildizlar" aria-hidden="true">⭐⭐⭐</div>
@@ -329,7 +449,7 @@ td.top{font-weight:800}
   </section>
 
   <!-- 3c. Bitkin kitap kurdu -->
-  <section id="s-yorgun" class="kap" hidden>
+  <section id="s-yorgun" class="kap cocuk" hidden>
     <div class="kart mesaj-kart">
       <p class="zarf">Kitap kurdun seni bekliyordu</p>
       <div class="kurt-kap" id="y-kurt" style="width:100%;max-width:520px"></div>
@@ -340,48 +460,48 @@ td.top{font-weight:800}
   </section>
 
   <!-- 4. Günlük -->
-  <section id="s-gunluk" class="kap" hidden>
+  <section id="s-gunluk" class="kap cocuk" hidden>
     <div class="ust">
       <div><h1 id="g-ad"></h1><p class="soluk" id="g-sinif"></p></div>
       <button class="geri" id="cikis">Çıkış</button>
     </div>
     <div class="istatistik">
-      <div class="rozet"><b id="g-seri">0</b><span>gün üst üste<br>okudun</span></div>
-      <div class="rozet"><b id="g-toplam">0</b><span>toplam<br>sayfa</span></div>
-      <div class="rozet"><b id="g-biten">0</b><span>bitirdiğim<br>kitap</span></div>
+      <div class="rozet r2"><span class="ikon" aria-hidden="true">🔥</span><b id="g-seri">0</b><span>gün üst üste okudun</span></div>
+      <div class="rozet r1"><span class="ikon" aria-hidden="true">📄</span><b id="g-toplam">0</b><span>toplam sayfa</span></div>
+      <div class="rozet r3"><span class="ikon" aria-hidden="true">📚</span><b id="g-biten">0</b><span>bitirdiğim kitap</span></div>
     </div>
-    <div class="kart kap"><div class="ust"><h3>Kitap kurdum</h3><span class="cip" id="g-bogum"></span></div>
+    <div class="kart kap kart-nane"><div class="ust"><h3>Kitap kurdum</h3><span class="cip" id="g-bogum"></span></div>
       <p class="enerji-not" id="g-enerji" hidden></p>
       <div class="kurt-kap" id="g-kurt"></div>
       <p class="soluk" style="font-size:.9rem">Her okuma günü kurduna yeni bir boğum ekler. Çok sayfa okuduğun günler kalın, her kitap ayrı renk olur.</p>
     </div>
-    <form class="kart form" id="okuma-form" novalidate>
+    <form class="kart form kart-gunes" id="okuma-form" novalidate>
       <h2>Bugünkü okumam</h2>
       <p class="soluk" id="secili-tarih"></p>
       <p class="not" id="var-notu" hidden>Bugün için kaydın var. Değiştirip yeniden kaydedebilirsin.</p>
-      <div><p class="etiket" id="kitap-etiket">Hangi kitabı okudun?</p>
+      <div><p class="etiket" id="kitap-etiket"><span class="adim r1" aria-hidden="true">1</span>Hangi kitabı okudun?</p>
         <div class="kitap-secenek" id="kitap-secenek" role="radiogroup" aria-labelledby="kitap-etiket"></div>
         <div id="yeni-kitap-kutu"><label class="etiket" for="kitap" id="yeni-kitap-etiket" hidden>Yeni kitabın adı</label><input id="kitap" maxlength="120" autocomplete="off" autocapitalize="words" placeholder="Kitabın adını yaz"></div>
         <label class="bitti-sec" for="bitti"><input type="checkbox" id="bitti"><span id="bitti-yazi">Bu kitabı bitirdim</span></label>
       </div>
-      <div><label class="etiket" for="sayfa">Kaç sayfa okudun?</label>
+      <div><label class="etiket" for="sayfa"><span class="adim r4" aria-hidden="true">2</span>Kaç sayfa okudun?</label>
         <div class="sayac"><button type="button" data-ekle="-5">−5</button><button type="button" data-ekle="-1">−1</button><input id="sayfa" type="number" inputmode="numeric" min="1" max="1000" value="10"><button type="button" data-ekle="1">+1</button><button type="button" data-ekle="5">+5</button></div>
       </div>
-      <div><label class="etiket" for="anlam">Bugün okuduklarından ne anladın?</label>
+      <div><label class="etiket" for="anlam"><span class="adim r5" aria-hidden="true">3</span>Bugün okuduklarından ne anladın?</label>
         <textarea id="anlam" maxlength="2000" placeholder="Kimler vardı? Ne oldu? Sana en ilginç gelen ne oldu?"></textarea>
         <div class="ipucu"><span>Kendi cümlelerinle anlat.</span><span id="anlam-sayac">0</span></div>
       </div>
       <p class="hata" id="form-hata"></p>
-      <button class="btn buyuk" id="kaydet" type="submit">Kaydet</button>
+      <button class="btn buyuk" id="kaydet" type="submit">Kaydet ✨</button>
     </form>
     <div class="kart kap" id="raf-kart" hidden><h3>Bitirdiğim kitaplar</h3><div class="raf" id="raf"></div></div>
-    <div class="kart kap"><div class="gecmis-ust"><h3>Okuma geçmişim</h3>
+    <div class="kart kap kart-gok"><div class="gecmis-ust"><h3>Okuma geçmişim</h3>
         <div class="gun-sec" role="group" aria-label="Görünüm"><button type="button" id="gor-liste" aria-pressed="true">Liste</button><button type="button" id="gor-takvim" aria-pressed="false">Takvim</button></div></div>
       <div id="gecmis" class="gecmis"></div></div>
   </section>
 
   <!-- 5. Tamam -->
-  <section id="s-tamam" class="kap" hidden>
+  <section id="s-tamam" class="kap cocuk" hidden>
     <div class="kart kutlama">
       <div class="buyuk-sayi" id="t-sayfa">0</div>
       <h2 id="t-mesaj">sayfa okudun, harika!</h2>
@@ -484,6 +604,7 @@ td.top{font-weight:800}
 <script>
 const MEYVELER=[['Elma','🍎'],['Muz','🍌'],['Çilek','🍓'],['Üzüm','🍇'],['Portakal','🍊'],['Karpuz','🍉'],['Armut','🍐'],['Kiraz','🍒'],['Havuç','🥕'],['Domates','🍅'],['Salatalık','🥒'],['Mısır','🌽'],['Brokoli','🥦'],['Patlıcan','🍆'],['Biber','🌶️'],['Patates','🥔']];
 const EMOJI=Object.fromEntries(MEYVELER);
+const MEYVE_RENK={Elma:'#ffd9d6',Muz:'#fff1b8','Çilek':'#ffd6e2','Üzüm':'#e8dcff',Portakal:'#ffe2c4',Karpuz:'#d9f5cf',Armut:'#ecf7cd',Kiraz:'#ffd0d8','Havuç':'#ffe0c2',Domates:'#ffd6cf','Salatalık':'#d8f2d0','Mısır':'#fff0b3',Brokoli:'#d4efd0','Patlıcan':'#e6d8f7',Biber:'#ffd4cc',Patates:'#f3e3c8'};
 const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const GUNLER=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const $=s=>document.querySelector(s);
@@ -513,6 +634,7 @@ const OGRENCI_EKRANLARI=['s-isim','s-sifre','s-mesaj','s-yorgun','s-gunluk','s-t
 let bosta=null;
 function goster(id){
   document.querySelectorAll('#uygulama > section').forEach(s=>s.hidden=s.id!==id);
+  document.body.dataset.mod=(id==='s-pin'||id==='s-panel')?'ogretmen':'cocuk';
   window.scrollTo(0,0);
   bostaKur();
   if(id==='s-sinif')siniflariCiz();
@@ -544,7 +666,7 @@ function siniflariCiz(){
   const kutu=$('#sinif-liste');
   const ciz=()=>{kutu.innerHTML='';
     if(!ROSTER.length){kutu.append(el('p','bos-durum','Henüz sınıf eklenmemiş. Öğretmeninin sınıf listesini eklemesi gerekiyor.'));return;}
-    ROSTER.forEach(c=>{const b=el('button','secim sinif-btn',c.sinif);b.onclick=()=>isimleriAc(c.sinif);kutu.append(b);});};
+    ROSTER.forEach((c,i)=>{const b=el('button','secim sinif-btn r'+(i%6+1),c.sinif);b.onclick=()=>isimleriAc(c.sinif);kutu.append(b);});};
   if(ROSTER)ciz();else{kutu.innerHTML='';kutu.append(el('p','soluk','Yükleniyor…'));}
   const once=JSON.stringify(ROSTER);
   rosterTazele().then(()=>{if(!$('#s-sinif').hidden&&JSON.stringify(ROSTER)!==once)ciz();})
@@ -554,11 +676,11 @@ function isimleriAc(sinif){
   S.sinif=sinif;$('#isim-sinif').textContent=nfc(sinif);goster('s-isim');
   const kutu=$('#isim-liste');kutu.innerHTML='';
   const c=(ROSTER||[]).find(x=>x.sinif===sinif);
-  (c?c.ogrenciler:[]).forEach(o=>{const b=el('button','secim',o.ad);b.onclick=()=>sifreAc(o);kutu.append(b);});
+  (c?c.ogrenciler:[]).forEach((o,i)=>{const b=el('button','secim');b.append(el('span','ad-rozet r'+(i%6+1),nfc(o.ad).charAt(0).toLocaleUpperCase('tr')),el('span',null,o.ad));b.onclick=()=>sifreAc(o);kutu.append(b);});
 }
 
 /* ---------- 3. şifre ---------- */
-(function(){const iz=$('#meyve-izgara');MEYVELER.forEach(([ad,e])=>{const b=el('button','secim meyve');b.type='button';b.setAttribute('aria-label',ad);b.append(el('span','e',e),el('span',null,ad));b.onclick=()=>meyveSec(ad);iz.append(b);});})();
+(function(){const iz=$('#meyve-izgara');MEYVELER.forEach(([ad,e])=>{const b=el('button','secim meyve');b.type='button';b.style.setProperty('--mr',MEYVE_RENK[ad]||'#fff');b.setAttribute('aria-label',ad);b.append(el('span','e',e),el('span',null,ad));b.onclick=()=>meyveSec(ad);iz.append(b);});})();
 function ilkAd(ad){return nfc(ad).split(' ')[0];}
 function sifreAc(o){S.ogr=o;S.sifre=[];$('#sifre-baslik').textContent='Merhaba, '+ilkAd(o.ad)+'!';$('#sifre-hata').textContent='';slotCiz();goster('s-sifre');}
 function slotCiz(){$('#slotlar').querySelectorAll('.slot').forEach((s,i)=>{const ad=S.sifre[i];s.className='slot'+(ad?' dolu':'');s.innerHTML='';if(ad){s.append(el('span',null,EMOJI[ad]),el('small',null,ad));}});}
@@ -653,7 +775,7 @@ function konfeti(){
 /* ---------- 4. günlük ---------- */
 function gunlukAc(){
   const v=S.veri;S.gorunum='liste';S.takvimAy=null;S.takvimGun=null;
-  $('#g-ad').textContent=nfc(v.ogrenci.ad);$('#g-sinif').textContent=nfc(v.ogrenci.sinif)+' sınıfı';
+  $('#g-ad').textContent='Merhaba, '+ilkAd(v.ogrenci.ad)+'!';$('#g-sinif').textContent=nfc(v.ogrenci.ad)+' · '+nfc(v.ogrenci.sinif)+' sınıfı';
   istatistikCiz();formDoldur();gecmisCiz();goster('s-gunluk');
 }
 function istatistikCiz(){const v=S.veri;$('#g-seri').textContent=v.seri;$('#g-toplam').textContent=v.toplamSayfa;$('#g-biten').textContent=v.bitenKitaplar.length;
@@ -1209,6 +1331,7 @@ const Mock=(()=>{
   };
 })();
 
+kurtCiz($('#maskot'),[['',14,'Küçük Prens'],['',22,'Şeker Portakalı'],['',30,'Pal Sokağı'],['',18,'Momo'],['',26,'Heidi'],['',34,'Pinokyo']],null,{kitaplar:false,yakin:true});
 if(!GAS){$('#demo-serit').hidden=false;ROSTER=Mock.getRoster();rosterZaman=Date.now();}
 goster('s-sinif');
 </script>
