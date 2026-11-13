@@ -204,6 +204,26 @@ td.top{font-weight:800}
 .kurt-kap svg{width:100%;height:auto;display:block}
 .kurt-kap .kseg{stroke:var(--kagit);stroke-width:2.5;animation:dalga 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
 .kurt-kap .kbas{fill:#2f8f5b;stroke:var(--kagit);stroke-width:2.5}
+.kurt-kap .kseg.yorgun{animation:solukla 4.5s ease-in-out infinite}
+.kurt-kap .yorgun .kbas{fill:#7f9a88}
+.kurt-kap .yorgun .kanten{stroke:#7f9a88}
+.kurt-kap .yorgun .kanten-uc{fill:#c98a80}
+.kurt-kap .kkapak{fill:#6d8a77}
+.kurt-kap .kkapak-cizgi{stroke:#1f2a26;stroke-width:2;stroke-linecap:round}
+.kurt-kap .kter{fill:#7cc4f0;stroke:#fff;stroke-width:1.5}
+.kurt-kap .kpil-kab{fill:var(--kagit);stroke:var(--murekkep);stroke-width:2.5}
+.kurt-kap .kpil-uc{fill:var(--murekkep)}
+.kurt-kap .kpil-bos{fill:var(--cizgi)}
+.kurt-kap .kpil-dolu.kirmizi{fill:var(--domates);animation:yanip 1.2s steps(2) infinite}
+.kurt-kap .kpil-dolu.turuncu{fill:#f2a93b}
+.kurt-kap .kzzz{fill:var(--soluk);font:800 22px var(--f-baslik);animation:uyku 3s ease-in-out infinite}
+.kurt-kap .kbas-g.yorgun{animation:bas-salla 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes solukla{0%,100%{transform:translateY(0)}50%{transform:translateY(1.5px)}}
+@keyframes yanip{50%{opacity:.25}}
+@keyframes uyku{0%,100%{opacity:.4;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+@keyframes bas-salla{0%,100%{transform:rotate(0)}50%{transform:rotate(4deg)}}
+.enerji-not{display:flex;align-items:center;gap:10px;background:var(--domates-acik);border-radius:14px;padding:10px 14px;font-weight:800}
+.yorgun-metin{color:var(--domates)}
 .kurt-kap .kgoz{fill:#fff}
 .kurt-kap .kbebek{fill:#1f2a26}
 .kurt-kap .kgozluk{fill:none;stroke:#1f2a26;stroke-width:2.5}
@@ -253,7 +273,7 @@ td.top{font-weight:800}
 </style>
 
 <div class="kap" id="uygulama" lang="tr">
-  <div id="demo-serit" class="demo-serit" hidden>Önizleme modu: örnek sınıflar ve öğrenciler gösteriliyor. Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç, öğretmen şifresi 1234. 4-A'daki öğrenciler dün 15+ sayfa okudu, girişte öğretmen mesajını görürler; daha önce okudukları kitaplar seçenek olarak çıkar.</div>
+  <div id="demo-serit" class="demo-serit" hidden>Önizleme modu: örnek sınıflar ve öğrenciler gösteriliyor. Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç, öğretmen şifresi 1234. 4-A'daki öğrenciler dün 15+ sayfa okudu, girişte öğretmen mesajını görürler; daha önce okudukları kitaplar seçenek olarak çıkar. 4-B'deki Zeynep Koç 3 gündür okumadı, bitkin kitap kurdunu görür.</div>
 
   <!-- 1. Sınıf seçimi -->
   <section id="s-sinif" class="kap">
@@ -299,6 +319,17 @@ td.top{font-weight:800}
     </div>
   </section>
 
+  <!-- 3c. Bitkin kitap kurdu -->
+  <section id="s-yorgun" class="kap" hidden>
+    <div class="kart mesaj-kart">
+      <p class="zarf">Kitap kurdun seni bekliyordu</p>
+      <div class="kurt-kap" id="y-kurt" style="width:100%;max-width:520px"></div>
+      <p class="mesaj-metin yorgun-metin" id="y-metin"></p>
+      <p class="mesaj-not">Kitap kurdunun enerjisi azaldı. Hadi okuduğun kitaplar ile ona biraz enerji ver!</p>
+      <button class="btn buyuk" id="y-tamam" style="max-width:320px">Hadi okuyalım!</button>
+    </div>
+  </section>
+
   <!-- 4. Günlük -->
   <section id="s-gunluk" class="kap" hidden>
     <div class="ust">
@@ -311,6 +342,7 @@ td.top{font-weight:800}
       <div class="rozet"><b id="g-biten">0</b><span>bitirdiğim<br>kitap</span></div>
     </div>
     <div class="kart kap"><div class="ust"><h3>Kitap kurdum</h3><span class="cip" id="g-bogum"></span></div>
+      <p class="enerji-not" id="g-enerji" hidden></p>
       <div class="kurt-kap" id="g-kurt"></div>
       <p class="soluk" style="font-size:.9rem">Her okuma günü kurduna yeni bir boğum ekler. Çok sayfa okuduğun günler kalın, her kitap ayrı renk olur.</p>
     </div>
@@ -472,7 +504,7 @@ function gunAdi(s){const[y,m,d]=s.split('-').map(Number);return GUNLER[new Date(
 const kitapAnahtari=k=>nfc(k).replace(/\s+/g,' ').trim().toLocaleLowerCase('tr');
 
 /* ---------- ekran geçişleri ---------- */
-const OGRENCI_EKRANLARI=['s-isim','s-sifre','s-mesaj','s-gunluk','s-tamam'];
+const OGRENCI_EKRANLARI=['s-isim','s-sifre','s-mesaj','s-yorgun','s-gunluk','s-tamam'];
 let bosta=null;
 function goster(id){
   document.querySelectorAll('#uygulama > section').forEach(s=>s.hidden=s.id!==id);
@@ -534,7 +566,7 @@ async function meyveSec(ad){
   try{
     const r=await api('studentLogin',S.ogr.id,S.sifre.join('-'));
     if(!r.ok){$('#sifre-hata').textContent=r.msg;kart.classList.remove('salla');void kart.offsetWidth;kart.classList.add('salla');S.sifre=[];setTimeout(slotCiz,500);return;}
-    S.veri=hesapla(r);if(r.tebrik)mesajAc(r.tebrik);else gunlukAc();
+    S.veri=hesapla(r);if(r.tebrik)mesajAc(r.tebrik);else if(S.veri.okumadigiGun)yorgunAc();else gunlukAc();
   }catch(e){$('#sifre-hata').textContent=e.message;S.sifre=[];slotCiz();}
   finally{kart.classList.remove('yukleniyor');}
 }
@@ -559,6 +591,11 @@ function hesapla(r){
   v.aktifKitaplar=Object.keys(son).filter(k=>!biten[k]).sort((a,b)=>son[b].tarih.localeCompare(son[a].tarih)).map(k=>son[k].kitap);
   v.bitenKitaplar=Object.values(biten).sort((a,b)=>b.tarih.localeCompare(a.tarih));
   v.kurt=liste.map(x=>[x[0],x[1],x[2]]);
+  // en son okuduğu günden bugüne kadar okumadığı gün sayısı (bugün sayılmaz; hiç kaydı yoksa 0)
+  const sonGun=[...gunler].sort().pop();
+  v.okumadigiGun=0;
+  if(sonGun&&!gunler.has(v.bugun)){const[a,b2,c]=sonGun.split('-').map(Number),[x,y,z]=v.bugun.split('-').map(Number);
+    v.okumadigiGun=Math.max(0,Math.round((Date.UTC(x,y-1,z)-Date.UTC(a,b2-1,c))/864e5)-1);}
   v.gecmis=liste.slice(-14).reverse().map(x=>({tarih:x[0],sayfa:x[1],kitap:x[2],bitti:x[3],anladiklarim:x[4]||''}));
   return v;
 }
@@ -571,6 +608,14 @@ function mesajAc(t){
   goster('s-mesaj');konfeti();
 }
 $('#m-tamam').onclick=gunlukAc;
+function okumadinYazisi(n){return n===1?'Dün hiç kitap okumadın.':n+' gündür hiç kitap okumadın.';}
+function yorgunAc(){
+  const v=S.veri;
+  $('#y-metin').textContent=okumadinYazisi(v.okumadigiGun);
+  kurtCiz($('#y-kurt'),v.kurt.slice(-9),null,{bitkin:v.okumadigiGun,kitaplar:false,yakin:true});
+  goster('s-yorgun');
+}
+$('#y-tamam').onclick=()=>{gunlukAc();setTimeout(()=>$('#okuma-form').scrollIntoView({behavior:'smooth'}),60);};
 function konfeti(){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const eski=$('#konfeti');if(eski)eski.remove();
@@ -601,7 +646,9 @@ function gunlukAc(){
   istatistikCiz();formDoldur();gecmisCiz();goster('s-gunluk');
 }
 function istatistikCiz(){const v=S.veri;$('#g-seri').textContent=v.seri;$('#g-toplam').textContent=v.toplamSayfa;$('#g-biten').textContent=v.bitenKitaplar.length;
-  $('#g-bogum').textContent=v.kurt.length+' boğum';kurtCiz($('#g-kurt'),v.kurt);
+  $('#g-bogum').textContent=v.kurt.length+' boğum';kurtCiz($('#g-kurt'),v.kurt,null,{bitkin:v.okumadigiGun});
+  const en=$('#g-enerji');en.hidden=!v.okumadigiGun;
+  if(v.okumadigiGun)en.textContent='🪫 '+okumadinYazisi(v.okumadigiGun)+' Bugün okuyup kaydedersen kurdun enerjisi geri gelir.';
   const raf=$('#raf');raf.innerHTML='';$('#raf-kart').hidden=!v.bitenKitaplar.length;
   v.bitenKitaplar.forEach(b=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(b.kitap);c.append(i,document.createTextNode(b.kitap+' ✓'));c.title=trTarih(b.tarih)+' bitirdin';raf.append(c);});
 }
@@ -663,7 +710,7 @@ $('#okuma-form').addEventListener('submit',ev=>{
   const ayni=S.veri.liste.slice().reverse().find(x=>kitapAnahtari(x[2])===kitapAnahtari(veri.kitap));if(ayni)veri.kitap=ayni[2];
 
   // Kutlama ekranını hemen göster, kayıt arka planda gitsin.
-  const onceki=S.veri;
+  const onceki=S.veri;S.oncekiBitkin=onceki.okumadigiGun>0;
   const yeniListe=onceki.liste.filter(x=>x[0]!==veri.tarih).concat([[veri.tarih,veri.sayfa,veri.kitap,veri.bitti?1:0,veri.anladiklarim]]);
   S.veri=hesapla(Object.assign({},onceki,{liste:yeniListe}));
   tamamGoster(veri);
@@ -685,7 +732,7 @@ function tamamGoster(veri){
   const v=S.veri;
   $('#t-sayfa').textContent=veri.sayfa;
   $('#t-mesaj').textContent='sayfa okudun, '+ilkAd(v.ogrenci.ad)+'. Harika!';
-  $('#t-seri').textContent=(v.seri>1?v.seri+' gündür üst üste okuyorsun. ':'')+'Kitap kurdun artık '+v.kurt.length+' boğum!';
+  $('#t-seri').textContent=(S.oncekiBitkin&&!v.okumadigiGun?'Kitap kurdunun enerjisi geri geldi! ':'')+(v.seri>1?v.seri+' gündür üst üste okuyorsun. ':'')+'Kitap kurdun artık '+v.kurt.length+' boğum!';
   const kb=$('#t-kitap-bitti');kb.hidden=!veri.bitti;
   if(veri.bitti)kb.textContent='«'+veri.kitap+'» kitabını bitirdin! Bu senin '+v.bitenKitaplar.length+'. kitabın.';
   kurtCiz($('#t-kurt'),v.kurt,veri.tarih);
@@ -762,36 +809,70 @@ const SVGNS='http://www.w3.org/2000/svg';
 function svgEl(t,a,txt){const e=document.createElementNS(SVGNS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=nfc(txt);return e;}
 const KURT_RENK=['#3fa36b','#f2a93b','#e86a52','#4f9fd6','#9b6fd0','#d4b62c','#e07bb0','#36b5a5'];
 function kitapRengi(k){let h=0;for(const c of kitapAnahtari(k))h=(h*31+c.codePointAt(0))>>>0;return KURT_RENK[h%KURT_RENK.length];}
-function kurtCiz(kap,kurt,yeniTarih){
+function solgun(hex,oran){const n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255,gri=(r*.3+g*.59+b*.11);
+  const m=c=>Math.round(c+(gri*0.9+20-c)*oran);return`rgb(${m(r)},${m(g)},${m(b)})`;}
+// kurtCiz(kap, kurt, yeniTarih, {bitkin: okunmayan gün sayısı, kitaplar: true/false})
+function kurtCiz(kap,kurt,yeniTarih,ops={}){
   kap.innerHTML='';
-  const W=800,pad=20,R=42,xL=pad+R,xR=W-pad-R,S=xR-xL,P=S+Math.PI*R,ust=pad+30;
+  const bitkin=ops.bitkin||0,sol=bitkin?Math.min(.75,.35+bitkin*.12):0;
+  const W=800,pad=20,R=42,xL=pad+R,xR=W-pad-R,S=xR-xL,P=S+Math.PI*R,ust=pad+(bitkin?62:30);
   const nokta=s=>{const k=Math.floor(s/P),t=s-k*P,y0=ust+k*2*R,sag=k%2===0;
     if(t<S)return{x:sag?xL+t:xR-t,y:y0};
     const a=(t-S)/R;return{x:sag?xR+R*Math.sin(a):xL-R*Math.sin(a),y:y0+R-R*Math.cos(a)};};
   const parca=[{r:7,renk:'#3fa36b'},...kurt.map(([t,s,k])=>({r:10+Math.min(s,40)/40*12,renk:kitapRengi(k),t,s,k}))];
   let d=0;parca.forEach((g,i)=>{if(i)d+=parca[i-1].r*0.72+g.r*0.72;g.d=d;Object.assign(g,nokta(d));});
   const bR=27,son=parca[parca.length-1],bd=d+son.r*0.72+bR*0.8,bas=nokta(bd),ileri=nokta(bd+1);
-  const maxY=Math.max(bas.y,...parca.map(g=>g.y))+bR+pad;
-  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${Math.ceil(maxY)}`,role:'img','aria-label':'Kitap kurdu, '+kurt.length+' boğum'});
+  const maxY=Math.max(bas.y,...parca.map(g=>g.y))+bR+pad+(bitkin?6:0);
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${Math.ceil(maxY)}`,role:'img','aria-label':'Kitap kurdu, '+kurt.length+' boğum'+(bitkin?', yorgun ve enerjisi düşük':'')});
   const anim=parca.length<=120; // çok uzun kurtta dalga animasyonu tableti yormasın
   parca.forEach((g,i)=>{
-    const c=svgEl('circle',{cx:g.x.toFixed(1),cy:g.y.toFixed(1),r:g.r.toFixed(1),fill:g.renk,class:anim?'kseg':''});
+    // bitkin kurt: renkler solar, boğumlar yere çöker
+    const cy=bitkin?g.y+Math.min(6,g.r*0.25):g.y;
+    const c=svgEl('circle',{cx:g.x.toFixed(1),cy:cy.toFixed(1),r:(bitkin?g.r*0.94:g.r).toFixed(1),fill:sol?solgun(g.renk,sol):g.renk,class:anim?(bitkin?'kseg yorgun':'kseg'):''});
     if(!anim){c.setAttribute('stroke','var(--kagit)');c.setAttribute('stroke-width','2.5');}
-    else c.style.animationDelay=(-(parca.length-i)*0.12)+'s';
+    else c.style.animationDelay=(-(parca.length-i)*(bitkin?0.25:0.12))+'s';
     if(g.t)c.append(svgEl('title',{},trTarih(g.t)+' · '+g.k+' · '+g.s+' sayfa'));
     if(yeniTarih&&i===parca.length-1&&g.t===yeniTarih){const w=svgEl('g',{class:'kyeni'});w.append(c);svg.append(w);}else svg.append(c);
   });
   let tx=ileri.x-bas.x,ty=ileri.y-bas.y;const L=Math.hypot(tx,ty)||1;tx/=L;ty/=L;
   if(Math.abs(ty)>0.9){tx=0;ty=1;}
-  const yon=tx>=0?1:-1,h=svgEl('g',{});
-  [-1,1].forEach(s=>{const ax=bas.x+s*9,ay=bas.y-bR+6;
-    h.append(svgEl('path',{d:`M${ax} ${ay} Q${ax+s*4} ${ay-14} ${ax+s*12} ${ay-20}`,class:'kanten'}),svgEl('circle',{cx:ax+s*12,cy:ay-20,r:4.5,class:'kanten-uc'}));});
-  h.append(svgEl('circle',{cx:bas.x,cy:bas.y,r:bR,class:'kbas'}));
-  const gx=bas.x+yon*6,gy=bas.y-5;
-  [-1,1].forEach(s=>{const ex=gx+s*9;h.append(svgEl('circle',{cx:ex,cy:gy,r:7.5,class:'kgoz'}),svgEl('circle',{cx:ex+yon*2,cy:gy+1,r:3.6,class:'kbebek'}),svgEl('circle',{cx:ex,cy:gy,r:9,class:'kgozluk'}));});
+  const yon=tx>=0?1:-1,h=svgEl('g',{class:bitkin?'kbas-g yorgun':'kbas-g'});
+  const by=bitkin?bas.y+5:bas.y; // bitkin baş hafif aşağıda
+  if(bitkin){
+    // sarkık antenler
+    [-1,1].forEach(s=>{const ax=bas.x+s*9,ay=by-bR+6;
+      h.append(svgEl('path',{d:`M${ax} ${ay} Q${ax+s*12} ${ay-12} ${ax+s*20} ${ay+2}`,class:'kanten'}),svgEl('circle',{cx:ax+s*20,cy:ay+5,r:4.5,class:'kanten-uc'}));});
+  }else{
+    [-1,1].forEach(s=>{const ax=bas.x+s*9,ay=by-bR+6;
+      h.append(svgEl('path',{d:`M${ax} ${ay} Q${ax+s*4} ${ay-14} ${ax+s*12} ${ay-20}`,class:'kanten'}),svgEl('circle',{cx:ax+s*12,cy:ay-20,r:4.5,class:'kanten-uc'}));});
+  }
+  h.append(svgEl('circle',{cx:bas.x,cy:by,r:bR,class:'kbas'}));
+  const gx=bas.x+yon*6,gy=by-5;
+  [-1,1].forEach(s=>{const ex=gx+s*9;
+    h.append(svgEl('circle',{cx:ex,cy:gy,r:7.5,class:'kgoz'}),svgEl('circle',{cx:ex+yon*2,cy:gy+(bitkin?3:1),r:3.6,class:'kbebek'}));
+    if(bitkin){ // yarı kapalı, düşük göz kapakları
+      h.append(svgEl('path',{d:`M${ex-8} ${gy+1.5} A8 8 0 0 1 ${ex+8} ${gy+1.5} Z`,class:'kkapak'}),svgEl('path',{d:`M${ex-8} ${gy+1.5} L${ex+8} ${gy+1.5}`,class:'kkapak-cizgi'}));}
+    h.append(svgEl('circle',{cx:ex,cy:gy,r:9,class:'kgozluk'}));});
   h.append(svgEl('path',{d:`M${gx-2} ${gy} h4`,class:'kgozluk'}));
-  h.append(svgEl('path',{d:`M${gx-7} ${bas.y+10} Q${gx} ${bas.y+16} ${gx+7} ${bas.y+10}`,class:'kagiz'}));
+  if(bitkin){
+    h.append(svgEl('path',{d:`M${gx-7} ${by+15} Q${gx} ${by+9} ${gx+7} ${by+15}`,class:'kagiz'})); // asık ağız
+    const tx2=bas.x-yon*(bR-2),ty2=by-6; // ter damlası
+    h.append(svgEl('path',{d:`M${tx2} ${ty2} q-5 9 0 11 q5 -2 0 -11 Z`,class:'kter'}));
+    // pil: enerji göstergesi
+    const dolu=Math.max(1,4-bitkin),px=bas.x-22,py=by-bR-38;
+    const pil=svgEl('g',{class:'kpil'});
+    pil.append(svgEl('rect',{x:px,y:py,width:40,height:20,rx:4,class:'kpil-kab'}),svgEl('rect',{x:px+40,y:py+6,width:4,height:8,rx:1,class:'kpil-uc'}));
+    for(let i=0;i<4;i++)pil.append(svgEl('rect',{x:px+3+i*9,y:py+3,width:7,height:14,rx:1.5,class:i<dolu?(dolu<=1?'kpil-dolu kirmizi':'kpil-dolu turuncu'):'kpil-bos'}));
+    h.append(pil);
+    h.append(svgEl('text',{x:bas.x+yon*(bR+4),y:by-bR+2,class:'kzzz','text-anchor':yon>0?'start':'end'},'z z'));
+  }else h.append(svgEl('path',{d:`M${gx-7} ${by+10} Q${gx} ${by+16} ${gx+7} ${by+10}`,class:'kagiz'}));
   svg.append(h);kap.append(svg);
+  if(ops.yakin){ // yalnızca kurdun çizildiği bölgeyi göster: kurt büyük görünsün
+    const xs=parca.map(g=>[g.x-g.r,g.x+g.r]).flat().concat([bas.x-bR-30,bas.x+bR+34]);
+    const x0=Math.max(0,Math.min(...xs)-14),x1=Math.min(W,Math.max(...xs)+14),y0=Math.max(0,Math.min(...parca.map(g=>g.y))-bR-(bitkin?70:40));
+    svg.setAttribute('viewBox',`${x0} ${y0} ${x1-x0} ${Math.ceil(maxY-y0)}`);
+  }
+  if(ops.kitaplar===false)return;
   const kitaplar=[...new Map(kurt.map(k=>[kitapAnahtari(k[2]),k[2]])).values()];
   if(kitaplar.length){const a=el('div','kurt-alt');kitaplar.slice(-8).forEach(k=>{const c=el('span','kitap-cip');const i=el('i');i.style.background=kitapRengi(k);c.append(i,document.createTextNode(nfc(k)));a.append(c);});kap.append(a);}
   else kap.append(el('p','soluk','İlk okumanı kaydettiğinde kurdun uzamaya başlayacak.'));
@@ -1080,6 +1161,8 @@ const Mock=(()=>{
   // Her öğrenci 16 günde bir kitap bitirir; 4-A'dakiler dün 15+ sayfa okudu.
   og.filter(o=>o.sinif==='4-A').forEach((o,i)=>{for(let d=45;d>=1;d--){if((i+d)%4===0||(d>7&&(i*3+d)%5===0))continue;const blok=Math.floor((d+i)/16);
     ok.push({tarih:gunEkle(T(),-d),sinif:o.sinif,ogrenciId:o.id,kitap:kitaplar[(i+blok)%4],sayfa:d===1?15+i:6+((i*7+d*3)%18),anl:cumleler[(i+d)%4],bitti:0});}});
+  // 4-B'deki Zeynep Koç birkaç gündür okumuyor (bitkin kurt örneği)
+  {const z=og.find(o=>o.ad==='Zeynep Koç');for(let d=14;d>=4;d--){if(d%3===0)continue;ok.push({tarih:gunEkle(T(),-d),sinif:z.sinif,ogrenciId:z.id,kitap:'Şeker Portakalı',sayfa:8+d%5,anl:cumleler[3],bitti:0});}}
   // her kitap bloğunun son kaydını "bitti" yap (en yeni blok hariç)
   og.forEach(o=>{const k=ok.filter(r=>r.ogrenciId===o.id);for(let j=0;j<k.length-1;j++){if(k[j].kitap!==k[j+1].kitap)k[j].bitti=1;}});
   [0,1,2,4].forEach(i=>{const o=og[i];const k=ok.filter(r=>r.ogrenciId===o.id);const sonKitap=k.length?k[k.length-1].kitap:kitaplar[0];ok.push({tarih:T(),sinif:o.sinif,ogrenciId:o.id,kitap:sonKitap,sayfa:8+i*3,anl:cumleler[i%4],bitti:0});});
