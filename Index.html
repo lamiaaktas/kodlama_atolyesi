@@ -5677,7 +5677,7 @@ const Y_UNITE=[
    {h:['..#.#.','..#*#.','SaA.BP','..#b#.','..#.#.'],hikaye:'Yıldız iki duvarın arasında saklanıyor. Hangi sırayla gideceksin?'},
    {h:['..#.#P','..#.#.','SaA.B*','..#b#.','..#.#.'],hikaye:'Yıldız köprünün hemen öbür ucunda, pil ise yukarıda! Önce kapıyı, sonra köprüyü aç.'},
    {h:['S.#*.P','..A.##','a.#.b.','..##B#','......'],hikaye:'Laboratuvar karıştı! Hangi düğme neyi açıyor, iyi düşün.'},
-   {h:['*a#...','..A.#P','S.#.B.','..#.b.','..#...'],hikaye:'Son laboratuvar! Yıldızı topla, kapıyı aç ve pile ulaş.'}
+   {h:['S.#..#','.aA*.#','.b#.BP','..#..#','..#..#'],hikaye:'Son laboratuvar! İki düğmeye de bas, yıldızı topla ve köprüden pile ulaş.'}
   ]},
  {id:'hata',ad:'Hata Ayıklama',kisa:'Yanlış kartı bul, düzelt',renk:'#8a6ad0',koyu:'#6b4db6',tema:'uzay',
   anlat:'Arkadaşın Bip bir kod yazmış ama içinde hata var. Bayrağa bas, robot nerede takılıyor bak. Yanlış karta dokun, doğru oku seç.',
@@ -5693,8 +5693,8 @@ const Y_UNITE=[
    {h:['......','......','S....P','......','......'],kod:[YT(5,'u')],duz:[YT(5,'r')],hata:1,dongu:1,hikaye:'Robot yukarı uçup gidiyor! Tekrarla kartının içinde yanlış ok var.'},
    {h:['......','...P..','......','#.....','S.....'],kod:[YT(3,'u','r')],duz:[YT(3,'r','u')],hata:2,dongu:1,hikaye:'Merdiveni çıkarken robot taşa çarpıyor. İçerideki okların sırası doğru mu?'},
    {h:['P.....','......','......','......','....S.'],kod:[YT(4,'u','l'),YO('r')],duz:[YT(4,'u','l')],hata:1,dongu:1,hikaye:'Robot pile ulaşıyor ama sonra bir adım daha atıyor. Fazla kartı bul!'},
-   {h:['......','......','S.aA.P','......','......'],kod:[YO('r'),YO('r'),YO('d'),YO('r'),YO('r')],duz:[YO('r'),YO('r'),YO('r'),YO('r'),YO('r')],hata:1,hikaye:'Robot düğmeye basıyor ama sonra yanlış yola sapıyor.'},
-   {h:['......','..a...','S..A.P','......','......'],kod:[YO('r'),YO('r'),YO('r'),YO('r'),YO('r')],duz:[YO('r'),YO('r'),YO('u'),YO('d'),YO('r'),YO('r'),YO('r')],hata:2,hikaye:'Robot kapıya çarpıyor! Önce düğmeye uğraması gerekiyordu.'},
+   {h:['..#...','..#...','SaA..P','..#...','..#...'],kod:[YO('r'),YO('d'),YO('r'),YO('r'),YO('r')],duz:[YO('r'),YO('r'),YO('r'),YO('r'),YO('r')],hata:1,hikaye:'Robot düğmeye basıyor ama sonra yanlış yola sapıyor.'},
+   {h:['....#.','.a..#.','S...AP','....#.','....#.'],kod:[YO('r'),YO('r'),YO('r'),YO('r'),YO('r')],duz:[YO('r'),YO('u'),YO('d'),YO('r'),YO('r'),YO('r'),YO('r')],hata:2,hikaye:'Robot kapıya çarpıyor! Önce düğmeye uğraması gerekiyordu.'},
    {h:['......','......','S.*.P.','......','......'],kod:[YO('r'),YO('u'),YO('r'),YO('r'),YO('d')],duz:[YO('r'),YO('r'),YO('r'),YO('r')],hata:2,hikaye:'Robot pile ulaşıyor ama yıldızı unutuyor. Yıldız tam yolunun üstünde!'},
    {h:['S.....','.##...','....#.','.....P','......'],kod:[YT(2,'d'),YT(5,'r'),YO('u')],duz:[YT(3,'d'),YT(5,'r')],hata:2,dongu:1,hikaye:'Bu kodda birden fazla hata var. Her şeyi tek tek kontrol et!'},
    {h:['*....*','......','..S...','......','.P....'],kod:[YT(2,'u','l'),YT(4,'r'),YT(4,'d','l')],duz:[YT(2,'u','l'),YT(5,'r'),YT(4,'l','d')],hata:3,dongu:1,hikaye:'Bip\'in en karışık kodu! Kodu düzelt, iki yıldızı da topla.'}
