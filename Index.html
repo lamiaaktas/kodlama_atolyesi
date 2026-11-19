@@ -382,6 +382,7 @@ button.chip{cursor:pointer}
 .ogr .av .yuz-av{width:88px;height:88px}
 .bos{background:#fff;border:3px dashed var(--cizgi);border-radius:22px;padding:22px;color:var(--muted);max-width:62ch}
 .ayak{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ayak-sol{display:flex;gap:10px;flex-wrap:wrap}
 
 /* ---------- öğretmen paneli ---------- */
 #panel{display:grid;gap:16px;padding-block:18px;max-width:1240px;margin:0 auto}
@@ -1117,6 +1118,149 @@ body.cd-tam #cdBolum iframe{position:fixed;inset:0;width:100vw;height:100vh;heig
   body.duzen-l .l-sahne{flex:1 1 auto;height:auto;min-height:0}
 }
 #lkimAv .yuz-av{width:42px;height:42px}
+
+/* ================= TARZLAR (öğrenci ekranları; öğretmen paneli ve Canlı Ders klasik kalır) =================
+   Tarz düğmesinden seçilir, bu cihazda hatırlanır. Kaynak: claude-video-2 stilleri (Paper Cut, Blueprint, Growing City). */
+/* --- kagit --- */
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){--k-krem:#F2E8D5;--k-kum:#E3CBA8;--k-ada:#9CB49A;--k-ada2:#5E7F6A;--k-cam:#2F5D62;--k-murekkep:#2B2B2B;--k-gul:#D98C7A;--ink:#2B2B2B;--muted:#5E7F6A;--cizgi:#E3CBA8}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){background-color:var(--k-krem);background-image:
+  radial-gradient(120% 60% at 50% 115%,var(--k-ada2) 0 30%,transparent 30.2%),
+  radial-gradient(130% 60% at 15% 122%,var(--k-ada) 0 34%,transparent 34.2%),
+  radial-gradient(130% 60% at 90% 125%,#B9CBB2 0 36%,transparent 36.2%),
+  url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .44  0 0 0 0 .29  0 0 0 .07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  background-attachment:fixed}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-bas h1,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-harita-bas h1{color:var(--k-cam);font-style:normal}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1 b{color:var(--k-gul)}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kutu,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-tahta-kap,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ogr,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .cb,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ben,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-sev,
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ub-ad{border:0!important;box-shadow:0 2px 0 rgba(255,255,255,.6) inset,0 10px 0 -4px rgba(60,45,25,.18),0 14px 22px -8px rgba(60,45,25,.35)!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart{border-radius:30px 34px 28px 36px/34px 28px 36px 30px;background:#FBF6EC}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-ad{font-style:normal;text-shadow:0 2px 0 rgba(0,0,0,.18)}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+1){--c:#5E7F6A!important;--d:#5E7F6A!important;--z:#E3ECDD!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+2){--c:#D98C7A!important;--d:#D98C7A!important;--z:#F7E4DC!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+3){--c:#2F5D62!important;--d:#2F5D62!important;--z:#DCE8E6!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+4){--c:#C9A36B!important;--d:#C9A36B!important;--z:#F4E9D3!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-resim{background-image:radial-gradient(circle,rgba(255,255,255,.7) 2px,transparent 2.5px)}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif{--b:var(--k-ada2)!important;color:#fff}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif:nth-child(2n){--b:var(--k-gul)!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) #eSoru{color:var(--k-ada2)}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart{background:#FBF6EC}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kod-kutu{background:#E3ECDD!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-palet-kutu{background:#F4E9D3!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ust{background:rgba(251,246,236,.9);box-shadow:0 8px 18px -10px rgba(60,45,25,.3)}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-tahta-kap{background:var(--k-cam)!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart:nth-child(5n+1) .y-ukart{--c:#5E7F6A!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart{--c:#5E7F6A!important;--d:#46634F!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-kap:nth-child(2n) .y-ukart{--c:#D98C7A!important;--d:#b96d5c!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-kap:nth-child(3n) .y-ukart{--c:#2F5D62!important;--d:#21454a!important}
+body[data-tema="kagit"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-res{background-color:#EFE6D3!important}
+/* --- mavi --- */
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){--m-zemin:#0E3A66;--m-cizgi:#CFE3F7;--m-ag:#1C4D80;--m-yazi:#EAF3FC;--m-vurgu:#FFD23F}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){background-color:var(--m-zemin);color:var(--m-yazi);background-image:
+  linear-gradient(var(--m-ag) 1px,transparent 1px),linear-gradient(90deg,var(--m-ag) 1px,transparent 1px),
+  linear-gradient(rgba(28,77,128,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(28,77,128,.5) 1px,transparent 1px);
+  background-size:120px 120px,120px 120px,24px 24px,24px 24px;background-attachment:fixed}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-bas h1,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-harita-bas h1,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .adim h2{color:var(--m-yazi)!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1 b{color:var(--m-vurgu)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman .gun,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-bas .gun,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-harita-bas p,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ayak .linkbtn{color:#9EC0E2;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;font-size:15px}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart{background:transparent!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important;border-radius:6px}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart::before,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart::before{content:"";position:absolute}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-resim{background:rgba(207,227,247,.06)!important;background-image:none!important;border-bottom:2px dashed rgba(207,227,247,.5)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-ad{background:transparent!important;color:var(--m-yazi);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.06em;font-size:24px}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:hover{border-color:var(--m-vurgu)!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:hover .etk-ad,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-oyna{color:var(--m-vurgu)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .cb{border:2px solid var(--m-cizgi)!important;box-shadow:none!important;border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .cb.beyaz{--b:transparent;--fg:var(--m-yazi)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif{--b:transparent!important;color:var(--m-yazi)!important;border:2px solid var(--m-cizgi)!important;font-family:'IBM Plex Mono',monospace}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .no{background:var(--m-vurgu);color:#0E3A66;box-shadow:none;border-radius:4px}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ogr{background:transparent!important;color:var(--m-yazi)!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) #eSoru{color:var(--m-vurgu)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-av{border:2px solid var(--m-cizgi);border-radius:6px}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ust{background:#0B2F53;border-bottom:2px solid var(--m-cizgi);color:var(--m-yazi)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ben{background:transparent;color:var(--m-yazi)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ben small{color:#9EC0E2}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-ic b{color:var(--m-yazi)!important;font-family:'IBM Plex Mono',monospace;text-transform:uppercase}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-ic span,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-say{color:#9EC0E2!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-res{background:rgba(207,227,247,.06)!important;background-image:none!important;border-bottom:2px dashed rgba(207,227,247,.5)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-tanit{background:transparent!important;color:var(--m-yazi)!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important;border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kutu{background:rgba(11,47,83,.85)!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important;border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kutu .y-baslik{color:#9EC0E2;font-family:'IBM Plex Mono',monospace}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-tahta-kap{background:var(--m-cizgi)!important;border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-sev{background:transparent!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important;color:var(--m-yazi);border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-oyna{--b:var(--m-vurgu)!important;--fg:#0E3A66!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ub-btn,
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ub-ad{border-radius:6px!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ben b{color:var(--m-yazi)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .logo{color:var(--m-yazi)}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-unite-bas>.y-ub-btn{background:transparent!important;color:var(--m-yazi)!important;border:2px solid var(--m-cizgi)!important;box-shadow:none!important}
+body[data-tema="mavi"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-sev .y-sev-no{color:var(--m-yazi)}
+/* --- kasaba --- */
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){--s-deniz:#BFE3E0;--s-cim:#CDE6B8;--s-kum:#F3E3C3;--s-bina:#F7EFDF;--s-lila:#DDD3EB;--s-golge:#6F6A93;--s-etiket:#2D4B53;--s-mercan:#F27D72;--s-agac:#A9D497;--ink:#2D4B53;--muted:#5d7b80;--cizgi:#d8e6dc}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]){background:linear-gradient(180deg,#D2EEE9,#ACD6D6);background-attachment:fixed}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"])::before{content:"";position:fixed;left:-10%;right:-10%;bottom:-38vh;height:70vh;z-index:-1;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 40%,var(--s-cim) 0 52%,var(--s-kum) 52% 58%,transparent 58.5%)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-bas h1,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-harita-bas h1,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .adim h2{color:var(--s-etiket)!important;letter-spacing:-.02em}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .kahraman h1 b{color:var(--s-mercan)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kutu,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ogr,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ben,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-sev,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ub-ad,
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-tahta-kap{border:0!important;box-shadow:8px 10px 0 rgba(111,106,147,.28),0 3px 0 rgba(255,255,255,.7) inset!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart{background:var(--s-bina);border-radius:26px}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+1){--c:#8FA9C9!important;--d:#8FA9C9!important;--z:#E9E1F2!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+2){--c:#F27D72!important;--d:#F27D72!important;--z:#F4E8E0!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+3){--c:#88BC85!important;--d:#88BC85!important;--z:#E3F1D8!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-kart:nth-child(4n+4){--c:#C9B28E!important;--d:#C9B28E!important;--z:#F3E3C3!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-ad{color:#fff;text-shadow:0 2px 0 rgba(45,75,83,.25)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .etk-resim{background-image:none}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .cb{box-shadow:6px 7px 0 rgba(111,106,147,.3)!important;border:0!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif{--b:#8FA9C9!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .sinif:nth-child(2n){--b:#F27D72!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) #eSoru{color:var(--s-golge)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .ust{background:rgba(247,239,223,.92);box-shadow:0 6px 0 rgba(111,106,147,.18)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart{background:var(--s-bina)}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-kod-kutu{background:#E3F1D8!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-palet-kutu{background:#F4E8E0!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-tahta-kap{background:#8FA9C9!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-oyna{--b:var(--s-mercan)!important;--bd:#c95b51!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart{--c:#8FA9C9!important;--d:#6f8cb0!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-kap:nth-child(2n) .y-ukart{--c:#F27D72!important;--d:#c95b51!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-kap:nth-child(3n) .y-ukart{--c:#88BC85!important;--d:#6a9e67!important}
+body[data-tema="kasaba"]:not([data-ekran="panel"]):not([data-ekran="canliDers"]) .y-ukart-res{background-color:#F4EFE6!important}
+.tarz-sec{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:6px 20px 20px}
+.tarz-kart{display:grid;gap:8px;padding:10px;border-radius:22px;background:#fff;border:3px solid var(--cizgi);text-align:center;font-family:var(--f-d);font-size:19px;color:var(--ink)}
+.tarz-kart[aria-pressed="true"]{border-color:var(--mor);box-shadow:0 0 0 4px #e6dcff}
+.tarz-on{height:110px;border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:12px}
+.tarz-on i{width:44px;height:52px;border-radius:10px;display:block}
+.tarz-on.klasik{background:#f4efe6}.tarz-on.klasik i{background:#4a86e8;box-shadow:0 5px 0 #2f62b8}.tarz-on.klasik i+i{background:#ff7a59;box-shadow:0 5px 0 #d4502f}.tarz-on.klasik i+i+i{background:#3fb56a;box-shadow:0 5px 0 #2b8a4c}
+.tarz-on.kagit{background:radial-gradient(120% 70% at 50% 130%,#5E7F6A 0 40%,transparent 40.5%),#F2E8D5}.tarz-on.kagit i{background:#FBF6EC;box-shadow:0 8px 14px -6px rgba(60,45,25,.45);border-bottom:12px solid #5E7F6A}.tarz-on.kagit i+i{border-bottom-color:#D98C7A}.tarz-on.kagit i+i+i{border-bottom-color:#2F5D62}
+.tarz-on.mavi{background-color:#0E3A66;background-image:linear-gradient(#1C4D80 1px,transparent 1px),linear-gradient(90deg,#1C4D80 1px,transparent 1px);background-size:14px 14px}.tarz-on.mavi i{border:2px solid #CFE3F7;border-radius:4px}.tarz-on.mavi i+i+i{border-color:#FFD23F}
+.tarz-on.kasaba{background:radial-gradient(ellipse 70% 45% at 50% 115%,#CDE6B8 0 60%,#F3E3C3 60% 70%,transparent 71%),linear-gradient(#D2EEE9,#ACD6D6)}.tarz-on.kasaba i{background:#F7EFDF;box-shadow:6px 7px 0 rgba(111,106,147,.3);border-bottom:12px solid #8FA9C9}.tarz-on.kasaba i+i{border-bottom-color:#F27D72}.tarz-on.kasaba i+i+i{border-bottom-color:#88BC85}
 </style>
 
 <div class="demo" id="demoNot" hidden>Önizleme: gönderilenler yalnızca bu tarayıcıda saklanır · öğretmen şifresi 1234 · internetten arama Google'a kurulunca çalışır</div>
@@ -1135,7 +1279,7 @@ body.cd-tam #cdBolum iframe{position:fixed;inset:0;width:100vw;height:100vh;heig
     <div class="adim"><button class="cb beyaz yuvarlak kucuk" id="geriSinif" aria-label="Sınıflara dön"></button><span class="no" aria-hidden="true">2</span><h2 id="adim2Baslik"></h2></div>
     <div class="tiles" id="ogrListe"></div>
   </div>
-  <div class="ayak"><button class="cb hap tam-hap" id="tamEkranGiris"></button><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
+  <div class="ayak"><span class="ayak-sol"><button class="cb hap tam-hap" id="tamEkranGiris"></button><button class="cb beyaz hap tarz-btn" id="tarzGiris"></button></span><button class="linkbtn" id="ogretmenGit">Öğretmen paneli</button></div>
 </section>
 
 <!-- STÜDYO -->
@@ -1197,7 +1341,7 @@ body.cd-tam #cdBolum iframe{position:fixed;inset:0;width:100vw;height:100vh;heig
 <section id="etkinlik" hidden>
   <div class="etk-bas"><button class="etk-av" id="eAv" aria-label="Profilim"></button><div><h1 id="eMerhaba"></h1><div class="gun" id="eSoru">Bugün ne yapalım?</div></div><button class="cb beyaz etk-cal" id="eCalismalarim" aria-label="Çalışmalarım"></button><button class="kapat-sayfa" aria-label="Sayfayı kapat" title="Sayfayı kapat"></button></div>
   <div class="etk-liste" id="etkListe"></div>
-  <div class="ayak"><button class="cb beyaz hap" id="eCikis"></button><span></span></div>
+  <div class="ayak"><button class="cb beyaz hap" id="eCikis"></button><button class="cb beyaz hap tarz-btn" id="tarzEtk"></button></div>
 </section>
 
 <!-- ROBOT FABRİKASI -->
@@ -4355,6 +4499,21 @@ function sayfaKapat(){
 document.querySelectorAll('.kapat-sayfa').forEach(function(b){ b.innerHTML=ic('x'); b.onclick=sayfaKapat; });
 function tamEkranIpucu(){ bildir('Tam ekran için klavyede Control + Command + F tuşlarına birlikte bas.'); }
 $('tamEkranBtn').onclick=tamEkran; $('tamEkranGiris').onclick=tamEkran;
+/* ---- Tarz: klasik + claude-video-2 stilleri. Bu cihazda hatırlanır. ---- */
+IC.palet='<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.3"/><circle cx="10" cy="7.3" r="1.3"/><circle cx="14.5" cy="7.3" r="1.3"/><circle cx="17" cy="11" r="1.3"/>';
+const TARZLAR=[['klasik','Klasik'],['kagit','Kâğıt Kesik'],['mavi','Mavi Kopya'],['kasaba','Oyuncak Kasaba']];
+function tarzUygula(t){ if(!TARZLAR.some(function(x){ return x[0]===t; })) t='klasik'; if(t==='klasik') delete document.body.dataset.tema; else document.body.dataset.tema=t; }
+function tarzSecici(){
+  const su=document.body.dataset.tema||'klasik', o=el('div','ortu'), d=el('div','dialog'); d.style.maxWidth='560px'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label','Tarz seç');
+  d.append(el('h2',null,'Tarz seç'),el('p',null,'Seçtiğin görünüm bu cihazda kalır.'));
+  const g=el('div','tarz-sec');
+  TARZLAR.forEach(function(t){ const b=el('button','tarz-kart'); b.setAttribute('aria-pressed',String(t[0]===su)); b.innerHTML='<span class="tarz-on '+t[0]+'"><i></i><i></i><i></i></span><span>'+t[1]+'</span>';
+    b.onclick=function(){ tarzUygula(t[0]); ls('kat3:tema',t[0]); kapat(); ton(660,80,'triangle',880); }; g.appendChild(b); });
+  const k=el('button','cb beyaz hap','Kapat'); k.onclick=kapat;
+  d.append(g,k); o.appendChild(d); katman(o);
+}
+document.querySelectorAll('.tarz-btn').forEach(function(b){ b.innerHTML=ic('palet')+'Tarz'; b.setAttribute('aria-label','Görünümü değiştir'); b.onclick=tarzSecici; });
+tarzUygula(ls('kat3:tema')||'klasik');
 document.addEventListener('fullscreenchange',tamEkranGuncelle); document.addEventListener('webkitfullscreenchange',tamEkranGuncelle);
 $('kaydetBtn').onclick=function(){ taslakKaydet(true); bildir('Kaydedildi ✓'); };
 $('cikis').onclick=function(){ onayla({e:'👋'},'Çıkış yapılsın mı? Çalışman bu bilgisayarda saklı kalır.',cikisYap); };
@@ -4367,7 +4526,7 @@ $('arkaBtn').onclick=arkaSecici;
 $('izgaraBtn').onclick=function(){ S.izgara=!S.izgara; this.setAttribute('aria-pressed',String(S.izgara)); this.classList.toggle('on',S.izgara); };
 
 /* ================= giriş ================= */
-function goster(e){ S.ekran=e; ['giris','etkinlik','editor','robot','yuru','lego','kasif','canliDers','panel'].forEach(function(x){ $(x).hidden=x!==e; }); document.body.classList.toggle('duzen-y',e==='yuru'); document.body.classList.toggle('duzen-l',e==='lego'); document.body.classList.remove('sunum'); document.body.classList.toggle('duzen',e==='editor'); document.body.classList.toggle('duzen-r',e==='robot'); window.scrollTo(0,0); if(e==='editor') requestAnimationFrame(sahneBoyut); }
+function goster(e){ S.ekran=e; document.body.dataset.ekran=e; ['giris','etkinlik','editor','robot','yuru','lego','kasif','canliDers','panel'].forEach(function(x){ $(x).hidden=x!==e; }); document.body.classList.toggle('duzen-y',e==='yuru'); document.body.classList.toggle('duzen-l',e==='lego'); document.body.classList.remove('sunum'); document.body.classList.toggle('duzen',e==='editor'); document.body.classList.toggle('duzen-r',e==='robot'); window.scrollTo(0,0); if(e==='editor') requestAnimationFrame(sahneBoyut); }
 function sahneBoyut(){ const k=document.querySelector('.sahne-kutu'), c=document.querySelector('.cerceve'); if(!k||!c) return;
   if(!document.body.classList.contains('duzen')||document.body.classList.contains('sunum')||getComputedStyle(k).overflow!=='hidden'){ c.style.width=''; return; }
   const w=k.clientWidth, h=k.clientHeight; c.style.width=Math.max(240,Math.min(w,(h-34)*4/3+28))+'px'; }
