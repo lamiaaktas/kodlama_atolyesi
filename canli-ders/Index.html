@@ -723,6 +723,20 @@ h1.baslik .bosluk{flex:1}
 .oturum-satir:hover{border-color:var(--ana)}
 .oturum-satir .tarih{color:var(--soluk);font-weight:600;min-width:160px}
 .rapor-kap{overflow-x:auto}
+.rs-baslik{font-size:1.05rem;margin:18px 0 10px}
+.rapor-sorular{display:grid;gap:10px}
+.rs{display:flex;gap:14px;padding:14px 16px;align-items:flex-start}
+.rs-gorsel{width:180px;flex-shrink:0}.rs-gorsel img{width:100%;border-radius:8px;border:1px solid var(--cizgi);display:block}
+.rs-ic{flex:1;min-width:0}
+.rs-ust{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rs-ust small{color:var(--soluk);font-weight:700;margin-left:auto}
+.rs-no{width:28px;height:28px;border-radius:8px;background:var(--yazi);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.85rem}
+.rs h3{margin:8px 0 6px;font-size:1.05rem;line-height:1.35}
+.rs-sik{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rs-sik li{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;background:#f7f8fc;font-weight:600;font-size:.9rem}
+.rs-sik li .harf{width:24px;height:24px;font-size:.78rem;border-radius:6px}
+.rs-sik li.dogru{background:#effaf3;color:#11713a}.rs-sik li small{color:var(--soluk);font-weight:700}
+.rs-not{margin:0;font-size:.92rem;color:#41465c}
+@media (max-width:640px){.rs{flex-direction:column}.rs-gorsel{width:100%}}
 table.rapor{border-collapse:collapse;width:100%}
 table.rapor th,table.rapor td{padding:10px 12px;border-bottom:1px solid var(--cizgi);text-align:left;vertical-align:top;font-size:.9rem}
 table.rapor th{background:#f7f8fc;font-weight:700;position:sticky;top:0}
@@ -866,6 +880,7 @@ function gorsel(id){
 }
 function isle(){ while(aktifIs<4&&kuyruk.length){ const is=kuyruk.shift(); aktifIs++;
   api('gorsel',{fileId:is.id}).then(is.coz,is.red).finally(function(){ aktifIs--; isle(); }); } }
+function kisalt(m,n){ m=String(m); return m.length>n?m.slice(0,n-1)+'…':m; }
 function gorselKutu(id,yedek){ const k=el('span',{style:'display:contents'},yedek||'');
   if(id) gorsel(id).then(function(v){ k.replaceChildren(el('img',{src:v,alt:''})); }).catch(function(){}); return k; }
 
@@ -1094,11 +1109,18 @@ async function raporlar(){
 }
 async function rapor(o){
   const b=bekletici('Rapor hazırlanıyor…'); b.guncelle(.5); let r;
-  try{ r=await api('rapor',{sessId:o.sessId}); }catch(e){ b.kapat(); return uyar(hata(e),true); } b.kapat();
-  const tb=el('table',{class:'rapor'}), notlu=r.questions.filter(function(q){ return q.kind==='mc'||q.kind==='tf'||q.kind==='short'; });
+  try{ r=await api('rapor',{sessId:o.sessId}); }catch(e){ b.kapat(); return uyar(hata(e),true); }
+  let ders=null; try{ ders=await api('dersGetir',{id:o.lessonId}); }catch(e){} b.kapat();
+  // Dersin kendi sorularını kullan (cevapsız kalanlar ve şıklar da görünsün)
+  if(ders&&ders.items){
+    const dq=ders.items.filter(function(it){ return it.type==='question'; }).map(function(it,i){ return Object.assign({},it,{no:i+1}); });
+    const uyumlu=r.questions.every(function(q){ const d=dq[q.no-1]; return d&&d.kind===q.kind; });
+    if(uyumlu&&dq.length) r.questions=dq;
+  }
+  const tb=el('table',{class:'rapor'}), notlu=r.questions.filter(function(q){ return q.kind==='mc'||q.kind==='tf'||(q.kind==='short'&&(!q.accepted||q.accepted.length)); });
   const od=r.rewards||{}, odVar=Object.keys(od).length>0;
   const rzMetin=function(b){ return Object.keys(b||{}).filter(function(k){ return b[k]>0; }).map(function(k){ const e=Object.values(ROZETLER).find(function(x){ return x[1]===k; }); return (e?e[0]+' ':'')+k+(b[k]>1?' ×'+b[k]:''); }).join(', '); };
-  tb.append(el('tr',{},el('th',{},'Öğrenci'),r.questions.map(function(q){ return el('th',{},q.no+'. '+(q.text||'Soru')); }),notlu.length?el('th',{},'Doğru'):null,
+  tb.append(el('tr',{},el('th',{},'Öğrenci'),r.questions.map(function(q){ return el('th',{title:q.text||''},q.no+'. '+kisalt(q.text||(q.bgImg?'(slayt üzerinde)':'Soru'),60)); }),notlu.length?el('th',{},'Doğru'):null,
     odVar?el('th',{},'❤️ Beğeni'):null,odVar?el('th',{},'🏅 Rozetler'):null));
   r.students.forEach(function(ad){
     let d=0, p=0;
@@ -1110,7 +1132,25 @@ async function rapor(o){
     tb.append(el('tr',{},el('td',{},el('b',{},ad)),h,notlu.length?el('td',{class:'puan'},p?d+' / '+notlu.length:'—'):null,
       odVar?el('td',{class:'puan'},x.likes||'—'):null,odVar?el('td',{},rzMetin(x.badges)||'—'):null));
   });
+  const sorular=r.questions.length?el('div',{class:'rapor-sorular'},r.questions.map(function(q){
+    const cv=r.answers[q.no]||{}, adlar=Object.keys(cv), dogruSay=adlar.filter(function(a){ return cv[a].correct==='Evet'; }).length;
+    const notlu=q.kind==='mc'||q.kind==='tf'||(q.kind==='short'&&q.accepted&&q.accepted.length);
+    let detay=null;
+    if((q.kind==='mc'||q.kind==='poll')&&q.options) detay=el('ol',{class:'rs-sik'},q.options.map(function(m,i){
+      const n=adlar.filter(function(a){ return cv[a].answer===m; }).length;
+      return el('li',{class:q.kind==='mc'&&q.correct===i?'dogru':''},el('span',{class:'harf',style:'background:'+SIK_RENK[i%6]},HARF[i]),el('span',{style:'flex:1'},m),
+        q.kind==='mc'&&q.correct===i?el('b',{},'✓ doğru'):null,el('small',{},n+' kişi')); }));
+    else if(q.kind==='tf'&&typeof q.correct==='boolean') detay=el('p',{class:'rs-not'},'Doğru cevap: ',el('b',{},q.correct?'Doğru':'Yanlış'));
+    else if(q.kind==='short'&&q.accepted&&q.accepted.length) detay=el('p',{class:'rs-not'},'Kabul edilen: ',el('b',{},q.accepted.join(', ')));
+    return el('div',{class:'kart rs'},
+      q.bgImg?el('div',{class:'rs-gorsel'},gorselKutu(q.bgImg)):null,
+      el('div',{class:'rs-ic'},
+        el('div',{class:'rs-ust'},el('span',{class:'rs-no'},q.no),el('span',{class:'rozet',html:turIkon(q.kind,14)+TUR[q.kind].ad}),
+          el('small',{},adlar.length+' / '+r.students.length+' cevap'+(notlu&&adlar.length?' · '+dogruSay+' doğru':''))),
+        el('h3',{},q.text||(q.bgImg?'(Soru slaytın üzerinde)':'(Soru metni yok)')),detay));
+  })):null;
   $('#icerik').replaceChildren(sekmeler(),el('h1',{class:'baslik'},el('button',{class:'dugme ikincil kucuk',onclick:raporlar},'←'),o.lessonTitle+' · '+o.sinif),
+    sorular?el('h2',{class:'rs-baslik'},'Sorular'):null,sorular,sorular?el('h2',{class:'rs-baslik'},'Öğrenci cevapları'):null,
     r.questions.length||odVar?el('div',{class:'kart rapor-kap'},tb):el('div',{class:'kart bos-durum'},'Bu derste cevaplanan soru yok.'));
 }
 
