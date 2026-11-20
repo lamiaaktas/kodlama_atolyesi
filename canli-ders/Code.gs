@@ -189,6 +189,11 @@ function siniflariKaydet(sifre, liste) {
 const CD_SURE = 21600;   // önbellek süresi: 6 saat (üst sınır)
 const CD_PARCA = 90000;  // önbellek parça boyutu (karakter)
 const CD_BASLIK = ['Zaman', 'Oturum', 'Sınıf', 'Ders', 'Soru no', 'Soru', 'Tür', 'Öğrenci', 'Cevap', 'Doğru mu'];
+const CD_ODUL_BASLIK = ['Zaman', 'Oturum', 'Sınıf', 'Ders', 'Öğrenci', 'Tür', 'Ayrıntı', 'Değer'];
+const CD_ROZETLER = {
+  yildiz: 'Yıldız Öğrenci', fikir: 'Harika Fikir', yaratici: 'Yaratıcı', yardim: 'Yardımsever',
+  dikkat: 'Dikkatli', azim: 'Azimli', dinleyici: 'İyi Dinleyici', hizli: 'Hızlı Düşünür'
+};
 
 /* ===================== Öğrenci uçları ===================== */
 
@@ -211,7 +216,8 @@ function cdDurum(sinif, ogrenci) {
     total: ders.items.length,
     item: cdOgrenciOgesi_(it, canli.reveal),
     reveal: !!canli.reveal,
-    myAnswer: cevap ? JSON.parse(cevap).v : null
+    myAnswer: cevap ? JSON.parse(cevap).v : null,
+    reward: cdOdulOgrenci_(canli.sessId, ad, it && it.id)
   };
 }
 
@@ -263,6 +269,8 @@ function cdOgretmen(sifre, islem, r) {
     case 'cevaplar': return cdOgretmenCevaplar_(r.sinif);
     case 'oturumlar': return { sessions: cdJsonOku_('oturumlar.json', []), sheetUrl: depo_().tablo.getUrl() };
     case 'rapor': return cdRapor_(r.sessId);
+    case 'odul': return cdOdulVer_(r);
+    case 'odulOzet': return cdOdulOzet_();
   }
   throw new Error('Bilinmeyen işlem: ' + islem);
 }
@@ -497,7 +505,11 @@ function cdCanliAyarla_(r) {
   let canli = cdCanliOku_(s.ad);
   if (canli) cdAnlikKaydet_(s, canli);   // sayfa değişmeden önce cevapları tabloya yaz
 
-  if (r.end) { cdCanliYaz_(s.ad, null); return null; }
+  if (r.end) {
+    cdCanliYaz_(s.ad, null);
+    if (canli) PropertiesService.getScriptProperties().deleteProperty('CD_ODUL_' + canli.sessId);
+    return null;
+  }
 
   if (r.start || !canli) {
     const ders = cdDersOku_(r.lessonId);
@@ -505,8 +517,6 @@ function cdCanliAyarla_(r) {
     const oturumlar = cdJsonOku_('oturumlar.json', []);
     oturumlar.unshift({ sessId: canli.sessId, sinif: s.ad, lessonId: ders.id, lessonTitle: ders.title, date: canli.startedAt });
     cdJsonYaz_('oturumlar.json', oturumlar.slice(0, 300));
-    // Canlı Ders kartı bu sınıfta kilitliyse aç
-    try { if (etkinlikDurumu(s.ad).canli !== true) etkinlikKaydet(OGRETMEN_SIFRESI, s.ad, { canli: true }); } catch (e) { }
   }
   const ders = cdDersOku_(canli.lessonId);
   if (r.idx != null) {
@@ -536,7 +546,8 @@ function cdOgretmenCevaplar_(sinif) {
   const canli = cdCanliOku_(s.ad);
   if (!canli) return { live: null, online: bagli, answers: {} };
   const it = cdDersOku_(canli.lessonId).items[canli.idx];
-  return { live: canli, online: bagli, answers: (it && it.type === 'question') ? cdCevaplariTopla_(s, canli, it) : {} };
+  return { live: canli, online: bagli, answers: (it && it.type === 'question') ? cdCevaplariTopla_(s, canli, it) : {},
+    rewards: cdOdulOku_(canli.sessId) };
 }
 
 /* ===================== Kayıt ve rapor ===================== */
@@ -619,11 +630,113 @@ function cdRapor_(sessId) {
   });
   const ogrenciler = s ? s.ogrenciler.slice() : [];
   Object.keys(adlar).forEach(function (a) { if (ogrenciler.indexOf(a) < 0) ogrenciler.push(a); });
+  const oduller = {};
+  const os = depo_().tablo.getSheetByName('Beğeniler');
+  if (os && os.getLastRow() > 1) {
+    os.getRange(2, 1, os.getLastRow() - 1, CD_ODUL_BASLIK.length).getValues().forEach(function (r) {
+      if (String(r[1]) !== sessId) return;
+      const ad = String(r[4]), d = Number(r[7]) || 0;
+      const x = oduller[ad] = oduller[ad] || { likes: 0, badges: {} };
+      if (r[5] === 'Beğeni') x.likes += d;
+      else { const b = String(r[6]); x.badges[b] = (x.badges[b] || 0) + d; }
+      if (ogrenciler.indexOf(ad) < 0) ogrenciler.push(ad);
+    });
+  }
   return {
-    session: o, students: ogrenciler,
+    session: o, students: ogrenciler, rewards: oduller,
     questions: Object.keys(sorular).map(function (k) { return sorular[k]; }).sort(function (a, b) { return a.no - b.no; }),
     answers: cevaplar
   };
 }
 
 /** Bir kez çalıştırın: klasörü ve tablo sayfasını hazırlar, PowerPoint dönüştürme iznini ister. */
+
+/* ===================== Beğeniler ve rozetler ===================== */
+
+function cdOdulBos_() { return { ogr: {}, q: {} }; }
+
+/** Bu dersin beğeni/rozet durumu: önce önbellek, yoksa kalıcı kayıt. */
+function cdOdulOku_(sessId) {
+  const c = CacheService.getScriptCache();
+  const hit = c.get('cd:odul:' + sessId);
+  if (hit) return JSON.parse(hit);
+  const p = PropertiesService.getScriptProperties().getProperty('CD_ODUL_' + sessId);
+  const o = p ? JSON.parse(p) : cdOdulBos_();
+  c.put('cd:odul:' + sessId, JSON.stringify(o), CD_SURE);
+  return o;
+}
+
+function cdOdulYaz_(sessId, o) {
+  const m = JSON.stringify(o);
+  CacheService.getScriptCache().put('cd:odul:' + sessId, m, CD_SURE);
+  try { PropertiesService.getScriptProperties().setProperty('CD_ODUL_' + sessId, m); } catch (e) { }
+}
+
+/** Öğrenciye giden özet: toplam beğeni, rozetleri ve bu soruda beğenilip beğenilmediği. */
+function cdOdulOgrenci_(sessId, ad, qid) {
+  const o = cdOdulOku_(sessId), x = o.ogr[ad];
+  return {
+    likes: x ? x.l : 0,
+    badges: x ? x.r : [],
+    liked: !!(qid && o.q[qid] && o.q[qid][ad])
+  };
+}
+
+/** Öğretmen bir cevabı beğenir (ya da geri alır) veya rozet verir (ya da geri alır). */
+function cdOdulVer_(r) {
+  const s = cdSinif_(r.sinif);
+  const ad = cdOgrenciKontrol_(s, r.ogrenci);
+  const canli = cdCanliOku_(s.ad);
+  if (!canli) throw new Error('Şu an canlı ders yok.');
+  const ver = r.deger !== false;
+  const kilit = LockService.getScriptLock();
+  kilit.waitLock(20000);
+  let satir = null, o;
+  try {
+    o = cdOdulOku_(canli.sessId);
+    const x = o.ogr[ad] = o.ogr[ad] || { l: 0, r: [] };
+    const ders = cdJsonOku_('ders_' + canli.lessonId + '.json', { title: '', items: [] });
+    if (r.tur === 'like') {
+      const qid = String(r.qid || '');
+      const qi = ders.items.findIndex(function (it) { return it.id === qid; });
+      if (qi < 0) throw new Error('Soru bulunamadı.');
+      const no = ders.items.slice(0, qi + 1).filter(function (it) { return it.type === 'question'; }).length;
+      const q = o.q[qid] = o.q[qid] || {};
+      if (ver && !q[ad]) { q[ad] = 1; x.l++; satir = ['Beğeni', no + '. soru', 1]; }
+      if (!ver && q[ad]) { delete q[ad]; x.l = Math.max(0, x.l - 1); satir = ['Beğeni', no + '. soru', -1]; }
+    } else {
+      const ra = CD_ROZETLER[r.tur];
+      if (!ra) throw new Error('Böyle bir rozet yok.');
+      if (ver) { x.r.push(r.tur); satir = ['Rozet', ra, 1]; }
+      else { const i = x.r.lastIndexOf(r.tur); if (i >= 0) { x.r.splice(i, 1); satir = ['Rozet', ra, -1]; } }
+    }
+    if (satir) {
+      cdOdulYaz_(canli.sessId, o);
+      const t = depo_().tablo;
+      let sh = t.getSheetByName('Beğeniler');
+      if (!sh) { sh = t.insertSheet('Beğeniler'); sh.getRange(1, 1, 1, CD_ODUL_BASLIK.length).setValues([CD_ODUL_BASLIK]); sh.setFrozenRows(1); }
+      sh.getRange(sh.getLastRow() + 1, 1, 1, CD_ODUL_BASLIK.length).setValues([[new Date(), canli.sessId, s.ad, ders.title, ad].concat(satir)]);
+    }
+  } finally { kilit.releaseLock(); }
+  return o;
+}
+
+/** Raporlar: her sınıfta her öğrencinin tüm derslerdeki beğeni ve rozet toplamı. */
+function cdOdulOzet_() {
+  const sh = depo_().tablo.getSheetByName('Beğeniler');
+  const sonuc = {};
+  siniflariGetir().forEach(function (s) {
+    sonuc[s.ad] = {};
+    s.ogrenciler.forEach(function (o) { sonuc[s.ad][o] = { likes: 0, badges: {} }; });
+  });
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, CD_ODUL_BASLIK.length).getValues().forEach(function (r) {
+      const sn = String(r[2]), ad = String(r[4]), d = Number(r[7]) || 0;
+      const k = sonuc[sn] = sonuc[sn] || {};
+      const x = k[ad] = k[ad] || { likes: 0, badges: {} };
+      if (r[5] === 'Beğeni') x.likes += d;
+      else { const b = String(r[6]); x.badges[b] = (x.badges[b] || 0) + d; }
+    });
+  }
+  return { classes: sonuc, badgeNames: CD_ROZETLER };
+}
