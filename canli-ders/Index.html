@@ -279,6 +279,16 @@ textarea.yaz:disabled{background:#f8f8fb;color:var(--soluk)}
 .tuval.kilitli canvas{pointer-events:none}
 
 [hidden]{display:none!important}
+.bekle.video .halka.tv{font-size:2.6rem;background:#fff4e5;animation:tvAt 1.6s ease-in-out infinite}
+.bekle.video h2{font-size:1.7rem}.bekle.video p{font-size:1.15rem}
+.bekle .vbaslik{margin-top:8px!important;font-weight:800!important;color:#b45309!important}
+@keyframes tvAt{50%{transform:translateY(-6px) rotate(-4deg)}}
+.soru-bas{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sure-bant{display:inline-flex;align-items:center;gap:6px;background:#1c2033;color:#fff;font-weight:800;border-radius:8px;padding:6px 12px;font-size:.92rem;font-variant-numeric:tabular-nums;position:relative;overflow:hidden}
+.sure-bant.az{background:#dc2626;animation:nabiz .5s ease infinite alternate}
+.sure-bant.bitti{background:#6b7088;animation:none}
+.sure-bant i{position:absolute;left:0;bottom:0;height:3px;background:#fbbf24;transition:width .25s linear}
+@keyframes nabiz{to{transform:scale(1.07)}}
 .odul{display:inline-flex;align-items:center;gap:6px;background:#fff1f3;color:#be123c;font-weight:800;border-radius:99px;padding:4px 12px;font-size:.92rem}
 .odul .rz{font-size:1.05rem;letter-spacing:1px}
 .kutlama{position:fixed;inset:0;display:grid;place-items:center;z-index:20;pointer-events:none;background:rgba(20,24,39,.35);animation:kSol 2.8s ease forwards}
@@ -418,8 +428,16 @@ function isle(d){
   $('sayfa').textContent=(d.idx+1)+' / '+d.total;
   $('ilerleme').style.width=Math.round(100*(d.idx+1)/d.total)+'%';
   const a=d.sessId+':'+d.idx+':'+d.item.id;
-  if(a!==anahtar){ anahtar=a; soru=null; if(d.item.type==='slide') slayt(d); else soruKur(d); }
+  if(a!==anahtar){ anahtar=a; soru=null; if(d.item.type==='slide') slayt(d); else if(d.item.type==='video') videoEkran(d); else soruKur(d); }
   else if(d.item.type==='question') guncelle(d);
+}
+
+function videoEkran(d){
+  const b=el('div','bekle video','<div class="halka tv">📺</div>');
+  b.appendChild(yazi('h2',null,'Video zamanı!'));
+  b.appendChild(yazi('p',null,'Videoyu öğretmeninin ekranından izle. 👀'));
+  if(d.item.title) b.appendChild(yazi('p','vbaslik',d.item.title));
+  $('sahne').replaceChildren(b);
 }
 
 async function slayt(d){
@@ -434,17 +452,18 @@ function soruKur(d){
   const it=d.item;
   soru={it:it, gonderilen:d.myAnswer, alan:el('div'), durum:el('div'), begeni:yazi('div','durum begeni','❤️ Öğretmenin bu cevabını beğendi!')};
   soru.begeni.hidden=true;
+  soru.saat=el('span','sure-bant','<b></b><i></i>'); soru.saat.hidden=true; soru.bitis=null;
   const et=el('span','etiket',ikon(it.kind)); et.appendChild(document.createTextNode(TUR[it.kind]||'Soru'));
   const baslik=it.text&&it.text.trim()?yazi('h1','metin',it.text):null;
   if(it.bgImg&&it.kind!=='draw'){
     const kap=el('div','ust-slayt'), sl=el('div','slayt','<div class="donen"></div>'), alt=el('div','alt-panel'), ust=el('div','panel-ust');
-    ust.append(et); if(baslik) ust.append(baslik);
+    ust.append(et, soru.saat); if(baslik) ust.append(baslik);
     alt.append(ust, soru.alan, soru.durum, soru.begeni); kap.append(sl,alt); $('sahne').replaceChildren(kap);
     const a=anahtar;
     gorsel(it.bgImg).then(function(v){ if(a!==anahtar) return; const img=el('img'); img.alt='Slayt'; img.src=v; sl.replaceChildren(img); }).catch(function(){ sl.replaceChildren(); });
   }else{
     const kap=el('div','soru'), ic=el('div','soru-ic');
-    ic.append(et); if(baslik) ic.append(baslik); ic.append(soru.alan, soru.durum, soru.begeni);
+    const bas=el('div','soru-bas'); bas.append(et, soru.saat); ic.append(bas); if(baslik) ic.append(baslik); ic.append(soru.alan, soru.durum, soru.begeni);
     kap.appendChild(ic); $('sahne').replaceChildren(kap);
   }
   if(it.kind==='mc'||it.kind==='poll') secenekKur(it.options,false);
@@ -474,7 +493,7 @@ function secenekKur(liste,ikili){
     b.appendChild(yazi('span',null,m));
     b.insertAdjacentHTML('beforeend','<span class="sag">'+ikon('ok')+'</span>');
     b.onclick=async function(){
-      if(son.reveal) return;
+      if(kilitli()) return;
       const once=soru.gonderilen; soru.gonderilen=deger; isaretle();
       if(!(await gonder(deger))){ soru.gonderilen=once; } isaretle(); durumYaz();
     };
@@ -490,7 +509,7 @@ function isaretle(){
   soru.secenekler.querySelectorAll('.secenek').forEach(function(b){
     const benim=g!=null&&b.dataset.deger===String(g);
     const dogruBu=ac&&it.correct!=null&&b.dataset.deger===String(it.correct);
-    b.disabled=ac;
+    b.disabled=ac||sureBitti();
     b.classList.toggle('secili',benim&&!ac);
     b.classList.toggle('dogru',dogruBu);
     b.classList.toggle('yanlis',ac&&benim&&it.correct!=null&&!dogruBu);
@@ -505,7 +524,7 @@ function kisaKur(){
   const sayac=yazi('span','sayac',t.value.length+' / 300');
   t.oninput=function(){ sayac.textContent=t.value.length+' / 300'; };
   const d=el('button','dugme',ikon('gonder')+'Gönder');
-  d.onclick=async function(){ const v=t.value.trim(); if(!v) return uyar('Önce cevabını yaz.',true); d.disabled=true; await gonder(v); d.disabled=false; durumYaz(); };
+  d.onclick=async function(){ if(kilitli()) return; const v=t.value.trim(); if(!v) return uyar('Önce cevabını yaz.',true); d.disabled=true; await gonder(v); d.disabled=false; durumYaz(); };
   const satir=el('div','alt-satir'); satir.append(d,sayac);
   soru.metin=t; soru.dugme=d; soru.alan.append(t,satir); soru.alan.style.cssText='display:grid;gap:12px';
 }
@@ -538,7 +557,7 @@ function cizimKur(it){
   cubuk.append(silgi,geri,cop); onizle();
   const kutu=el('div','tuval'), tv=el('canvas'); kutu.appendChild(tv);
   const d=el('button','dugme',ikon('gonder')+'Çizimi gönder');
-  d.onclick=async function(){ if(!M.cizgiler.length) return uyar('Önce bir şeyler çiz.',true); d.disabled=true; await gonder(disari()); d.disabled=false; durumYaz(); };
+  d.onclick=async function(){ if(kilitli()) return; if(!M.cizgiler.length) return uyar('Önce bir şeyler çiz.',true); d.disabled=true; await gonder(disari()); d.disabled=false; durumYaz(); };
   const satir=el('div','alt-satir'); satir.appendChild(d);
   soru.dugme=d; soru.tuval=kutu;
   soru.alan.style.cssText='display:grid;gap:12px'; soru.alan.append(cubuk,kutu,satir);
@@ -570,7 +589,7 @@ function cizimKur(it){
   }
   let aktif=null;
   const nokta=function(e){ const r=tv.getBoundingClientRect(); return [(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]; };
-  tv.addEventListener('pointerdown',function(e){ if(son.reveal) return; tv.setPointerCapture(e.pointerId);
+  tv.addEventListener('pointerdown',function(e){ if(kilitli()) return; tv.setPointerCapture(e.pointerId);
     M.yedek=null; aktif={renk:M.renk,kalin:M.silgi?Math.max(12,M.kalin*1.6):M.kalin,silgi:M.silgi,n:[nokta(e)]}; M.cizgiler.push(aktif); ciz(); });
   tv.addEventListener('pointermove',function(e){ if(aktif){ aktif.n.push(nokta(e)); ciz(); } });
   tv.addEventListener('pointerup',function(){ aktif=null; }); tv.addEventListener('pointercancel',function(){ aktif=null; });
@@ -585,7 +604,9 @@ function durumYaz(){
   const it=soru.it, g=soru.gonderilen, ac=!!son.reveal, k=soru.durum;
   k.replaceChildren();
   let sinif='', html='';
-  if(!ac){
+  if(!ac&&sureBitti()){
+    sinif='notr'; html=ikon('saat')+(g==null?'<span><b>Süre doldu!</b> Bu soruya cevap veremedin.</span>':'<span><b>Süre doldu!</b> Cevabın gönderildi. Öğretmenin doğru cevabı açıklayınca burada göreceksin.</span>');
+  }else if(!ac){
     if(g==null) return;
     sinif='kayit'; html=ikon('ok')+'<span><b>Cevabın gönderildi!</b> '+(it.kind==='draw'||it.kind==='short'?'İstersen değiştirip yeniden gönderebilirsin.':'Öğretmen cevapları kapatana kadar değiştirebilirsin.')+'</span>';
   }else if(g==null){
@@ -611,14 +632,34 @@ function guncelle(d){
   if(!soru) return;
   if(soru.gonderilen==null&&d.myAnswer!=null) soru.gonderilen=d.myAnswer;
   if(d.reveal){ soru.it=d.item; }
-  const ac=!!d.reveal;
-  isaretle();
-  if(soru.metin) soru.metin.disabled=ac;
-  if(soru.dugme) soru.dugme.hidden=ac;
-  if(soru.tuval) soru.tuval.classList.toggle('kilitli',ac);
+  soru.bitis=d.timerLeft!=null&&!d.reveal?performance.now()+d.timerLeft:null; soru.sureToplam=d.timerTotal||null;
+  kilitUygula();
   soru.begeni.hidden=!(d.reward&&d.reward.liked);
+  sureCiz();
+}
+function sureBitti(){ return !!(soru&&soru.bitis!=null&&performance.now()>=soru.bitis); }
+function kilitli(){ return !!son.reveal||sureBitti(); }
+function kilitUygula(){
+  if(!soru) return;
+  const k=kilitli(); soru.kilitDurum=k;
+  isaretle();
+  if(soru.metin) soru.metin.disabled=k;
+  if(soru.dugme) soru.dugme.hidden=k;
+  if(soru.tuval) soru.tuval.classList.toggle('kilitli',k);
   durumYaz();
 }
+function sureCiz(){
+  if(!soru||!soru.saat) return;
+  const s=soru.saat;
+  if(soru.bitis==null){ s.hidden=true; return; }
+  const kalan=Math.max(0,soru.bitis-performance.now()), sn=Math.ceil(kalan/1000);
+  s.hidden=false;
+  s.className='sure-bant'+(kalan<=0?' bitti':kalan<=5000?' az':'');
+  s.firstChild.textContent=kalan<=0?'⏰ Süre doldu':'⏱ '+Math.floor(sn/60)+':'+String(sn%60).padStart(2,'0');
+  s.lastChild.style.width=kalan<=0?'0':(soru.sureToplam?Math.min(100,100*kalan/(soru.sureToplam*1000)):100)+'%';
+  if(soru.kilitDurum!==kilitli()) kilitUygula();
+}
+setInterval(sureCiz,250);
 
 bekleme('Bağlanıyor…','Bir saniye.');
 yokla();
@@ -692,7 +733,20 @@ h1.baslik .bosluk{flex:1}
 .oge .araclar button:hover{background:var(--ana-a);color:var(--ana)}
 .oge .araclar button:disabled{opacity:.3}
 .soru-oge .onizleme{background:var(--ana-a);color:var(--ana-k);font-weight:700;font-size:.85rem;text-align:center}
-.arayer{height:24px;display:flex;align-items:center;justify-content:center}
+.arayer{height:24px;display:flex;align-items:center;justify-content:center;gap:8px}
+.video-oge .onizleme{background:#fff4e5;color:#b45309}
+.video-kap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;min-width:0}
+.video-kap iframe,.video-kap video{width:100%;max-width:min(100%,calc((100vh - 230px)*16/9));aspect-ratio:16/9;border:0;border-radius:10px;background:#000;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.video-kap .vb{display:flex;align-items:center;gap:12px;color:#c7cbe6;font-weight:700}
+.video-kap a{color:#fff}
+.video-bos{text-align:center;color:#c7cbe6}.video-bos .e{font-size:3.5rem}
+.serit button.video-mini{background:#7c4a12}
+.sure-hap{display:inline-flex;align-items:center;gap:6px;background:#1c2033;color:#fff;font-weight:800;border-radius:9px;padding:7px 12px;font-variant-numeric:tabular-nums;position:relative;overflow:hidden}
+.sure-hap.az{background:#dc2626}.sure-hap.bitti{background:#6b7088}
+.sure-hap .bar{position:absolute;left:0;bottom:0;height:3px;background:#fbbf24;transition:width .25s linear}
+.sure-secim{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sure-secim button{border:1px solid var(--cizgi);background:#fff;border-radius:10px;padding:14px 4px;font-weight:800;font-size:1rem}
+.sure-secim button:hover{border-color:var(--ana);background:var(--ana-a)}
 .arayer button{border:0;background:#fff;color:var(--ana);font-weight:700;font-size:.82rem;padding:4px 12px;border-radius:99px;box-shadow:0 0 0 1px var(--cizgi);opacity:.4;transition:opacity .15s}
 .arayer:hover button,.arayer button:focus{opacity:1}
 @media (hover:none){.arayer button{opacity:.9}}
@@ -880,6 +934,41 @@ function gorsel(id){
 }
 function isle(){ while(aktifIs<4&&kuyruk.length){ const is=kuyruk.shift(); aktifIs++;
   api('gorsel',{fileId:is.id}).then(is.coz,is.red).finally(function(){ aktifIs--; isle(); }); } }
+function sureMetni(sn){ sn=Math.round(sn); if(sn<60) return sn+' sn'; const d=Math.floor(sn/60), k=sn%60; return d+' dk'+(k?' '+k+' sn':''); }
+function saatMetni(ms){ const t=Math.ceil(ms/1000); return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
+function videoKaynak(u){
+  u=String(u||'').trim(); let m;
+  if((m=u.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/))){
+    const t=u.match(/[?&](?:t|start)=(\d+)/);
+    return {tur:'iframe',src:'https://www.youtube-nocookie.com/embed/'+m[1]+'?rel=0'+(t?'&start='+t[1]:''),ac:'https://www.youtube.com/watch?v='+m[1]+(t?'&t='+t[1]:'')}; }
+  if((m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]{20,})/))) return {tur:'iframe',src:'https://drive.google.com/file/d/'+m[1]+'/preview',ac:u};
+  if((m=u.match(/vimeo\.com\/(\d+)/))) return {tur:'iframe',src:'https://player.vimeo.com/video/'+m[1],ac:u};
+  if(/^https?:\/\/.+\.(mp4|webm|ogg)(\?.*)?$/i.test(u)) return {tur:'video',src:u,ac:u};
+  if(/^https?:\/\//i.test(u)) return {tur:'link',ac:u};
+  return null;
+}
+function videoDuzenle(indeks,yer){
+  const eski=indeks!=null?ders.items[indeks]:null;
+  const v=eski?Object.assign({},eski):{id:kimlik(),type:'video',url:'',title:''};
+  const ad=el('input',{class:'girdi',value:v.title,placeholder:'ör. Su döngüsü animasyonu'});
+  const url=el('input',{class:'girdi',value:v.url,placeholder:'https://www.youtube.com/watch?v=…'});
+  const bilgi=el('p',{style:'margin:6px 0 0;font-weight:600;font-size:.88rem;color:var(--soluk)'});
+  const kontrol=function(){ const k=videoKaynak(url.value);
+    bilgi.textContent=!url.value.trim()?'YouTube, Google Drive ya da Vimeo bağlantısı yapıştırın.':!k?'Bu bir bağlantıya benzemiyor.':
+      k.tur==='link'?'Bu bağlantı ders sırasında yeni sekmede açılır.':'Video ders sırasında sizin ekranınızda oynatılır.'; };
+  url.oninput=kontrol; kontrol();
+  const p=pencere([el('h2',{},eski?'Videoyu düzenle':'Video ekle'),
+    el('div',{class:'alan'},el('label',{},'Video bağlantısı'),url,bilgi),
+    el('div',{class:'alan'},el('label',{},'Başlık ',el('small',{},'— isteğe bağlı')),ad),
+    el('p',{style:'margin:0;color:var(--soluk);font-weight:600;font-size:.9rem'},'Öğrencilerin ekranında “Videoyu öğretmeninin ekranından izle” yazar.'),
+    el('div',{class:'alt'},el('button',{class:'dugme ikincil',onclick:function(){ p.kapat(); }},'Vazgeç'),
+      el('button',{class:'dugme yesil',onclick:function(){
+        v.url=url.value.trim(); v.title=ad.value.trim();
+        if(!videoKaynak(v.url)) return uyar('Geçerli bir video bağlantısı yapıştırın.',true);
+        if(eski) ders.items[indeks]=v; else ders.items.splice(yer,0,v);
+        degisti=true; p.kapat(); yenile(); }},eski?'Kaydet':'Ekle'))]);
+  setTimeout(function(){ url.focus(); },0);
+}
 function kisalt(m,n){ m=String(m); return m.length>n?m.slice(0,n-1)+'…':m; }
 function gorselKutu(id,yedek){ const k=el('span',{style:'display:contents'},yedek||'');
   if(id) gorsel(id).then(function(v){ k.replaceChildren(el('img',{src:v,alt:''})); }).catch(function(){}); return k; }
@@ -954,7 +1043,8 @@ function duzenleyiciCiz(){
 }
 function liste(){
   const k=el('div',{id:'ogeler'});
-  const arayer=function(i){ return el('div',{class:'arayer'},el('button',{onclick:function(){ soruDuzenle(null,i); }},'+ Buraya soru ekle')); };
+  const arayer=function(i){ return el('div',{class:'arayer'},el('button',{onclick:function(){ soruDuzenle(null,i); }},'+ Buraya soru ekle'),
+    el('button',{onclick:function(){ videoDuzenle(null,i); }},'+ Video ekle')); };
   if(!ders.items.length){ k.append(el('div',{class:'bos-durum'},'Henüz slayt yok. Sunumunuzu ekleyin ya da doğrudan soru ekleyin.'),arayer(0)); return k; }
   let sn=0, qn=0;
   ders.items.forEach(function(it,i){
@@ -963,14 +1053,19 @@ function liste(){
       el('button',{title:'Yukarı',disabled:i===0,onclick:function(){ tasi(i,-1); }},'↑'),
       el('button',{title:'Aşağı',disabled:i===ders.items.length-1,onclick:function(){ tasi(i,1); }},'↓'),
       it.type==='question'?el('button',{title:'Düzenle',onclick:function(){ soruDuzenle(i); }},'✎'):null,
+      it.type==='video'?el('button',{title:'Düzenle',onclick:function(){ videoDuzenle(i); }},'✎'):null,
       el('button',{title:'Sil',onclick:function(){ ogeSil(i); }},'✕'));
     if(it.type==='slide'){ sn++;
       k.append(el('div',{class:'kart oge'},el('span',{class:'no'},i+1),el('div',{class:'onizleme'},gorselKutu(it.img,el('div',{class:'donen',style:'margin:0'}))),
         el('div',{class:'aciklama'},el('b',{},'Slayt '+sn)),ar));
+    }else if(it.type==='video'){
+      k.append(el('div',{class:'kart oge video-oge'},el('span',{class:'no'},i+1),
+        el('div',{class:'onizleme',html:'<div><span style="font-size:1.8rem">🎬</span><div>Video</div></div>'}),
+        el('div',{class:'aciklama'},el('b',{},it.title||'Video'),el('small',{},kisalt(it.url,70))),ar));
     }else{ qn++;
       k.append(el('div',{class:'kart oge soru-oge'},el('span',{class:'no'},i+1),
         el('div',{class:'onizleme',html:'<div>'+turIkon(it.kind,28)+'<div>'+TUR[it.kind].ad+'</div></div>'}),
-        el('div',{class:'aciklama'},el('b',{},it.text||(it.bgImg?'(slayt üzerinde soru)':'(soru metni yok)')),el('small',{},'Soru '+qn+' · '+TUR[it.kind].ad)),ar));
+        el('div',{class:'aciklama'},el('b',{},it.text||(it.bgImg?'(slayt üzerinde soru)':'(soru metni yok)')),el('small',{},'Soru '+qn+' · '+TUR[it.kind].ad+(it.timer?' · ⏱ '+sureMetni(it.timer):''))),ar));
     }
   });
   k.append(arayer(ders.items.length));
@@ -978,7 +1073,7 @@ function liste(){
 }
 function yenile(){ $('#ogeler').replaceWith(liste()); }
 function tasi(i,y){ const j=i+y; const t=ders.items[i]; ders.items[i]=ders.items[j]; ders.items[j]=t; degisti=true; yenile(); }
-async function ogeSil(i){ if(ders.items[i].type==='question'&&!(await onayla('Bu soru silinsin mi?','Sil',true))) return; ders.items.splice(i,1); degisti=true; yenile(); }
+async function ogeSil(i){ if(ders.items[i].type!=='slide'&&!(await onayla('Bu soru silinsin mi?','Sil',true))) return; ders.items.splice(i,1); degisti=true; yenile(); }
 async function dersKaydet(){
   if(!ders.title.trim()) return uyar('Derse bir ad verin.',true);
   try{ const r=await api('dersKaydet',{lesson:ders}); veri.lessons=r.lessons; degisti=false; uyar('Kaydedildi'); }catch(e){ uyar(hata(e),true); }
@@ -1074,7 +1169,12 @@ function soruDuzenle(indeks,yer){
     if(s.kind==='short'){ const g=el('input',{class:'girdi',value:(s.accepted||[]).join(', '),placeholder:'ör. su buharı, buhar'});
       g.oninput=function(){ s.accepted=g.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean); };
       govde.append(el('div',{class:'alan'},el('label',{},'Kabul edilen cevaplar ',el('small',{},'— isteğe bağlı, virgülle ayırın. Boş kalırsa açık uçlu olur.')),g)); }
-    if(s.kind==='poll') govde.append(el('p',{style:'color:var(--soluk);font-weight:600;margin:0'},'Ankette doğru cevap yoktur.'));
+    if(s.kind==='poll') govde.append(el('p',{style:'color:var(--soluk);font-weight:600;margin:0 0 14px'},'Ankette doğru cevap yoktur.'));
+    const ss=el('select',{class:'girdi',style:'max-width:220px'});
+    [0,15,30,45,60,90,120,180,300].forEach(function(v){ const o=el('option',{value:v},v?sureMetni(v):'Süre yok'); if((s.timer||0)===v) o.selected=true; ss.append(o); });
+    if(s.timer&&[0,15,30,45,60,90,120,180,300].indexOf(s.timer)<0) ss.append(el('option',{value:s.timer,selected:true},sureMetni(s.timer)));
+    ss.onchange=function(){ s.timer=Number(ss.value)||0; };
+    govde.append(el('div',{class:'alan'},el('label',{},'⏱ Süre ',el('small',{},'— soru açılınca kendiliğinden başlar, bitince cevaplar kilitlenir')),ss));
     setTimeout(function(){ t.focus(); },0);
   }
   ciz();
@@ -1207,6 +1307,7 @@ async function canliAc(sinifAd){
     el('div',{class:'c-sahne',id:'cSahne'}),el('aside',{class:'c-yan',id:'cYan'}),
     el('div',{class:'c-alt'},el('button',{class:'dugme ikincil',onclick:function(){ git(C.live.idx-1); }},'◀'),
       el('div',{class:'serit',id:'cSerit'}),el('button',{class:'dugme',onclick:function(){ git(C.live.idx+1); }},'Sonraki ▶')));
+  C.tik=setInterval(sureCiz,250); sureAl(live);
   serit(); sahne(); yan(); yokla();
 }
 document.addEventListener('keydown',function(e){
@@ -1214,7 +1315,7 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){ e.preventDefault(); git(C.live.idx+1); }
   if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); git(C.live.idx-1); }
 });
-function kucult(){ if(C) clearTimeout(C.zaman); C=null; $('#canli').classList.add('gizli'); K.tamEkran(false); if(gorunum==='dersler') dersler(); }
+function kucult(){ if(C){ clearTimeout(C.zaman); clearInterval(C.tik); } C=null; $('#canli').classList.add('gizli'); K.tamEkran(false); if(gorunum==='dersler') dersler(); }
 async function bitir(){
   if(!(await onayla('Ders bitirilsin mi? Öğrencilerin ekranı bekleme ekranına döner.','Bitir',true))) return;
   const ad=C.sinif.ad;
@@ -1224,19 +1325,21 @@ let sira=Promise.resolve();
 function git(idx,ek){
   if(!C) return;
   const istek=Object.assign({sinif:C.sinif.ad},ek||{});
-  if(!ek){ const y=Math.max(0,Math.min(C.ders.items.length-1,idx)); if(y===C.live.idx) return; istek.idx=y; C.live.idx=y; C.live.reveal=false; C.cevaplar={}; }
-  else Object.assign(C.live,ek);
+  if(!ek){ const y=Math.max(0,Math.min(C.ders.items.length-1,idx)); if(y===C.live.idx) return; istek.idx=y; C.live.idx=y; C.live.reveal=false; C.cevaplar={};
+    const yi=C.ders.items[y]; const t=yi.type==='question'&&yi.timer?yi.timer:0; C.bitis=t?performance.now()+t*1000:null; C.sureToplam=t||null; }
+  else{ const e=Object.assign({},ek); delete e.timer; delete e.timerAdd; Object.assign(C.live,e); }
   serit(); sahne(); yan();
   const benim=C;
-  sira=sira.then(function(){ return api('canli',istek); }).then(function(r){
-    if(C===benim&&r&&r.sessId===C.live.sessId&&r.idx===C.live.idx){ C.live=r; veri.lives[C.sinif.ad]=r; }
-  }).catch(function(e){ uyar(hata(e),true); });
+  C.bekle=(C.bekle||0)+1;
+  sira=sira.then(function(){ return api('canli',istek); }).then(function(r){ if(C===benim) C.bekle--;
+    if(C===benim&&r&&r.sessId===C.live.sessId&&r.idx===C.live.idx){ C.live=r; veri.lives[C.sinif.ad]=r; sureAl(r); if(C.soru) guncelle(); }
+  }).catch(function(e){ if(C===benim) C.bekle--; uyar(hata(e),true); });
 }
 async function yokla(){
   if(!C) return; clearTimeout(C.zaman); const benim=C;
   try{ const r=await api('cevaplar',{sinif:C.sinif.ad}); if(C!==benim) return;
     C.online=r.online||{}; if(r.rewards) C.odul=r.rewards;
-    if(r.live&&r.live.sessId===C.live.sessId&&r.live.idx===C.live.idx){ C.cevaplar=r.answers||{}; guncelle(); }
+    if(r.live&&r.live.sessId===C.live.sessId&&r.live.idx===C.live.idx){ C.cevaplar=r.answers||{}; if(!C.bekle) sureAl(r.live); guncelle(); }
     yan();
   }catch(e){}
   if(C===benim) C.zaman=setTimeout(yokla,document.hidden?5000:2000);
@@ -1245,13 +1348,23 @@ function oge(){ return C.ders.items[C.live.idx]; }
 function serit(){
   const s=$('#cSerit');
   s.replaceChildren.apply(s,C.ders.items.map(function(it,i){
-    return el('button',{class:(i===C.live.idx?'aktif ':'')+(it.type==='question'?'soru-mini':''),onclick:function(){ git(i); }},
-      it.type==='slide'?gorselKutu(it.img):TUR[it.kind].k,el('i',{},i+1)); }));
+    return el('button',{class:(i===C.live.idx?'aktif ':'')+(it.type==='question'?'soru-mini':it.type==='video'?'video-mini':''),onclick:function(){ git(i); }},
+      it.type==='slide'?gorselKutu(it.img):it.type==='video'?'🎬 Video':TUR[it.kind].k,el('i',{},i+1)); }));
   const a=s.querySelector('.aktif'); if(a) a.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
 }
 function sahne(){
   const it=oge(), sh=$('#cSahne');
-  C.soru=null;
+  C.soru=null; C.sureImza=null;
+  if(it.type==='video'){
+    const k=videoKaynak(it.url), kap=el('div',{class:'video-kap'});
+    if(k&&k.tur==='iframe') kap.append(el('iframe',{src:k.src,allow:'autoplay; encrypted-media; picture-in-picture; fullscreen',allowfullscreen:true,referrerpolicy:'strict-origin-when-cross-origin'}));
+    else if(k&&k.tur==='video') kap.append(el('video',{src:k.src,controls:true}));
+    else kap.append(el('div',{class:'video-bos'},el('div',{class:'e'},'🎬'),el('p',{},'Bu video burada oynatılamıyor.')));
+    kap.append(el('div',{class:'vb'},el('span',{},'🎬 '+(it.title||'Video')+' · öğrenciler sizin ekranınıza bakıyor'),
+      k&&k.ac?el('a',{class:'dugme ikincil kucuk',href:k.ac,target:'_blank',rel:'noopener',style:'text-decoration:none'},'Yeni sekmede aç ↗'):null));
+    sh.replaceChildren(kap);
+    return;
+  }
   if(it.type==='slide'){
     sh.replaceChildren(el('div',{class:'c-slayt'},gorselKutu(it.img,el('div',{class:'donen'}))));
     const n=C.ders.items[C.live.idx+1]; if(n&&n.type==='slide') gorsel(n.img).catch(function(){});
@@ -1263,9 +1376,10 @@ function sahne(){
       if(gizliMi(it)){ C.gizle=false; C.soru.goster=true; } else { C.gizle=true; C.soru.goster=false; }
       ls('cd:gizle',C.gizle); C.soru.imza=null; guncelle(); }}),
     dIsim:el('button',{class:'dugme ikincil kucuk',onclick:function(){ C.isimler=!C.isimler; C.soru.imza=null; guncelle(); }}),
-    dAc:el('button',{class:'dugme ikincil kucuk',onclick:function(){ git(null,{reveal:!C.live.reveal}); }})};
+    dAc:el('button',{class:'dugme ikincil kucuk',onclick:function(){ git(null,{reveal:!C.live.reveal}); }}),
+    saat:el('span',{class:'sure-alan',style:'display:inline-flex;gap:6px;align-items:center'})};
   const sKutu=el('div',{class:'c-soru'},
-    el('div',{class:'c-soru-ust'},el('span',{class:'rozet',html:turIkon(it.kind,16)+TUR[it.kind].ad}),C.soru.sayi,
+    el('div',{class:'c-soru-ust'},el('span',{class:'rozet',html:turIkon(it.kind,16)+TUR[it.kind].ad}),C.soru.sayi,C.soru.saat,
       el('div',{class:'c-kontroller'},C.soru.dGizle,C.soru.dIsim,C.soru.dAc)),
     it.text?el('h2',{},it.text):null,C.soru.sonuc);
   if(it.bgImg&&it.kind!=='draw') sh.replaceChildren(el('div',{class:'c-ust-slayt'},el('div',{class:'c-slayt'},gorselKutu(it.bgImg,el('div',{class:'donen'}))),sKutu));
@@ -1283,6 +1397,7 @@ function guncelle(){
   S.dIsim.classList.toggle('gizli',it.kind==='draw'||gizli);
   S.dAc.textContent=C.live.reveal?'Cevapları yeniden aç':(S.dogruVar?'Doğru cevabı göster':'Cevapları kapat');
   S.dAc.classList.toggle('acik',!!C.live.reveal);
+  sureCiz();
   const imza=JSON.stringify([cv,C.live.reveal,C.isimler,gizli,C.odul.q[it.id]||{}]);
   if(S.imza===imza) return; S.imza=imza;
   const k=S.sonuc; k.replaceChildren();
@@ -1308,6 +1423,41 @@ function guncelle(){
   }else if(it.kind==='draw'){
     k.append(el('div',{class:'cizimler'},adlar.map(function(a){ return el('div',{class:'cizim-kart',role:'button',onclick:function(){ cizimBuyut(a,it.id,cv[a].v); }},
       el('img',{src:cv[a].v,alt:''}),el('div',{},a),kalp(a)); })));
+  }
+}
+/* --- süre --- */
+function sureAl(live){ if(!C) return; C.bitis=live&&live.timerLeft!=null?performance.now()+live.timerLeft:null; C.sureToplam=live&&live.timerTotal||null; C.sureImza=null; sureCiz(); }
+function sureVer(sn){ C.bitis=sn?performance.now()+sn*1000:null; C.sureToplam=sn||null; C.sureImza=null; sureCiz(); git(null,{timer:sn}); }
+function sureEkle(sn){ if(C.bitis){ C.bitis=Math.max(performance.now(),C.bitis)+sn*1000; C.sureToplam=(C.sureToplam||0)+sn; } sureCiz(); git(null,{timerAdd:sn}); }
+function sureSec(){
+  const ozel=el('input',{class:'girdi',type:'number',min:1,max:30,placeholder:'dk',style:'max-width:90px'});
+  const p=pencere([el('h2',{},'Öğrencilere ne kadar süre verilsin?'),
+    el('div',{class:'sure-secim'},[15,30,45,60,90,120,180,300].map(function(v){ return el('button',{onclick:function(){ p.kapat(); sureVer(v); }},sureMetni(v)); })),
+    el('div',{style:'display:flex;gap:8px;align-items:center;margin-top:14px;font-weight:700'},'Başka:',ozel,'dakika',
+      el('button',{class:'dugme kucuk',onclick:function(){ const d=Number(ozel.value); if(!(d>0&&d<=30)) return uyar('1 ile 30 dakika arasında yazın.',true); p.kapat(); sureVer(Math.round(d*60)); }},'Başlat')),
+    el('p',{style:'margin:12px 0 0;color:var(--soluk);font-weight:600;font-size:.9rem'},'Süre bitince öğrenciler cevap veremez, cevapları kilitlenir.'),
+    el('div',{class:'alt'},el('button',{class:'dugme ikincil',onclick:function(){ p.kapat(); }},'Vazgeç'))]);
+}
+function sureCiz(){
+  if(!C||!C.soru||!C.soru.saat) return;
+  const k=C.soru.saat, kalan=C.bitis!=null?Math.max(0,C.bitis-performance.now()):null;
+  const durum=kalan==null?'yok':kalan>0?'var':'bitti';
+  const imza=durum+(C.live.reveal?'r':'');
+  if(C.sureImza!==imza){
+    C.sureImza=imza; k.replaceChildren();
+    if(durum==='yok'){ if(!C.live.reveal) k.append(el('button',{class:'dugme ikincil kucuk',onclick:sureSec},'⏱ Süre ver')); }
+    else{
+      C.soru.hap=el('span',{class:'sure-hap'},el('span',{class:'yazi'}),el('span',{class:'bar'}));
+      k.append(C.soru.hap);
+      if(durum==='var') k.append(el('button',{class:'dugme ikincil kucuk',onclick:function(){ sureEkle(15); }},'+15 sn'),
+        el('button',{class:'dugme ikincil kucuk',onclick:function(){ sureVer(0); }},'Süreyi kaldır'));
+      else if(!C.live.reveal) k.append(el('button',{class:'dugme ikincil kucuk',onclick:sureSec},'Yeniden süre ver'));
+    }
+  }
+  if(C.soru.hap&&durum!=='yok'){
+    C.soru.hap.className='sure-hap'+(durum==='bitti'?' bitti':kalan<=5000?' az':'');
+    C.soru.hap.querySelector('.yazi').textContent=durum==='bitti'?'⏰ Süre doldu':'⏱ '+saatMetni(kalan);
+    C.soru.hap.querySelector('.bar').style.width=durum==='bitti'?'0':(C.sureToplam?Math.min(100,100*kalan/(C.sureToplam*1000)):100)+'%';
   }
 }
 function gizliMi(it){

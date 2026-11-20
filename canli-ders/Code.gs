@@ -217,6 +217,7 @@ function cdDurum(sinif, ogrenci) {
     item: cdOgrenciOgesi_(it, canli.reveal),
     reveal: !!canli.reveal,
     myAnswer: cevap ? JSON.parse(cevap).v : null,
+    timerLeft: cdKalan_(canli), timerTotal: canli.timerTotal || null,
     reward: cdOdulOgrenci_(canli.sessId, ad, it && it.id)
   };
 }
@@ -239,6 +240,7 @@ function cdCevap(sinif, ogrenci, sessId, qid, deger) {
   const it = cdDersOku_(canli.lessonId).items[canli.idx];
   if (!it || it.type !== 'question' || it.id !== qid) throw new Error('Öğretmen başka bir sayfaya geçti.');
   if (canli.reveal) throw new Error('Cevaplar kapandı.');
+  if (canli.timerEnd && Date.now() > canli.timerEnd + 1500) throw new Error('Süre doldu, cevaplar kilitlendi.');
   let v = deger;
   if (it.kind === 'mc' || it.kind === 'poll') v = Number(v);
   if (it.kind === 'tf') v = (v === true || v === 'true');
@@ -377,13 +379,18 @@ function cdDersKaydet_(ders) {
     title: String(ders.title || 'Adsız ders').trim().slice(0, 120),
     items: (ders.items || []).map(function (it) {
       if (it.type === 'slide') return { id: String(it.id || cdKimlik_()), type: 'slide', img: String(it.img) };
+      if (it.type === 'video') return {
+        id: String(it.id || cdKimlik_()), type: 'video',
+        url: String(it.url || '').trim().slice(0, 500), title: String(it.title || '').trim().slice(0, 120)
+      };
       return {
         id: String(it.id || cdKimlik_()), type: 'question', kind: it.kind,
         text: String(it.text || '').slice(0, 500),
         options: (it.options || []).map(String),
         correct: it.correct == null ? null : it.correct,
         accepted: (it.accepted || []).map(String),
-        bgImg: it.bgImg || null
+        bgImg: it.bgImg || null,
+        timer: Math.max(0, Math.min(600, Math.round(Number(it.timer) || 0)))
       };
     }),
     updated: new Date().toISOString()
@@ -393,7 +400,7 @@ function cdDersKaydet_(ders) {
   const liste = cdDersListesi_().filter(function (d) { return d.id !== temiz.id; });
   liste.unshift({
     id: temiz.id, title: temiz.title, updated: temiz.updated,
-    slides: slaytlar.length, questions: temiz.items.length - slaytlar.length,
+    slides: slaytlar.length, questions: temiz.items.filter(function (i) { return i.type === 'question'; }).length,
     cover: slaytlar.length ? slaytlar[0].img : null
   });
   cdJsonYaz_('dersler.json', liste);
@@ -485,6 +492,15 @@ function cdCanliYaz_(sinif, canli) {
   }
 }
 
+/** Kalan süre (ms); süre yoksa null. Saatler cihazdan cihaza farklı olabileceği için kalan süre gönderilir. */
+function cdKalan_(canli) { return canli && canli.timerEnd ? Math.max(0, canli.timerEnd - Date.now()) : null; }
+function cdCanliDis_(canli) {
+  if (!canli) return canli;
+  const o = JSON.parse(JSON.stringify(canli));
+  o.timerLeft = cdKalan_(canli);
+  return o;
+}
+
 function cdTumCanlilar_() {
   const o = {};
   siniflariGetir().forEach(function (s) { const c = cdCanliOku_(s.ad); if (c) o[s.ad] = c; });
@@ -495,6 +511,7 @@ function cdTumCanlilar_() {
 function cdOgrenciOgesi_(it, acik) {
   if (!it) return null;
   if (it.type === 'slide') return { id: it.id, type: 'slide', img: it.img };
+  if (it.type === 'video') return { id: it.id, type: 'video', title: it.title || '' };
   const o = { id: it.id, type: 'question', kind: it.kind, text: it.text, options: it.options, bgImg: it.bgImg || null };
   if (acik) { o.correct = it.correct; o.accepted = it.accepted; }
   return o;
@@ -519,14 +536,29 @@ function cdCanliAyarla_(r) {
     cdJsonYaz_('oturumlar.json', oturumlar.slice(0, 300));
   }
   const ders = cdDersOku_(canli.lessonId);
+  const sureKur = function (sn) {
+    if (sn > 0) { canli.timerEnd = Date.now() + sn * 1000; canli.timerTotal = sn; }
+    else { canli.timerEnd = null; canli.timerTotal = null; }
+  };
+  if (r.start) { const ilk = ders.items[0]; sureKur(ilk && ilk.type === 'question' ? ilk.timer : 0); }
   if (r.idx != null) {
     const yeni = Math.max(0, Math.min(ders.items.length - 1, Number(r.idx)));
-    if (yeni !== canli.idx) { canli.idx = yeni; canli.reveal = false; }
+    if (yeni !== canli.idx) {
+      canli.idx = yeni; canli.reveal = false;
+      const it = ders.items[yeni];
+      sureKur(it && it.type === 'question' ? it.timer : 0);
+    }
   }
   if (r.reveal != null) canli.reveal = !!r.reveal;
+  if (r.timer != null) sureKur(Math.max(0, Math.min(1800, Number(r.timer) || 0)));
+  if (r.timerAdd && canli.timerEnd) {
+    const ek = Math.max(-600, Math.min(600, Number(r.timerAdd) || 0));
+    canli.timerEnd = Math.max(Date.now(), canli.timerEnd) + ek * 1000;
+    canli.timerTotal = Math.max(1, (canli.timerTotal || 0) + ek);
+  }
   canli.updated = Date.now();
   cdCanliYaz_(s.ad, canli);
-  return canli;
+  return cdCanliDis_(canli);
 }
 
 function cdCevaplariTopla_(s, canli, it) {
@@ -546,7 +578,7 @@ function cdOgretmenCevaplar_(sinif) {
   const canli = cdCanliOku_(s.ad);
   if (!canli) return { live: null, online: bagli, answers: {} };
   const it = cdDersOku_(canli.lessonId).items[canli.idx];
-  return { live: canli, online: bagli, answers: (it && it.type === 'question') ? cdCevaplariTopla_(s, canli, it) : {},
+  return { live: cdCanliDis_(canli), online: bagli, answers: (it && it.type === 'question') ? cdCevaplariTopla_(s, canli, it) : {},
     rewards: cdOdulOku_(canli.sessId) };
 }
 
