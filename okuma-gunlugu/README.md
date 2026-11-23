@@ -1,17 +1,26 @@
 # Okuma Günlüğüm
 
-Öğrencilerin bireysel kitap okumalarını takip eden uygulama. Google Apps Script üzerinde çalışır; Kodlama Atölyesi ve diğer uygulamalardan ayrı bir Apps Script projesidir.
+Öğrencilerin bireysel kitap okumalarını takip eden uygulama.
 
-- Öğrenci sınıfını ve adını seçer, iki meyve-sebze resminden oluşan şifresiyle girer.
-- Her gün kitap adını, kaç sayfa okuduğunu ve ne anladığını yazar. Daha önce girdiği kitaplar dokunarak seçilir; biten kitap "bitirdim" diye işaretlenir ve bir daha seçenek olarak çıkmaz. Okudukça kitap kurdu uzar.
-- Bir gün 15 sayfa ve üzeri okuyan öğrenci ertesi gün ilk girişinde öğretmeninden tebrik mesajı ve konfetiyle karşılanır.
-- Öğretmen paneli: günlük ve haftalık görünüm, öğrenci bazlı grafik, sınıf listeleri ve şifre kartları.
+- Öğrenci sınıf kodunu yazar (tablet hatırlar), adını seçer, iki meyve-sebze resminden oluşan şifresiyle girer.
+- Her gün kitap adını, kaç sayfa okuduğunu ve ne anladığını yazar. Daha önce girdiği kitaplar dokunarak seçilir; biten kitap işaretlenir ve süslü tek bir boğuma dönüşür. Okudukça kitap kurdu uzar, okumadığı günlerde enerjisi azalır.
+- Bir gün 15 sayfa ve üzeri okuyan öğrenci ertesi gün öğretmeninden tebrik mesajı ve konfetiyle karşılanır.
+- Öğretmen paneli (okul Google hesabıyla giriş): günlük ve haftalık görünüm, öğrenci bazlı grafik, sınıf listeleri, sınıf kodları ve şifre kartları.
+- Yönetici paneli: öğretmen ekleme/çıkarma, sınıfları öğretmene devretme, okul geneli 7 günlük özet.
 
-## Dosyalar
+## Yapı (yeni sistem)
 
-- `Index.html` – uygulamanın ekranı. Apps Script bu dosyayı buradan okur; buraya gönderilen her güncelleme en geç 5 dakikada siteye yansır.
-- `Code.gs` – Apps Script'teki sunucu kodunun kopyası.
+| Parça | Nerede |
+|---|---|
+| Site (öğrenci ve öğretmen ekranları) | Firebase Hosting — `web/index.html` |
+| Veritabanı | Cloud Firestore — erişim `web/firestore.rules` ile sınırlı |
+| Giriş | Firebase Authentication — öğrenciler meyve şifresi, öğretmenler Google |
+| Yönetim köprüsü | Google Apps Script — `Firebase.gs` (öğrenci hesabı açma, yayınlama, taşıma) |
 
-Öğrenci listeleri ve okuma kayıtları bu depoda değil, öğretmenin Google Drive'ındaki "Okuma Günlüğü — Veriler" e-tablosunda tutulur. Öğretmen şifresi yalnızca Apps Script ayarlarında saklanır.
+`web/` klasörüne gönderilen her değişiklik, Apps Script köprüsü tarafından en geç 5 dakikada Firebase'e yayınlanır.
 
-Hız için sınıf listeleri ve okumalar Apps Script önbelleğinde tutulur. E-tabloda elle değişiklik yaparsanız Apps Script'te `onbellegiTemizle` işlevini bir kez çalıştırın.
+## Eski sistem
+
+`Index.html` ve `Code.gs` eski (yalnızca Apps Script + Google E-Tablo) sürümdür. `eskiVerileriTasi` ile veriler yeni sisteme taşınır; `eskiAdresiYonlendir` çalıştırıldıktan sonra eski adres yeni adrese yönlendirir.
+
+Öğrenci adları, şifreleri ve okuma kayıtları bu depoda değil, okulun Firebase projesindeki veritabanında tutulur.

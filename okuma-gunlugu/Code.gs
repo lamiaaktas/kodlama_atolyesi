@@ -4,6 +4,9 @@
  *  "Okuma Günlüğü — Veriler" adlı Google E-Tablo'da tutulur.
  *  Öğretmen şifresi ilk kurulumda 1234'tür; panelden değiştirin.
  *
+ *  YENİ SİSTEM: Firebase'e geçiş için aynı projedeki Firebase.gs dosyasına bakın.
+ *  Veriler taşındıktan sonra bu eski uygulamanın adresi yeni adrese yönlendirir.
+ *
  *  Hız için sınıf listeleri ve öğrencilerin okumaları önbellekte tutulur.
  *  E-Tablo'da elle değişiklik yaparsanız "onbellegiTemizle" işlevini bir kez çalıştırın.
  ******************************************************/
@@ -32,6 +35,8 @@ const PANEL_METIN_GUN = 92;  // öğretmen paneline yazısıyla gönderilen gün
 /* ================= sayfa ================= */
 
 function doGet() {
+  const yeniAdres = PropertiesService.getScriptProperties().getProperty('YENI_ADRES');
+  if (yeniAdres && typeof yonlendirmeSayfasi_ === 'function') return yonlendirmeSayfasi_(yeniAdres);
   let html = sayfaGetir_();
   if (!html) {
     try { html = HtmlService.createHtmlOutputFromFile('Index').getContent(); }

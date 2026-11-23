@@ -1,0 +1,93 @@
+rules_version = '2';
+// Okuma Günlüğüm — Firestore güvenlik kuralları
+// Bu dosya Apps Script yönetim köprüsü tarafından otomatik yayınlanır; elle değiştirmeyin.
+//
+// Kim neye erişir?
+//  - Öğrenci (meyve şifresiyle giriş): yalnızca kendi kaydını okur; yalnızca BUGÜNÜN okumasını
+//    ekler ya da düzeltir. Adını, sınıfını, öğretmenini değiştiremez.
+//  - Öğretmen (okul Google hesabıyla giriş): yalnızca kendi sınıflarını ve öğrencilerini okur.
+//  - Yönetici: tüm okulu okur.
+//  - Sınıf kodu bilen herkes: o sınıfın isim listesini görür (yalnızca isimler; şifre yok).
+//  - Sınıf, öğrenci ve öğretmen ekleme/silme işlemlerini yalnızca yönetim köprüsü yapar.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function girisli() { return request.auth != null; }
+    function eposta() { return request.auth.token.email; }
+    function dogrulanmis() { return girisli() && request.auth.token.email_verified == true; }
+    function ogretmen() {
+      return dogrulanmis() && exists(/databases/$(database)/documents/ogretmenler/$(eposta()));
+    }
+    function yonetici() {
+      return dogrulanmis() && exists(/databases/$(database)/documents/yoneticiler/$(eposta()));
+    }
+
+    // Türkiye saatine göre bugünün tarihi: "2026-11-23"
+    function bugun() {
+      let t = request.time + duration.value(3, 'h');
+      let ay = t.month();
+      let gun = t.day();
+      return string(t.year()) + '-' + (ay < 10 ? '0' : '') + string(ay) + '-' + (gun < 10 ? '0' : '') + string(gun);
+    }
+
+    // Tek bir okuma kaydı: s = sayfa, k = kitap, a = ne anladı, b = kitabı bitirdi, z = kayıt zamanı
+    function kayitGecerli(k) {
+      return k.keys().hasAll(['s', 'k', 'a', 'b'])
+        && k.keys().hasOnly(['s', 'k', 'a', 'b', 'z'])
+        && k.s is int && k.s >= 1 && k.s <= 1000
+        && k.k is string && k.k.size() >= 1 && k.k.size() <= 120
+        && k.a is string && k.a.size() >= 15 && k.a.size() <= 2000
+        && k.b is bool
+        && (!('z' in k) || k.z == request.time);
+    }
+
+    // Öğrenci yalnızca bugünün kaydını ekleyebilir ya da değiştirebilir
+    function okumaGecerli() {
+      let eski = resource.data.get('okumalar', {});
+      let yeni = request.resource.data.get('okumalar', {});
+      let fark = yeni.diff(eski).affectedKeys();
+      return fark.size() == 0
+        || (fark.hasOnly([bugun()]) && bugun() in yeni && yeni[bugun()] is map && kayitGecerli(yeni[bugun()]));
+    }
+
+    match /yoneticiler/{e} {
+      allow get: if girisli() && eposta() == e;
+      allow list, write: if false;
+    }
+
+    match /ogretmenler/{e} {
+      allow get: if (girisli() && eposta() == e) || yonetici();
+      allow list: if yonetici();
+      allow write: if false;
+    }
+
+    // Sınıf: ad, öğretmen, sınıf kodu ve öğrenci listesi (şifreler dahil)
+    match /siniflar/{s} {
+      allow read: if yonetici() || (ogretmen() && resource.data.ogretmen == eposta());
+      allow write: if false;
+    }
+
+    // Sınıf kodu → isim listesi (şifre yok). Kodu bilen okur; kodlar listelenemez.
+    match /kodlar/{k} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
+    // Öğrencinin kaydı ve tüm okumaları
+    match /ogrenciler/{id} {
+      allow read: if (girisli() && request.auth.uid == id)
+        || yonetici()
+        || (ogretmen() && resource.data.ogretmen == eposta());
+      allow update: if girisli() && request.auth.uid == id
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['okumalar', 'tebrik'])
+        && request.resource.data.get('tebrik', '') is string
+        && request.resource.data.get('okumalar', {}) is map
+        && okumaGecerli();
+      allow create, delete: if false;
+    }
+
+    match /{diger=**} {
+      allow read, write: if false;
+    }
+  }
+}
