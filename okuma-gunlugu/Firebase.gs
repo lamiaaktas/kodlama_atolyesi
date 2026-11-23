@@ -32,6 +32,7 @@ function firebaseKurulum() {
   fbProjeKontrol_();
   const props = PropertiesService.getScriptProperties();
 
+  authKontrol_();
   const ayar = fbWebAyari_();
   props.setProperty('FB_AYAR', JSON.stringify(ayar));
   Logger.log('Firebase uygulama ayarı alındı.');
@@ -365,6 +366,7 @@ function ogrencileriEkle_(sinif, adlar, eskiKayitlar) {
  */
 function eskiVerileriTasi() {
   fbProjeKontrol_();
+  authKontrol_();
   const ben = Session.getEffectiveUser().getEmail().toLowerCase();
   const eskiOgr = ogrenciler_();
   const eskiOku = okumalar_();
@@ -405,12 +407,27 @@ function eskiVerileriTasi() {
 
 function ogrEposta_(id) { return id + OGR_EPOSTA_SONU; }
 
+const AUTH_KAPALI = 'Firebase Authentication henüz başlatılmamış. Firebase konsolunda Derleme → Authentication → Başlayın\'a tıklayın, ' +
+  'Oturum açma yöntemi sekmesinde E-posta/Şifre ve Google\'ı etkinleştirin, sonra bu işlevi tekrar çalıştırın.';
+
+/** Öğrenci hesabı açmadan önce Authentication'ın hazır olduğunu kontrol eder. */
+function authKontrol_() {
+  const r = gIstek_('get', 'https://identitytoolkit.googleapis.com/admin/v2/projects/' + FIREBASE_PROJE + '/config', null, true);
+  if (/CONFIGURATION_NOT_FOUND/.test(r.hata || '')) throw new Error(AUTH_KAPALI);
+  if (r.kod === 200) {
+    const ep = r.veri && r.veri.signIn && r.veri.signIn.email;
+    if (ep && ep.enabled === false) throw new Error('Firebase Authentication\'da E-posta/Şifre giriş yöntemi kapalı. Oturum açma yöntemi sekmesinden açın ve tekrar çalıştırın.');
+  }
+}
+
 function authOlustur_(id, sifre, ad) {
   const r = gIstek_('post', 'https://identitytoolkit.googleapis.com/v1/projects/' + FIREBASE_PROJE + '/accounts',
     { localId: id, email: ogrEposta_(id), password: sifre, displayName: ad }, true);
   if (r.kod === 200) return;
   const mesaj = r.hata || '';
   if (/DUPLICATE_LOCAL_ID|EMAIL_EXISTS/.test(mesaj)) { authGuncelle_(id, sifre); return; }
+  if (/CONFIGURATION_NOT_FOUND/.test(mesaj)) throw new Error(AUTH_KAPALI);
+  if (/OPERATION_NOT_ALLOWED|PASSWORD_LOGIN_DISABLED/.test(mesaj)) throw new Error('Firebase Authentication\'da E-posta/Şifre giriş yöntemi kapalı. Oturum açma yöntemi sekmesinden açın ve tekrar çalıştırın.');
   throw new Error('Öğrenci hesabı açılamadı (' + ad + '): ' + mesaj);
 }
 
