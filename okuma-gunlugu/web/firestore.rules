@@ -3,11 +3,10 @@ rules_version = '2';
 // Bu dosya Apps Script yönetim köprüsü tarafından otomatik yayınlanır; elle değiştirmeyin.
 //
 // Kim neye erişir?
-//  - Öğrenci (meyve şifresiyle giriş): yalnızca kendi kaydını okur; yalnızca BUGÜNÜN okumasını
+//  - Öğrenci (kullanıcı adı + şifreyle giriş): yalnızca kendi kaydını okur; yalnızca BUGÜNÜN okumasını
 //    ekler ya da düzeltir. Adını, sınıfını, öğretmenini değiştiremez.
 //  - Öğretmen (okul Google hesabıyla giriş): yalnızca kendi sınıflarını ve öğrencilerini okur.
 //  - Yönetici: tüm okulu okur.
-//  - Sınıf kodu bilen herkes: o sınıfın isim listesini görür (yalnızca isimler; şifre yok).
 //  - Sınıf, öğrenci ve öğretmen ekleme/silme işlemlerini yalnızca yönetim köprüsü yapar.
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -61,16 +60,10 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Sınıf: ad, öğretmen, sınıf kodu ve öğrenci listesi (şifreler dahil)
+    // Sınıf: ad, öğretmen ve öğrenci listesi (kullanıcı adları ve şifreler dahil)
     match /siniflar/{s} {
       allow read: if yonetici() || (ogretmen() && resource.data.ogretmen == eposta());
       allow write: if false;
-    }
-
-    // Sınıf kodu → isim listesi (şifre yok). Kodu bilen okur; kodlar listelenemez.
-    match /kodlar/{k} {
-      allow get: if true;
-      allow list, write: if false;
     }
 
     // Öğrencinin kaydı ve tüm okumaları

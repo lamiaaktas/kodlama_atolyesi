@@ -415,6 +415,15 @@ body[data-mod="cocuk"]{
 .kod-satir{display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
 .cocuk .kod-satir input{flex:1 1 220px;min-width:0;font-family:var(--f-baslik);font-size:2.1rem;font-weight:800;letter-spacing:.35em;text-transform:uppercase;text-align:center;padding:8px 10px}
 .cocuk .kod-satir .btn.buyuk{flex:0 0 auto;width:auto;padding:12px 30px}
+.giris-form{display:flex;flex-direction:column;gap:16px}
+.giris-alan{display:flex;flex-direction:column;gap:6px}
+.cocuk .giris-alan input{font-family:var(--f-baslik);font-size:1.6rem;font-weight:700;padding:12px 16px;letter-spacing:.02em}
+.sifre-satir{display:flex;gap:8px;align-items:stretch}
+.sifre-satir input{flex:1 1 auto;min-width:0}
+.cocuk .goz-btn{flex:none;border:3px solid var(--kalin);border-radius:16px;background:var(--kagit);color:var(--murekkep2);font-family:var(--f-baslik);font-weight:700;padding:0 14px;box-shadow:0 4px 0 var(--kalin)}
+.giris-bilgi{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;background:var(--zemin);border:1px solid var(--cizgi);border-radius:8px;padding:2px 8px}
+.giris-bilgi small{font-family:var(--f-govde);font-weight:700;color:var(--soluk)}
+.sifre-karti .kb{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1.15rem;font-weight:800;display:block}
 .kod-cip{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-baslik);font-weight:800;font-size:1.05rem;letter-spacing:.12em;background:var(--muz);color:#3a2c00;border-radius:12px;padding:4px 12px}
 .kod-cip small{letter-spacing:0;font-weight:700;font-size:.8rem}
 .google-btn{display:inline-flex;align-items:center;gap:10px;font-size:1.05rem}
@@ -428,44 +437,25 @@ body[data-mod="cocuk"]{
 </style>
 
 <div class="kap" id="uygulama" lang="tr">
-  <div id="demo-serit" class="demo-serit" hidden>Önizleme: sınıf kodları <b>ELMA4A</b> (4-A) ve <b>ARMUT4</b> (4-B). Tüm örnek öğrencilerin şifresi 🍎 Elma + 🥕 Havuç. Öğretmen girişinde Google yerine örnek yönetici hesabıyla girilir. 4-A'daki öğrenciler dün 15+ sayfa okudu; 4-B'deki Zeynep Koç 3 gündür okumadı.</div>
+  <div id="demo-serit" class="demo-serit" hidden>Önizleme: örnek giriş için kullanıcı adı <b>defnek</b>, şifre <b>kedi12</b> (tüm örnek öğrencilerin şifresi kedi12). Diğer örnekler: <b>zeynepk</b> 3 gündür okumadı, <b>adat</b> dün 15+ sayfa okudu. Öğretmen girişinde Google yerine örnek yönetici hesabıyla girilir.</div>
 
-  <!-- 1. Sınıf seçimi -->
+  <!-- 1. Öğrenci girişi -->
   <section id="s-sinif" class="kap cocuk">
     <div class="karsilama">
       <div class="kurt-kap maskot" id="maskot" aria-hidden="true" style="width:100%"></div>
       <div><h1>Okuma Günlüğüm</h1><p class="balon">Merhaba! Bugün hangi maceraya daldın?</p></div>
     </div>
-    <div class="kart kap" id="kayitli-kart" hidden>
-      <h2>Sınıfını seç</h2>
-      <div id="sinif-liste" class="izgara"></div>
-    </div>
-    <form class="kart kap" id="kod-form" novalidate>
-      <h2 id="kod-baslik">Sınıf kodunu yaz</h2>
-      <p class="soluk">Öğretmeninin verdiği 6 harfli kodu yaz.</p>
-      <div class="kod-satir"><input id="kod" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Sınıf kodu" placeholder="KODUN"><button class="btn buyuk" type="submit" id="kod-gir">Gir</button></div>
-      <p class="hata" id="kod-hata"></p>
+    <form class="kart kap giris-form" id="giris-form" novalidate autocomplete="off">
+      <h2>Giriş yap</h2>
+      <div class="giris-alan"><label class="etiket" for="kullanici">Kullanıcı adın</label>
+        <input id="kullanici" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="24" placeholder="örnek: aysey"></div>
+      <div class="giris-alan"><label class="etiket" for="sifre">Şifren</label>
+        <div class="sifre-satir"><input id="sifre" type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="24" placeholder="örnek: kedi47">
+        <button type="button" class="goz-btn" id="sifre-goster" aria-pressed="false">Göster</button></div></div>
+      <p class="hata" id="giris-hata"></p>
+      <button class="btn buyuk" type="submit" id="giris-btn">Giriş</button>
     </form>
     <button class="alt-link" id="ogretmen-git">Öğretmen girişi</button>
-  </section>
-
-  <!-- 2. İsim seçimi -->
-  <section id="s-isim" class="kap cocuk" hidden>
-    <div class="ust"><button class="geri" data-git="s-sinif">← Sınıflar</button><span class="cip" id="isim-sinif"></span></div>
-    <div class="kart kap"><h2>Adını bul ve dokun</h2><div id="isim-liste" class="izgara"></div></div>
-  </section>
-
-  <!-- 3. Şifre -->
-  <section id="s-sifre" class="kap cocuk" hidden>
-    <div class="ust"><button class="geri" data-git="s-isim">← İsimler</button></div>
-    <div class="kart kap" style="text-align:center">
-      <h2 id="sifre-baslik">Merhaba!</h2>
-      <p class="soluk">Şifrendeki iki meyve ya da sebzeye sırayla dokun.</p>
-      <div class="slotlar" id="slotlar"><div class="slot"></div><div class="slot"></div></div>
-      <p class="hata" id="sifre-hata"></p>
-      <div id="meyve-izgara" class="izgara"></div>
-      <div><button class="btn ikincil kucuk" id="sifre-sil">Sil</button></div>
-    </div>
   </section>
 
   <!-- 3b. Öğretmenden mesaj -->
@@ -606,7 +596,7 @@ body[data-mod="cocuk"]{
         <h2>Sınıfa öğrenci ekle</h2>
         <div><label class="etiket" for="ek-sinif">Sınıf adı</label><input id="ek-sinif" placeholder="Örn. 4-A" maxlength="30" list="sinif-oneri"><datalist id="sinif-oneri"></datalist></div>
         <div><label class="etiket" for="ek-adlar">Öğrenci adları (her satıra bir öğrenci)</label><textarea id="ek-adlar" placeholder="Ada Yılmaz&#10;Can Demir&#10;..."></textarea>
-          <div class="ipucu"><span>E-okul listesinden kopyalayıp yapıştırabilirsiniz. Her öğrenciye otomatik meyve-sebze şifresi verilir. Yeni bir sınıf adı yazarsanız sınıf açılır ve bir sınıf kodu verilir.</span></div></div>
+          <div class="ipucu"><span>E-okul listesinden kopyalayıp yapıştırabilirsiniz. Her öğrenciye kendiliğinden bir kullanıcı adı (ör. aysey) ve şifre (ör. kedi47) verilir. Yeni bir sınıf adı yazarsanız sınıf açılır.</span></div></div>
         <p class="hata" id="ek-hata"></p>
         <button class="btn" type="submit">Öğrencileri ekle</button>
       </form>
@@ -657,13 +647,18 @@ const $=s=>document.querySelector(s);
 const nfc=v=>String(v==null?'':v).normalize('NFC');
 const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=nfc(txt);return e;};
 const YENI='__yeni__';
-const S={sinif:null,ogr:null,sifre:[],veri:null,gun:'bugun',pin:'',pinGiris:'',siniflar:[],kitap:YENI,kaydediliyor:false};
+const S={ogr:null,veri:null,gun:'bugun',pin:'',siniflar:[],kitap:YENI,kaydediliyor:false};
 
 /* ---------- veri katmanı: Firebase (gerçek site) ya da önizleme verisi ---------- */
 const AYAR=window.ON_AYAR||null;
 const TEBRIK_ESIGI=15;
 const TEBRIKLER=['Harika gidiyorsun!','Gayet güzel!','Müthiş!','Çabanı takdir ediyorum.','Seninle gurur duyuyorum!','Bravo, emeğine sağlık!','Böyle devam et, süpersin!','Okuma yıldızı oldun!','Kitap kurdun çok mutlu!','Harika bir okuma günüydü!'];
 const OGR_EPOSTA='@ogrenci.example.com';
+// Kullanıcı adı ve şifre: Türkçe harfler İngilizce karşılığına, büyük harf küçüğe çevrilir (KEDİ47 → kedi47).
+function girisMetni(v){
+  const tr={'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','Ç':'c','Ğ':'g','İ':'i','I':'i','Ö':'o','Ş':'s','Ü':'u','â':'a','î':'i','û':'u'};
+  return nfc(v).replace(/[çğıöşüÇĞİIÖŞÜâîû]/g,c=>tr[c]).toLowerCase().replace(/\s+/g,'').replace(/[^a-z0-9._-]/g,'');
+}
 function api(fn,...args){
   if(AYAR)return Promise.resolve().then(()=>Fb[fn](...args));
   return new Promise((ok,hata)=>setTimeout(()=>{try{const r=Mock[fn](...args);ok(r==null?r:JSON.parse(JSON.stringify(r)));}catch(e){hata(e);}},60));
@@ -683,7 +678,7 @@ function fbHazir(){
 }
 function authMesaj(e){
   const c=(e&&e.code)||'';
-  if(/invalid-credential|wrong-password|user-not-found|invalid-login|invalid-email/.test(c))return'Şifre yanlış, tekrar dene.';
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login|invalid-email/.test(c))return'Kullanıcı adı ya da şifre yanlış. Tekrar dene.';
   if(/too-many-requests/.test(c))return'Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.';
   if(/network-request-failed/.test(c))return'İnternet bağlantısı yok gibi görünüyor.';
   if(/user-disabled/.test(c))return'Bu hesap kapatılmış. Öğretmenine söyle.';
@@ -696,16 +691,16 @@ function okumaListesi(okumalar){return Object.keys(okumalar||{}).sort().map(t=>{
 function tebrikSec(id,dun){let h=0;for(const c of id+dun)h=(h*31+c.charCodeAt(0))>>>0;return TEBRIKLER[h%TEBRIKLER.length];}
 const OTURUM={eposta:'',yonetici:false,siniflar:{}}; // sınıf adı → belge kimliği
 const Fb={
-  async getRosterByKod(kod){const{F,db}=await fbHazir();const s=await F.getDoc(F.doc(db,'kodlar',kod));if(!s.exists())return null;const d=s.data();return{kod,sinif:d.sinif,imza:d.imza||'',ogrenciler:d.ogrenciler||[]};},
-  async studentLogin(id,sifre){
+  async studentLogin(kullanici,sifre){
     const{Au,F,auth,db}=await fbHazir();
-    try{await Au.signInWithEmailAndPassword(auth,id+OGR_EPOSTA,sifre);}catch(e){return{ok:false,msg:authMesaj(e)};}
+    try{await Au.signInWithEmailAndPassword(auth,kullanici+OGR_EPOSTA,sifre);}catch(e){return{ok:false,msg:authMesaj(e)};}
+    const id=auth.currentUser.uid;
     const ref=F.doc(db,'ogrenciler',id);let s;
     try{s=await F.getDoc(ref);}catch(e){await Au.signOut(auth);return{ok:false,msg:'Kaydın açılamadı. İnternet bağlantısını kontrol et.'};}
     if(!s.exists()){await Au.signOut(auth);return{ok:false,msg:'Kaydın bulunamadı. Öğretmenine söyle.'};}
     const d=s.data(),bugun=bugunIst(),dun=gunEkle(bugun,-1),r=(d.okumalar||{})[dun];let tebrik=null;
     if(r&&r.s>=TEBRIK_ESIGI&&d.tebrik!==dun){
-      tebrik={mesaj:tebrikSec(id,dun),sayfa:r.s,kitap:r.k,imza:(S.kodVeri&&S.kodVeri.imza)||'Öğretmenin'};
+      tebrik={mesaj:tebrikSec(id,dun),sayfa:r.s,kitap:r.k,imza:d.imza||'Öğretmenin'};
       F.updateDoc(ref,{tebrik:dun}).catch(()=>{});
     }
     return{ok:true,tebrik,ogrenci:{id,ad:d.ad,sinif:d.sinif},bugun,dun,liste:okumaListesi(d.okumalar)};
@@ -744,7 +739,7 @@ const Fb={
     const s=await F.getDocs(OTURUM.yonetici?c:F.query(c,F.where('ogretmen','==',OTURUM.eposta)));
     OTURUM.siniflar={};
     return s.docs.map(d=>{const x=d.data();OTURUM.siniflar[x.ad]=d.id;
-      return{sinif:nfc(x.ad),kod:x.kod,ogretmen:x.ogretmen,ogrenciler:(x.ogrenciler||[]).map(o=>({id:o.id,ad:nfc(o.ad),sifre:nfc(o.sifre)})).sort((a,b)=>a.ad.localeCompare(b.ad,'tr'))};})
+      return{sinif:nfc(x.ad),ogretmen:x.ogretmen,ogrenciler:(x.ogrenciler||[]).map(o=>({id:o.id,ad:nfc(o.ad),kullanici:o.kullanici||'',sifre:o.sifre||''})).sort((a,b)=>a.ad.localeCompare(b.ad,'tr'))};})
       .sort((a,b)=>a.sinif.localeCompare(b.sinif,'tr'));
   },
   async tClassData(pin,sinif){
@@ -769,13 +764,13 @@ const Fb={
   async tResetPassword(pin,id){await Fb.kopru('sifreYenile',{id});return Fb.tGetClasses();},
   async tRenameClass(pin,eski,yeni){await Fb.kopru('sinifAdDegistir',{eski,yeni});return Fb.tGetClasses();},
   async tDeleteClass(pin,sinif){await Fb.kopru('sinifSil',{sinif});return Fb.tGetClasses();},
-  async tRegenCode(pin,sinif){await Fb.kopru('kodYenile',{sinif});return Fb.tGetClasses();},
+  async tSetUsername(pin,id,kullanici){await Fb.kopru('kullaniciDegistir',{id,kullanici});return Fb.tGetClasses();},
   async tSetTeacherName(pin,imza){await Fb.kopru('imzaKaydet',{imza});return{ok:true};},
   async aSchool(){
     const{F,db}=await fbHazir();
     const[og,sn]=await Promise.all([F.getDocs(F.collection(db,'ogretmenler')),F.getDocs(F.collection(db,'siniflar'))]);
     return{ogretmenler:og.docs.map(d=>({eposta:d.id,ad:nfc(d.data().ad||'')})).sort((a,b)=>(a.ad||a.eposta).localeCompare(b.ad||b.eposta,'tr')),
-      siniflar:sn.docs.map(d=>{const x=d.data();return{sinif:nfc(x.ad),ogretmen:x.ogretmen,kod:x.kod,ogrenciSayisi:(x.ogrenciler||[]).length};}).sort((a,b)=>a.sinif.localeCompare(b.sinif,'tr'))};
+      siniflar:sn.docs.map(d=>{const x=d.data();return{sinif:nfc(x.ad),ogretmen:x.ogretmen,ogrenciSayisi:(x.ogrenciler||[]).length};}).sort((a,b)=>a.sinif.localeCompare(b.sinif,'tr'))};
   },
   async aSchoolSummary(){
     const{F,db}=await fbHazir();const s=await F.getDocs(F.collection(db,'ogrenciler'));
@@ -799,7 +794,7 @@ function gunAdi(s){const[y,m,d]=s.split('-').map(Number);return GUNLER[new Date(
 const kitapAnahtari=k=>nfc(k).replace(/\s+/g,' ').trim().toLocaleLowerCase('tr');
 
 /* ---------- ekran geçişleri ---------- */
-const OGRENCI_EKRANLARI=['s-isim','s-sifre','s-mesaj','s-yorgun','s-gunluk','s-tamam'];
+const OGRENCI_EKRANLARI=['s-sinif','s-mesaj','s-yorgun','s-gunluk','s-tamam'];
 let bosta=null;
 function goster(id){
   document.querySelectorAll('#uygulama > section').forEach(s=>s.hidden=s.id!==id);
@@ -813,83 +808,34 @@ function bostaKur(){
   const aktif=[...document.querySelectorAll('#uygulama > section')].find(s=>!s.hidden);
   if(!aktif)return;
   const sure=aktif.id==='s-tamam'?20000:aktif.id==='s-panel'?30*60000:OGRENCI_EKRANLARI.includes(aktif.id)?4*60000:0;
-  if(sure)bosta=setTimeout(()=>{if(S.kaydediliyor){bostaKur();return;}const ogretmen=!!S.pin;S.ogr=null;S.sifre=[];S.veri=null;S.pin='';api(ogretmen?'teacherLogout':'studentLogout').catch(()=>{});goster('s-sinif');},sure);
+  if(sure)bosta=setTimeout(()=>{if(S.kaydediliyor){bostaKur();return;}const ogretmen=!!S.pin;S.ogr=null;S.veri=null;S.pin='';api(ogretmen?'teacherLogout':'studentLogout').catch(()=>{});goster('s-sinif');},sure);
 }
 ['pointerdown','keydown'].forEach(t=>document.addEventListener(t,bostaKur,{passive:true}));
 document.querySelectorAll('[data-git]').forEach(b=>b.onclick=()=>goster(b.dataset.git));
 
-/* ---------- 1-2. sınıf kodu ve isim listesi ---------- */
-// Tablet daha önce girilen sınıf kodlarını hatırlar; sınıflar düğme olarak çıkar.
-const KOD_ANAHTAR='okuma_sinif_kodlari';
-let ROSTER=[]; // [{kod, sinif, imza, ogrenciler:[{id, ad}]}]
-function kayitliKodlar(){try{const l=JSON.parse(localStorage.getItem(KOD_ANAHTAR)||'[]');return Array.isArray(l)?l.filter(k=>/^[A-Z0-9]{6}$/.test(k)):[];}catch(e){return[];}}
-function kodlariKaydet(l){try{localStorage.setItem(KOD_ANAHTAR,JSON.stringify([...new Set(l)].slice(0,8)));}catch(e){}}
-function kodTemizle(v){return String(v||'').toLocaleUpperCase('en').replace(/[İ]/g,'I').replace(/[^A-Z0-9]/g,'').slice(0,6);}
-function rosterSirala(){ROSTER.sort((a,b)=>nfc(a.sinif).localeCompare(nfc(b.sinif),'tr'));}
-function siniflariCiz(){
-  const kutu=$('#sinif-liste');kutu.innerHTML='';
-  ROSTER.forEach((c,i)=>{const b=el('button','secim sinif-btn r'+(i%6+1),c.sinif);b.type='button';b.onclick=()=>isimleriAc(c.kod);kutu.append(b);});
-  $('#kayitli-kart').hidden=!ROSTER.length;
-  $('#kod-baslik').textContent=ROSTER.length?'Başka bir sınıfın kodu':'Sınıf kodunu yaz';
-  $('#kod').value='';$('#kod-hata').textContent='';
+/* ---------- 1. öğrenci girişi: kullanıcı adı + şifre ---------- */
+function siniflariCiz(){ // giriş ekranı her açıldığında temizlenir (ortak tabletler)
+  $('#kullanici').value='';$('#sifre').value='';$('#sifre').type='password';
+  $('#sifre-goster').textContent='Göster';$('#sifre-goster').setAttribute('aria-pressed','false');$('#giris-hata').textContent='';
 }
-async function rosterYukle(){
-  const kodlar=kayitliKodlar();if(!kodlar.length)return;
-  const sonuc=await Promise.all(kodlar.map(k=>api('getRosterByKod',k).catch(()=>undefined)));
-  const kalan=[],yeni=[];
-  kodlar.forEach((k,i)=>{const r=sonuc[i];if(r===null)return; /* kod artık yok */ kalan.push(k);if(r)yeni.push(r);});
-  kodlariKaydet(kalan);ROSTER=yeni;rosterSirala();
-  if(!$('#s-sinif').hidden)siniflariCiz();
-}
-$('#kod').addEventListener('input',e=>{const v=kodTemizle(e.target.value);if(v!==e.target.value)e.target.value=v;});
-$('#kod-form').addEventListener('submit',async e=>{
-  e.preventDefault();const kod=kodTemizle($('#kod').value),h=$('#kod-hata');
-  if(kod.length!==6){h.textContent='Sınıf kodu 6 harf ve rakamdan oluşur.';return;}
-  const b=$('#kod-gir');b.disabled=true;h.textContent='';
-  try{
-    const r=await api('getRosterByKod',kod);
-    if(!r){h.textContent='Bu kodla bir sınıf bulunamadı. Kodu kontrol et.';return;}
-    ROSTER=ROSTER.filter(c=>c.kod!==kod).concat([r]);rosterSirala();
-    kodlariKaydet([kod,...kayitliKodlar()]);isimleriAc(kod);
-  }catch(err){h.textContent=err.message;}
-  finally{b.disabled=false;}
-});
-function isimleriCiz(c){
-  const kutu=$('#isim-liste');kutu.innerHTML='';
-  if(!c.ogrenciler.length){kutu.append(el('p','bos-durum','Bu sınıfta henüz öğrenci yok.'));return;}
-  c.ogrenciler.forEach((o,i)=>{const b=el('button','secim');b.type='button';b.append(el('span','ad-rozet r'+(i%6+1),nfc(o.ad).charAt(0).toLocaleUpperCase('tr')),el('span',null,o.ad));b.onclick=()=>sifreAc(o);kutu.append(b);});
-}
-function isimleriAc(kod){
-  const c=ROSTER.find(x=>x.kod===kod);if(!c)return;
-  S.sinif=c.sinif;S.kodVeri=c;$('#isim-sinif').textContent=nfc(c.sinif);goster('s-isim');isimleriCiz(c);
-  // liste değişmiş olabilir (yeni öğrenci): arka planda tazele
-  api('getRosterByKod',kod).then(r=>{
-    if(r===null){ROSTER=ROSTER.filter(x=>x.kod!==kod);kodlariKaydet(kayitliKodlar().filter(k=>k!==kod));if(!$('#s-isim').hidden)goster('s-sinif');return;}
-    if(!r)return;const i=ROSTER.findIndex(x=>x.kod===kod);if(i<0)return;
-    const degisti=JSON.stringify(ROSTER[i])!==JSON.stringify(r);ROSTER[i]=r;
-    if(S.kodVeri&&S.kodVeri.kod===kod)S.kodVeri=r;
-    if(degisti&&!$('#s-isim').hidden)isimleriCiz(r);
-  }).catch(()=>{});
-}
-
-/* ---------- 3. şifre ---------- */
-(function(){const iz=$('#meyve-izgara');MEYVELER.forEach(([ad,e])=>{const b=el('button','secim meyve');b.type='button';b.style.setProperty('--mr',MEYVE_RENK[ad]||'#fff');b.setAttribute('aria-label',ad);b.append(el('span','e',e),el('span',null,ad));b.onclick=()=>meyveSec(ad);iz.append(b);});})();
+['#kullanici','#sifre'].forEach(sec=>$(sec).addEventListener('input',e=>{const v=girisMetni(e.target.value);if(v!==e.target.value)e.target.value=v;$('#giris-hata').textContent='';}));
+$('#sifre-goster').onclick=()=>{const i=$('#sifre'),acik=i.type==='password';i.type=acik?'text':'password';
+  $('#sifre-goster').textContent=acik?'Gizle':'Göster';$('#sifre-goster').setAttribute('aria-pressed',acik);i.focus();};
 function ilkAd(ad){return nfc(ad).split(' ')[0];}
-function sifreAc(o){S.ogr=o;S.sifre=[];$('#sifre-baslik').textContent='Merhaba, '+ilkAd(o.ad)+'!';$('#sifre-hata').textContent='';slotCiz();goster('s-sifre');}
-function slotCiz(){$('#slotlar').querySelectorAll('.slot').forEach((s,i)=>{const ad=S.sifre[i];s.className='slot'+(ad?' dolu':'');s.innerHTML='';if(ad){s.append(el('span',null,EMOJI[ad]),el('small',null,ad));}});}
-$('#sifre-sil').onclick=()=>{S.sifre.pop();slotCiz();$('#sifre-hata').textContent='';};
-async function meyveSec(ad){
-  if(S.sifre.length>=2)return;
-  S.sifre.push(ad);slotCiz();$('#sifre-hata').textContent='';
-  if(S.sifre.length<2)return;
-  const kart=$('#s-sifre .kart');kart.classList.add('yukleniyor');
+$('#giris-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const kullanici=girisMetni($('#kullanici').value),sifre=girisMetni($('#sifre').value),h=$('#giris-hata');
+  if(!kullanici){h.textContent='Kullanıcı adını yaz.';$('#kullanici').focus();return;}
+  if(!sifre){h.textContent='Şifreni yaz.';$('#sifre').focus();return;}
+  const kart=$('#giris-form'),b=$('#giris-btn');kart.classList.add('yukleniyor');b.disabled=true;h.textContent='';
   try{
-    const r=await api('studentLogin',S.ogr.id,S.sifre.join('-'));
-    if(!r.ok){$('#sifre-hata').textContent=r.msg;kart.classList.remove('salla');void kart.offsetWidth;kart.classList.add('salla');S.sifre=[];setTimeout(slotCiz,500);return;}
+    const r=await api('studentLogin',kullanici,sifre);
+    if(!r.ok){h.textContent=r.msg;kart.classList.remove('salla');void kart.offsetWidth;kart.classList.add('salla');$('#sifre').value='';$('#sifre').focus();return;}
+    S.ogr={id:r.ogrenci.id,ad:r.ogrenci.ad};
     S.veri=hesapla(r);if(r.tebrik)mesajAc(r.tebrik);else if(S.veri.okumadigiGun)yorgunAc();else gunlukAc();
-  }catch(e){$('#sifre-hata').textContent=e.message;S.sifre=[];slotCiz();}
-  finally{kart.classList.remove('yukleniyor');}
-}
+  }catch(err){h.textContent=err.message;}
+  finally{kart.classList.remove('yukleniyor');b.disabled=false;}
+});
 
 /* ---------- öğrenci verisini hesapla: kayıt listesinden seri, toplam, kitaplar, kurt ---------- */
 // liste: [[tarih, sayfa, kitap, bitti, yazı?], ...] eskiden yeniye
@@ -1041,7 +987,7 @@ $('#okuma-form').addEventListener('submit',ev=>{
   S.kaydediliyor=true;
   const durum=$('#t-durum'),bitir=$('#bitir');
   durum.className='durum';durum.textContent='Kaydediliyor…';bitir.disabled=true;
-  api('saveReading',S.ogr.id,S.sifre.join('-'),veri).then(r=>{
+  api('saveReading',S.ogr.id,null,veri).then(r=>{
     S.kaydediliyor=false;
     if(r&&(r.liste||r.kurt))S.veri=hesapla(r);
     durum.className='durum ok';durum.textContent='Kaydedildi ✓';bitir.disabled=false;bostaKur();
@@ -1463,7 +1409,7 @@ function detayGoster(k){
 }
 
 /* sınıf listeleri */
-function sifreEl(s){const w=el('span','sifre-goster');const p=nfc(s).split('-');w.append(document.createTextNode(p.map(x=>EMOJI[x]||'?').join(' ')),el('small',null,p.join(' + ')));return w;}
+function bilgiEl(etiket,deger){const w=el('span','giris-bilgi');w.append(el('small',null,etiket),document.createTextNode(deger||'—'));return w;}
 function onayButon(metin,onayMetin,fn,cls='btn ikincil kucuk'){
   const b=el('button',cls,metin);let bekle=false,t;
   b.onclick=async()=>{if(!bekle){bekle=true;b.textContent=onayMetin;b.classList.add('tehlike');b.classList.remove('ikincil');t=setTimeout(()=>{bekle=false;b.textContent=metin;b.classList.remove('tehlike');b.classList.add('ikincil');},4000);return;}
@@ -1477,23 +1423,35 @@ function sinifBloklariCiz(){
   S.siniflar.forEach(c=>{
     const b=el('div','kart sinif-blok');
     const bas=el('div','sinif-bas');const bl=el('h2',null,c.sinif+' ');bl.append(el('span','cip',c.ogrenciler.length+' öğrenci'));
-    const kodSatir=el('div','butonlar');const kc=el('span','kod-cip');kc.append(el('small',null,'Sınıf kodu'),document.createTextNode(c.kod||'—'));kodSatir.append(kc);
+    const kodSatir=el('div','butonlar');
     if(S.yonetici&&c.ogretmen&&c.ogretmen!==S.eposta)kodSatir.append(el('span','cip',c.ogretmen));
-    kodSatir.append(onayButon('Kodu yenile','Eski kod çalışmayacak. Emin misiniz?',()=>listeIslem('tRegenCode',c.sinif)));
     const bt=el('div','butonlar');
-    const kartBtn=el('button','btn kucuk','Şifre kartları');kartBtn.onclick=()=>sifreKartlari(c);
+    const kartBtn=el('button','btn kucuk','Giriş kartları');kartBtn.onclick=()=>sifreKartlari(c);
     const ekleBtn=el('button','btn ikincil kucuk','Öğrenci ekle');ekleBtn.onclick=()=>{$('#ek-sinif').value=c.sinif;$('#ek-adlar').focus();window.scrollTo({top:0,behavior:'smooth'});};
     const adBtn=el('button','btn ikincil kucuk','Adını değiştir');adBtn.onclick=()=>adDegistir(c.sinif,bas);
     bt.append(kartBtn,ekleBtn,adBtn,onayButon('Sınıfı sil','Silmek için tekrar dokunun',()=>listeIslem('tDeleteClass',c.sinif)));
     bas.append(bl,bt);b.append(bas,kodSatir);
     c.ogrenciler.forEach(o=>{
-      const r=el('div','ogr-satir');r.append(el('span','ad',o.ad),sifreEl(o.sifre));
+      const r=el('div','ogr-satir');r.append(el('span','ad',o.ad),bilgiEl('kullanıcı',o.kullanici),bilgiEl('şifre',o.sifre));
       const yb=el('button','btn ikincil kucuk','Yeni şifre');yb.onclick=async()=>{yb.disabled=true;try{await listeIslem('tResetPassword',o.id);}catch(e){yb.disabled=false;yb.textContent=e.message;}};
-      const bb=el('div','butonlar');bb.append(yb,onayButon('Çıkar','Emin misiniz?',()=>listeIslem('tRemoveStudent',o.id)));
+      const kb=el('button','btn ikincil kucuk','Kullanıcı adı');kb.onclick=()=>kullaniciDuzenle(o,r);
+      const bb=el('div','butonlar');bb.append(yb,kb,onayButon('Çıkar','Emin misiniz?',()=>listeIslem('tRemoveStudent',o.id)));
       r.append(bb);b.append(r);
     });
     k.append(b);
   });
+}
+function kullaniciDuzenle(o,satir){
+  const f=el('form','ogr-satir');const i=el('input');i.value=o.kullanici||'';i.id='yeni-kullanici';i.maxLength=20;i.style.maxWidth='220px';
+  i.setAttribute('autocapitalize','none');i.setAttribute('spellcheck','false');i.setAttribute('aria-label',o.ad+' için yeni kullanıcı adı');
+  i.addEventListener('input',()=>{const v=girisMetni(i.value);if(v!==i.value)i.value=v;});
+  const kay=el('button','btn kucuk','Kaydet');const ip=el('button','btn ikincil kucuk','Vazgeç');ip.type='button';ip.onclick=sinifBloklariCiz;
+  const h=el('span','hata');
+  f.append(el('span','ad',o.ad),i,kay,ip,h);
+  f.onsubmit=async e=>{e.preventDefault();const v=girisMetni(i.value);
+    if(!/^[a-z0-9._-]{3,20}$/.test(v)){h.textContent='3-20 harf ya da rakam olmalı.';return;}
+    kay.disabled=true;try{await listeIslem('tSetUsername',o.id,v);}catch(err){kay.disabled=false;h.textContent=err.message;}};
+  satir.replaceWith(f);i.focus();i.select();
 }
 function adDegistir(eski,bas){
   const f=el('form','filtre');const d=el('div');const i=el('input');i.value=nfc(eski);i.id='yeni-sinif-adi';i.maxLength=30;d.append(i);
@@ -1512,9 +1470,9 @@ $('#ekle-form').addEventListener('submit',async e=>{
 });
 function sifreKartlari(c){
   const g=el('div','kartlar');
-  c.ogrenciler.forEach(o=>{const k=el('div','sifre-karti');const p=nfc(o.sifre).split('-');k.append(el('b',null,o.ad),el('div','em',p.map(x=>EMOJI[x]||'?').join(' ')),el('small',null,p.join(' + ')),el('div','soluk','Sınıf kodu: '+(c.kod||'')));g.append(k);});
-  const ic=[el('h3',null,c.sinif+' şifre kartları'),el('p','soluk','Sınıf kodu: '+(c.kod||'')+'. Kesip öğrencilere dağıtabilirsiniz. Şifreyi unutan öğrenciye buradan bakabilir ya da "Yeni şifre" verebilirsiniz.'),g];
-  if(AYAR){const y=el('button','btn','Yazdır');y.onclick=()=>{const a=$('#yazdir-alani');a.innerHTML='';const h=el('h2',null,c.sinif+' — Okuma Günlüğüm şifreleri');a.append(h,g.cloneNode(true));document.body.classList.add('yazdir');window.print();setTimeout(()=>document.body.classList.remove('yazdir'),500);};ic.splice(2,0,y);}
+  c.ogrenciler.forEach(o=>{const k=el('div','sifre-karti');k.append(el('b',null,o.ad),el('small',null,'Kullanıcı adı'),el('span','kb',o.kullanici||'—'),el('small',null,'Şifre'),el('span','kb',o.sifre||'—'));g.append(k);});
+  const ic=[el('h3',null,c.sinif+' giriş kartları'),el('p','soluk','Kesip öğrencilere dağıtabilirsiniz. Şifresini unutan öğrenciye buradan bakabilir ya da "Yeni şifre" verebilirsiniz.'),g];
+  if(AYAR){const y=el('button','btn','Yazdır');y.onclick=()=>{const a=$('#yazdir-alani');a.innerHTML='';const h=el('h2',null,c.sinif+' — Okuma Günlüğüm giriş bilgileri');a.append(h,g.cloneNode(true));document.body.classList.add('yazdir');window.print();setTimeout(()=>document.body.classList.remove('yazdir'),500);};ic.splice(2,0,y);}
   modal(ic);
 }
 $('#ad-form').addEventListener('submit',async e=>{
@@ -1539,7 +1497,7 @@ async function okulYukle(veri){
 function okulSiniflariCiz(ozet){
   const t=$('#ok-siniflar');t.innerHTML='';if(!OKUL)return;
   if(!OKUL.siniflar.length){t.append(el('p','bos-durum','Henüz sınıf yok.'));return;}
-  const tb=el('table');const hr=el('tr');['Sınıf','Öğretmen','Kod','Öğrenci','7 günde okuyan','7 günde sayfa','Bugün giren'].forEach(h=>hr.append(el('th',null,h)));
+  const tb=el('table');const hr=el('tr');['Sınıf','Öğretmen','Öğrenci','7 günde okuyan','7 günde sayfa','Bugün giren'].forEach(h=>hr.append(el('th',null,h)));
   const th=el('thead');th.append(hr);tb.append(th);const bd=el('tbody');
   OKUL.siniflar.forEach(c=>{
     const tr=el('tr');tr.append(el('td','top',c.sinif));
@@ -1548,7 +1506,7 @@ function okulSiniflariCiz(ozet){
     if(!OKUL.ogretmenler.some(o=>o.eposta===c.ogretmen)){const op=el('option',null,c.ogretmen||'—');op.value=c.ogretmen||'';sel.prepend(op);}
     sel.value=c.ogretmen||'';
     sel.onchange=async()=>{sel.disabled=true;try{OKUL=await api('aTransferClass',S.pin,c.sinif,sel.value);Object.keys(SINIF_VERI).forEach(k=>delete SINIF_VERI[k]);await siniflarYenile();okulYukle(OKUL);}catch(e){sel.value=c.ogretmen;sel.disabled=false;$('#ok-siniflar').prepend(el('p','hata',e.message));}};
-    const td=el('td');td.append(sel);tr.append(td,el('td',null,c.kod||''),el('td',null,c.ogrenciSayisi));
+    const td=el('td');td.append(sel);tr.append(td,el('td',null,c.ogrenciSayisi));
     const z=ozet&&ozet[c.sinif];
     tr.append(el('td',null,z?z.okuyan+' / '+c.ogrenciSayisi:'·'),el('td',null,z?z.sayfa:'·'),el('td',null,z?z.bugun:'·'));
     bd.append(tr);
@@ -1571,9 +1529,12 @@ const Mock=(()=>{
   let imza='';const goruldu={};const T=()=>bugunIst();
   const BEN='yonetici@okul.example';
   const ogretmenler=[{eposta:BEN,ad:'Örnek Yönetici'},{eposta:'ece@okul.example',ad:'Ece Yıldız'}];
-  const siniflar=[{ad:'4-A',kod:'ELMA4A',ogretmen:BEN},{ad:'4-B',kod:'ARMUT4',ogretmen:'ece@okul.example'}];
+  const siniflar=[{ad:'4-A',ogretmen:BEN},{ad:'4-B',ogretmen:'ece@okul.example'}];
   const og=[];let n=0;
-  const ekle=(s,ad)=>og.push({id:'o'+(++n),sinif:s,ad,sifre:'Elma-Havuç'});
+  const KELIMELER=['elma','armut','kiraz','karpuz','limon','kivi','mango','ayva','erik','incir','kedi','balina','zebra','panda','aslan','kaplan','tilki','kartal','yunus','penguen','bulut','deniz','orman','nehir','kitap','kalem','defter','roket','gemi','tren','araba','fener'];
+  const kAdi=ad=>{const p=ad.trim().split(/\s+/);let b=girisMetni(p[0])+(p.length>1?girisMetni(p[p.length-1]).charAt(0):'');b=b.slice(0,16)||'ogrenci';let k=b,i=2;while(og.some(o=>o.kullanici===k))k=b+(i++);return k;};
+  const rs=()=>KELIMELER[Math.floor(Math.random()*KELIMELER.length)]+(10+Math.floor(Math.random()*90));
+  const ekle=(s,ad)=>og.push({id:'o'+(++n),sinif:s,ad,kullanici:kAdi(ad),sifre:'kedi12'});
   ['Ada Yılmaz','Can Demir','Defne Kaya','Efe Şahin','Elif Çelik','Mert Arslan','Nehir Aksoy','Yusuf Kılıç'].forEach(a=>ekle('4-A',a));
   ['Zeynep Koç','Kerem Aydın','Ela Öztürk','Ömer Polat','İpek Güneş','Işıl Doğan'].forEach(a=>ekle('4-B',a));
   const kitaplar=['Küçük Prens','Pal Sokağı Çocukları','Charlie\'nin Çikolata Fabrikası','Şeker Portakalı'];
@@ -1585,31 +1546,28 @@ const Mock=(()=>{
   og.forEach(o=>{const k=ok.filter(r=>r.ogrenciId===o.id);for(let j=0;j<k.length-1;j++){if(k[j].kitap!==k[j+1].kitap)k[j].bitti=1;}});
   [0,1,2,4].forEach(i=>{const o=og[i];const k=ok.filter(r=>r.ogrenciId===o.id);const sonKitap=k.length?k[k.length-1].kitap:kitaplar[0];ok.push({tarih:T(),ogrenciId:o.id,kitap:sonKitap,sayfa:8+i*3,anl:cumleler[i%4],bitti:0});});
   const tr=(a,b)=>a.localeCompare(b,'tr');
-  const rs=()=>{const a=MEYVELER[Math.floor(Math.random()*16)][0];let b;do{b=MEYVELER[Math.floor(Math.random()*16)][0];}while(b===a);return a+'-'+b;};
-  const rk=()=>{const h='ABCDEFGHJKLMNPRSTUVYZ23456789';let s='';for(let i=0;i<6;i++)s+=h[Math.floor(Math.random()*h.length)];return s;};
   const liste=id=>ok.filter(r=>r.ogrenciId===id).sort((a,b)=>a.tarih.localeCompare(b.tarih)).map(r=>[r.tarih,r.sayfa,r.kitap,r.bitti,r.anl]);
   const sinifBul=ad=>{const s=siniflar.find(x=>x.ad===ad);if(!s)throw new Error('Sınıf bulunamadı.');return s;};
-  const cls=()=>siniflar.map(s=>({sinif:s.ad,kod:s.kod,ogretmen:s.ogretmen,ogrenciler:og.filter(o=>o.sinif===s.ad).map(o=>({id:o.id,ad:o.ad,sifre:o.sifre})).sort((a,b)=>tr(a.ad,b.ad))})).sort((a,b)=>tr(a.sinif,b.sinif));
-  const okul=()=>({ogretmenler:ogretmenler.slice(),siniflar:siniflar.map(s=>({sinif:s.ad,ogretmen:s.ogretmen,kod:s.kod,ogrenciSayisi:og.filter(o=>o.sinif===s.ad).length})).sort((a,b)=>tr(a.sinif,b.sinif))});
+  const cls=()=>siniflar.map(s=>({sinif:s.ad,ogretmen:s.ogretmen,ogrenciler:og.filter(o=>o.sinif===s.ad).map(o=>({id:o.id,ad:o.ad,kullanici:o.kullanici,sifre:o.sifre})).sort((a,b)=>tr(a.ad,b.ad))})).sort((a,b)=>tr(a.sinif,b.sinif));
+  const okul=()=>({ogretmenler:ogretmenler.slice(),siniflar:siniflar.map(s=>({sinif:s.ad,ogretmen:s.ogretmen,ogrenciSayisi:og.filter(o=>o.sinif===s.ad).length})).sort((a,b)=>tr(a.sinif,b.sinif))});
   return{
-    getRosterByKod:kod=>{const s=siniflar.find(x=>x.kod===kod);if(!s)return null;return{kod,sinif:s.ad,imza:s.ogretmen===BEN?imza:'',ogrenciler:og.filter(o=>o.sinif===s.ad).map(o=>({id:o.id,ad:o.ad})).sort((a,b)=>tr(a.ad,b.ad))};},
-    studentLogin:(id,p)=>{const s=og.find(x=>x.id===id);if(!s)return{ok:false,msg:'Kaydın bulunamadı. Öğretmenine söyle.'};if(s.sifre!==p)return{ok:false,msg:'Şifre yanlış, tekrar dene.'};
+    studentLogin:(k,p)=>{const s=og.find(x=>x.kullanici===k);if(!s||s.sifre!==p)return{ok:false,msg:'Kullanıcı adı ya da şifre yanlış. Tekrar dene.'};const id=s.id;
       const dn=gunEkle(T(),-1);let tebrik=null;const r=ok.find(x=>x.ogrenciId===id&&x.tarih===dn);
-      if(r&&r.sayfa>=TEBRIK_ESIGI&&goruldu[id]!==dn){goruldu[id]=dn;tebrik={mesaj:tebrikSec(id,dn),sayfa:r.sayfa,kitap:r.kitap,imza:(S.kodVeri&&S.kodVeri.imza)||'Öğretmenin'};}
+      if(r&&r.sayfa>=TEBRIK_ESIGI&&goruldu[id]!==dn){goruldu[id]=dn;tebrik={mesaj:tebrikSec(id,dn),sayfa:r.sayfa,kitap:r.kitap,imza:(sinifBul(s.sinif).ogretmen===BEN&&imza)||'Öğretmenin'};}
       return{ok:true,tebrik,ogrenci:{id,ad:s.ad,sinif:s.sinif},bugun:T(),dun:dn,liste:liste(id)};},
     saveReading:(id,p,v)=>{const i=ok.findIndex(r=>r.ogrenciId===id&&r.tarih===v.tarih);const r={tarih:v.tarih,ogrenciId:id,kitap:v.kitap,sayfa:v.sayfa,anl:v.anladiklarim,bitti:v.bitti?1:0};if(i>=0)ok[i]=r;else ok.push(r);return null;},
     studentLogout:()=>null,
     teacherLogin:()=>({ok:true,bugun:T(),ogretmenAdi:imza,eposta:BEN,yonetici:true,siniflar:cls()}),
     teacherLogout:()=>null,
     tGetClasses:()=>cls(),
-    tAddStudents:(p,s,t)=>{let sn=siniflar.find(x=>x.ad===s);if(!sn){sn={ad:s,kod:rk(),ogretmen:BEN};siniflar.push(sn);}
+    tAddStudents:(p,s,t)=>{let sn=siniflar.find(x=>x.ad===s);if(!sn){sn={ad:s,ogretmen:BEN};siniflar.push(sn);}
       const var_=new Set(og.filter(o=>o.sinif===s).map(o=>o.ad.toLocaleLowerCase('tr')));
-      t.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[.)-]?\s*/,'').trim()).filter(Boolean).forEach(a=>{if(var_.has(a.toLocaleLowerCase('tr')))return;var_.add(a.toLocaleLowerCase('tr'));og.push({id:'o'+(++n),sinif:s,ad:a,sifre:rs()});});return cls();},
+      t.split(/\r?\n/).map(x=>x.replace(/^\s*\d+[.)-]?\s*/,'').trim()).filter(Boolean).forEach(a=>{if(var_.has(a.toLocaleLowerCase('tr')))return;var_.add(a.toLocaleLowerCase('tr'));og.push({id:'o'+(++n),sinif:s,ad:a,kullanici:kAdi(a),sifre:rs()});});return cls();},
     tRemoveStudent:(p,id)=>{const i=og.findIndex(o=>o.id===id);if(i>=0)og.splice(i,1);return cls();},
     tResetPassword:(p,id)=>{const o=og.find(x=>x.id===id);if(o)o.sifre=rs();return cls();},
     tRenameClass:(p,e,y)=>{if(e!==y&&siniflar.some(x=>x.ad===y))throw new Error('"'+y+'" adında bir sınıf zaten var.');sinifBul(e).ad=y;og.forEach(o=>{if(o.sinif===e)o.sinif=y;});return cls();},
     tDeleteClass:(p,s)=>{const i=siniflar.findIndex(x=>x.ad===s);if(i>=0)siniflar.splice(i,1);for(let j=og.length-1;j>=0;j--)if(og[j].sinif===s)og.splice(j,1);return cls();},
-    tRegenCode:(p,s)=>{sinifBul(s).kod=rk();return cls();},
+    tSetUsername:(p,id,k)=>{if(og.some(o=>o.kullanici===k&&o.id!==id))throw new Error('"'+k+'" kullanıcı adı başka bir öğrencide var.');const o=og.find(x=>x.id===id);if(o)o.kullanici=k;return cls();},
     tClassData:(p,s)=>{const o=og.filter(x=>x.sinif===s).sort((a,b)=>tr(a.ad,b.ad));const ids=new Set(o.map(x=>x.id));
       return{bugun:T(),ogrenciler:o.map(x=>({id:x.id,ad:x.ad})),okumalar:ok.filter(r=>ids.has(r.ogrenciId)).sort((a,b)=>a.tarih.localeCompare(b.tarih)).map(r=>[r.tarih,r.ogrenciId,r.sayfa,r.kitap,r.bitti,r.anl])};},
     tSetTeacherName:(p,a)=>{imza=String(a||'').trim();return{ok:true};},
@@ -1625,6 +1583,5 @@ const Mock=(()=>{
 kurtCiz($('#maskot'),[['',14,'Küçük Prens'],['',22,'Şeker Portakalı'],['',30,'Pal Sokağı'],['',18,'Momo'],['',26,'Heidi'],['',34,'Pinokyo']],null,{kitaplar:false,yakin:true});
 if(!AYAR)$('#demo-serit').hidden=false;
 goster('s-sinif');
-rosterYukle();
 if(AYAR)fbHazir().catch(()=>{}); // bağlantıyı önceden hazırla
 </script>

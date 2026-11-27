@@ -23,7 +23,11 @@ const OZEL_ALAN_ADI = '';
 
 const FB_GITHUB = 'https://raw.githubusercontent.com/lamiaaktas/kodlama_atolyesi/main/okuma-gunlugu/web/';
 const OGR_EPOSTA_SONU = '@ogrenci.example.com';  // öğrenci hesapları için iç adres; e-posta gönderilmez
-const KOD_HARFLERI = 'ABCDEFGHJKLMNPRSTUVYZ23456789';  // karışabilen I, O, Q, W, X, 0, 1 yok
+/** Şifreler: kolay okunan bir kelime + iki rakam (örn. kedi47). Türkçe harf yok, her klavyede yazılır. */
+const KELIMELER = ['elma', 'armut', 'kiraz', 'karpuz', 'limon', 'kivi', 'mango', 'ayva', 'erik', 'incir',
+  'kedi', 'balina', 'zebra', 'panda', 'aslan', 'kaplan', 'tilki', 'kartal', 'yunus', 'penguen',
+  'bulut', 'deniz', 'orman', 'nehir', 'kitap', 'kalem', 'defter', 'roket', 'gemi', 'tren', 'araba', 'fener'];
+const KULLANICI_KALIBI = /^[a-z0-9._-]{3,20}$/;
 
 /* ================= kurulum ve yayın ================= */
 
@@ -179,8 +183,7 @@ const ISLEMLER = {
     const sinif = fsAl_('siniflar/' + o.sinifId);
     if (!sinif) throw new Error('Sınıf bulunamadı.');
     yetki_(kim, sinif);
-    const kullanilan = new Set((sinif.ogrenciler || []).map(x => x.sifre));
-    const sifre = rastgeleSifre_(kullanilan);
+    const sifre = sifreUret_();
     authGuncelle_(o._id, sifre);
     sinif.ogrenciler.forEach(x => { if (x.id === o._id) x.sifre = sifre; });
     fsYaz_(sinifListesiYaz_(sinif));
@@ -206,20 +209,27 @@ const ISLEMLER = {
     const ids = (sinif.ogrenciler || []).map(x => x.id);
     if (ids.length) authSil_(ids);
     const yazilar = ids.map(id => fsSil_('ogrenciler/' + id));
-    yazilar.push(fsSil_('kodlar/' + sinif.kod), fsSil_('siniflar/' + sinif._id));
+    if (sinif.kod) yazilar.push(fsSil_('kodlar/' + sinif.kod));  // eski sürümden kalan kod belgesi
+    yazilar.push(fsSil_('siniflar/' + sinif._id));
     fsYaz_(yazilar);
   },
 
-  kodYenile: (kim, g) => {
-    const sinif = sinifBul_(nfc_(g.sinif));
+  kullaniciDegistir: (kim, g) => {
+    const o = fsAl_('ogrenciler/' + kimlikTemizle_(g.id));
+    if (!o) throw new Error('Öğrenci bulunamadı.');
+    const sinif = fsAl_('siniflar/' + o.sinifId);
     if (!sinif) throw new Error('Sınıf bulunamadı.');
     yetki_(kim, sinif);
-    const eski = sinif.kod;
-    sinif.kod = yeniKod_();
+    const yeni = girisMetni_(g.kullanici);
+    if (!KULLANICI_KALIBI.test(yeni)) throw new Error('Kullanıcı adı 3-20 karakter olmalı; yalnızca harf, rakam, nokta, tire kullanın.');
+    if (yeni === o.kullanici) return { kullanici: yeni };
+    if (tumKullanicilar_().has(yeni)) throw new Error('"' + yeni + '" kullanıcı adı okulda başka bir öğrencide var.');
+    authGuncelle_(o._id, null, yeni);
+    sinif.ogrenciler.forEach(x => { if (x.id === o._id) x.kullanici = yeni; });
     const yazilar = sinifListesiYaz_(sinif);
-    yazilar.push(fsSil_('kodlar/' + eski));
+    yazilar.push(fsGuncelle_('ogrenciler/' + o._id, { kullanici: yeni }));
     fsYaz_(yazilar);
-    return { kod: sinif.kod };
+    return { kullanici: yeni };
   },
 
   imzaKaydet: (kim, g) => {
@@ -228,7 +238,7 @@ const ISLEMLER = {
     const yazilar = [fsKoy_('ogretmenler/' + kim.eposta, { ad: og.ad || '', imza: imza, eklenme: og.eklenme || new Date() })];
     fsSorgu_('siniflar', 'ogretmen', kim.eposta).forEach(s => {
       yazilar.push(fsGuncelle_('siniflar/' + s._id, { imza: imza }));
-      if (s.kod && fsAl_('kodlar/' + s.kod)) yazilar.push(fsGuncelle_('kodlar/' + s.kod, { imza: imza }));
+      (s.ogrenciler || []).forEach(x => yazilar.push(fsGuncelle_('ogrenciler/' + x.id, { imza: imza })));
     });
     fsYaz_(yazilar);
   },
@@ -261,7 +271,7 @@ const ISLEMLER = {
     sinif.ogretmen = ep;
     sinif.imza = og.imza || '';
     const yazilar = sinifListesiYaz_(sinif);
-    (sinif.ogrenciler || []).forEach(x => yazilar.push(fsGuncelle_('ogrenciler/' + x.id, { ogretmen: ep })));
+    (sinif.ogrenciler || []).forEach(x => yazilar.push(fsGuncelle_('ogrenciler/' + x.id, { ogretmen: ep, imza: sinif.imza })));
     fsYaz_(yazilar);
   }
 };
@@ -302,13 +312,46 @@ function sinifBul_(ad) {
   return s.length ? s[0] : null;
 }
 
-function yeniKod_() {
-  for (let i = 0; i < 50; i++) {
-    let k = '';
-    for (let j = 0; j < 6; j++) k += KOD_HARFLERI.charAt(Math.floor(Math.random() * KOD_HARFLERI.length));
-    if (!fsAl_('kodlar/' + k)) return k;
-  }
-  throw new Error('Sınıf kodu üretilemedi, tekrar deneyin.');
+/** Bir koleksiyondaki tüm belgeler (sayfa sayfa). */
+function fsListe_(koleksiyon) {
+  const sonuc = [];
+  let jeton = '';
+  do {
+    const r = gIstek_('get', fsTaban_() + '/' + koleksiyon + '?pageSize=300' + (jeton ? '&pageToken=' + encodeURIComponent(jeton) : '')) || {};
+    (r.documents || []).forEach(d => { const o = fsNesne_(d.fields || {}); o._id = d.name.split('/').pop(); sonuc.push(o); });
+    jeton = r.nextPageToken || '';
+  } while (jeton);
+  return sonuc;
+}
+
+/** Okuldaki tüm kullanıcı adları. */
+function tumKullanicilar_() {
+  const set = new Set();
+  fsListe_('siniflar').forEach(s => (s.ogrenciler || []).forEach(x => { if (x.kullanici) set.add(x.kullanici); }));
+  return set;
+}
+
+/** Türkçe harfleri sadeleştirir, küçültür; yalnızca a-z 0-9 . _ - bırakır. */
+function girisMetni_(v) {
+  const tr = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'İ': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'c', 'Ğ': 'g', 'Ö': 'o', 'Ş': 's', 'Ü': 'u', 'â': 'a', 'î': 'i', 'û': 'u' };
+  return String(v || '').normalize('NFC').replace(/[çğıİöşüÇĞÖŞÜâîû]/g, c => tr[c]).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9._-]/g, '');
+}
+
+/** Ad + soyadın ilk harfi (örn. "Defne Kaya" → defnek). Kullanılmışsa sonuna rakam ekler. */
+function kullaniciUret_(ad, kullanilan) {
+  const parca = String(ad || '').trim().split(/\s+/).map(girisMetni_).filter(Boolean);
+  let kok = (parca[0] || 'ogrenci').slice(0, 14);
+  if (parca.length > 1) kok += parca[parca.length - 1].charAt(0);
+  while (kok.length < 3) kok += 'x';
+  let aday = kok;
+  for (let i = 2; kullanilan.has(aday); i++) aday = kok + i;
+  kullanilan.add(aday);
+  return aday;
+}
+
+function sifreUret_() {
+  return KELIMELER[Math.floor(Math.random() * KELIMELER.length)] + (10 + Math.floor(Math.random() * 90));
 }
 
 function yeniKimlik_() {
@@ -320,16 +363,16 @@ function yeniKimlik_() {
 
 function sinifOlustur_(ad, ogretmenEposta) {
   const og = fsAl_('ogretmenler/' + ogretmenEposta) || {};
-  return { _id: yeniKimlik_(), ad: ad, ogretmen: ogretmenEposta, kod: yeniKod_(), imza: og.imza || '', ogrenciler: [], olusturma: new Date() };
+  return { _id: yeniKimlik_(), ad: ad, ogretmen: ogretmenEposta, imza: og.imza || '', ogrenciler: [], olusturma: new Date() };
 }
 
-/** Sınıf belgesini ve kod belgesini (yalnızca isimler) birlikte yazar. */
+/** Sınıf belgesini (öğrenci listesi, kullanıcı adları ve şifrelerle) yazar. */
 function sinifListesiYaz_(sinif) {
-  const liste = (sinif.ogrenciler || []).slice().sort((a, b) => trSirala_(a.ad, b.ad));
+  const liste = (sinif.ogrenciler || []).slice().sort((a, b) => trSirala_(a.ad, b.ad))
+    .map(x => ({ id: x.id, ad: x.ad, kullanici: x.kullanici || '', sifre: x.sifre || '' }));
   sinif.ogrenciler = liste;
   return [
-    fsKoy_('siniflar/' + sinif._id, { ad: sinif.ad, ogretmen: sinif.ogretmen, kod: sinif.kod, imza: sinif.imza || '', ogrenciler: liste, olusturma: sinif.olusturma || new Date() }),
-    fsKoy_('kodlar/' + sinif.kod, { sinifId: sinif._id, sinif: sinif.ad, imza: sinif.imza || '', ogrenciler: liste.map(x => ({ id: x.id, ad: x.ad })) })
+    fsKoy_('siniflar/' + sinif._id, { ad: sinif.ad, ogretmen: sinif.ogretmen, imza: sinif.imza || '', ogrenciler: liste, olusturma: sinif.olusturma || new Date() })
   ];
 }
 
@@ -337,22 +380,20 @@ function sinifListesiYaz_(sinif) {
 function ogrencileriEkle_(sinif, adlar, eskiKayitlar) {
   sinif.ogrenciler = sinif.ogrenciler || [];
   const adSet = new Set(sinif.ogrenciler.map(x => x.ad.toLocaleLowerCase('tr')));
-  const sifreSet = new Set(sinif.ogrenciler.map(x => x.sifre));
+  const kullanilan = tumKullanicilar_();
   const eklenen = [];
   adlar.forEach(ad => {
     ad = ad.slice(0, 60);
     const k = ad.toLocaleLowerCase('tr');
     if (adSet.has(k)) return;
     adSet.add(k);
-    const sifre = rastgeleSifre_(sifreSet);
-    sifreSet.add(sifre);
-    eklenen.push({ id: yeniKimlik_(), ad: ad, sifre: sifre });
+    eklenen.push({ id: yeniKimlik_(), ad: ad, kullanici: kullaniciUret_(ad, kullanilan), sifre: sifreUret_() });
   });
-  eklenen.forEach(o => authOlustur_(o.id, o.sifre, o.ad));
+  eklenen.forEach(o => authOlustur_(o.id, o.kullanici, o.sifre, o.ad));
   sinif.ogrenciler = sinif.ogrenciler.concat(eklenen);
   const yazilar = sinifListesiYaz_(sinif);
   eklenen.forEach(o => yazilar.push(fsKoy_('ogrenciler/' + o.id,
-    { ad: o.ad, sinifId: sinif._id, sinif: sinif.ad, ogretmen: sinif.ogretmen, okumalar: {}, tebrik: '' })));
+    { ad: o.ad, kullanici: o.kullanici, sinifId: sinif._id, sinif: sinif.ad, ogretmen: sinif.ogretmen, imza: sinif.imza || '', okumalar: {}, tebrik: '' })));
   fsYaz_(yazilar);
   return eklenen;
 }
@@ -360,7 +401,8 @@ function ogrencileriEkle_(sinif, adlar, eskiKayitlar) {
 /* ================= eski verileri taşıma ================= */
 
 /**
- * Eski e-tablodaki sınıfları, öğrencileri (aynı meyve şifreleriyle) ve tüm okuma kayıtlarını yeni sisteme taşır.
+ * Eski e-tablodaki sınıfları, öğrencileri ve tüm okuma kayıtlarını yeni sisteme taşır.
+ * Her öğrenciye kullanıcı adı ve yeni şifre verilir (öğretmen panelindeki "Giriş kartları"ndan yazdırılır).
  * Tekrar çalıştırılırsa zaten taşınmış öğrencileri atlar. Taşınan sınıflar sizin adınıza açılır;
  * sonra yönetici panelinden öğretmenlere devredebilirsiniz.
  */
@@ -372,6 +414,7 @@ function eskiVerileriTasi() {
   const eskiOku = okumalar_();
   const props = PropertiesService.getScriptProperties();
   const tasinan = new Set(JSON.parse(props.getProperty('FB_TASINAN') || '[]')); // taşınmış eski kimlikler
+  const kullanilan = tumKullanicilar_();
   const sinifAdlari = [...new Set(eskiOgr.map(s => s.sinif))].sort(trSirala_);
   let toplamOgr = 0, toplamOku = 0;
   sinifAdlari.forEach(sinifAd => {
@@ -381,31 +424,67 @@ function eskiVerileriTasi() {
     eskiOgr.filter(s => s.sinif === sinifAd).forEach(s => {
       if (tasinan.has(s.id)) return;
       const id = kimlikTemizle_(s.id.replace(/[^A-Za-z0-9_-]/g, '') || yeniKimlik_());
-      const sifre = s.sifre.normalize('NFC');
-      authOlustur_(id, sifre, s.ad);
+      const kullanici = kullaniciUret_(s.ad, kullanilan);
+      const sifre = sifreUret_();
+      authOlustur_(id, kullanici, sifre, s.ad);
       const okumalar = {};
       eskiOku.filter(r => r.ogrenciId === s.id && r.sayfa > 0).forEach(r => {
         okumalar[r.tarih] = { s: Math.min(1000, Math.max(1, Math.round(r.sayfa))), k: (r.kitap || '?').slice(0, 120),
           a: (r.anl || '').slice(0, 2000), b: !!r.bitti };
         toplamOku++;
       });
-      sinif.ogrenciler.push({ id: id, ad: s.ad, sifre: sifre });
-      yazilar.push(fsKoy_('ogrenciler/' + id, { ad: s.ad, sinifId: sinif._id, sinif: sinif.ad, ogretmen: sinif.ogretmen, okumalar: okumalar, tebrik: '' }));
+      sinif.ogrenciler.push({ id: id, ad: s.ad, kullanici: kullanici, sifre: sifre });
+      yazilar.push(fsKoy_('ogrenciler/' + id, { ad: s.ad, kullanici: kullanici, sinifId: sinif._id, sinif: sinif.ad, ogretmen: sinif.ogretmen,
+        imza: sinif.imza || '', okumalar: okumalar, tebrik: '' }));
       tasinan.add(s.id);
       toplamOgr++;
     });
     yazilar.push.apply(yazilar, sinifListesiYaz_(sinif));
     for (let i = 0; i < yazilar.length; i += 200) fsYaz_(yazilar.slice(i, i + 200));
     props.setProperty('FB_TASINAN', JSON.stringify([...tasinan]));
-    Logger.log(sinif.ad + ' sınıfı taşındı. Sınıf kodu: ' + sinif.kod + ' (' + sinif.ogrenciler.length + ' öğrenci)');
+    Logger.log(sinif.ad + ' sınıfı taşındı (' + sinif.ogrenciler.length + ' öğrenci).');
   });
   Logger.log('Bitti: ' + toplamOgr + ' öğrenci ve ' + toplamOku + ' okuma kaydı taşındı.');
+  Logger.log('Kullanıcı adları ve şifreler öğretmen panelinde, her sınıfın "Giriş kartları" düğmesinde.');
   Logger.log('Yeni siteyi deneyin: ' + fbAdres_() + ' — her şey yolundaysa "eskiAdresiYonlendir" işlevini çalıştırın.');
+}
+
+/**
+ * Daha önce meyve şifresi + sınıf koduyla taşınmış öğrencileri kullanıcı adı + şifre girişine çevirir.
+ * Okuma kayıtları aynen kalır. Kullanıcı adı olan öğrencilere dokunmaz; tekrar çalıştırmak güvenlidir.
+ */
+function girisBilgileriniYenile() {
+  fbProjeKontrol_();
+  authKontrol_();
+  const siniflar = fsListe_('siniflar');
+  const kullanilan = new Set();
+  siniflar.forEach(s => (s.ogrenciler || []).forEach(x => { if (x.kullanici) kullanilan.add(x.kullanici); }));
+  let cevrilen = 0;
+  siniflar.forEach(sinif => {
+    const yazilar = [];
+    let degisti = false;
+    (sinif.ogrenciler || []).forEach(x => {
+      if (x.kullanici) return;
+      x.kullanici = kullaniciUret_(x.ad, kullanilan);
+      x.sifre = sifreUret_();
+      authGuncelle_(x.id, x.sifre, x.kullanici);
+      yazilar.push(fsGuncelle_('ogrenciler/' + x.id, { kullanici: x.kullanici, imza: sinif.imza || '' }));
+      degisti = true;
+      cevrilen++;
+    });
+    if (sinif.kod) { yazilar.push(fsSil_('kodlar/' + sinif.kod)); delete sinif.kod; degisti = true; }
+    if (!degisti) return;
+    yazilar.push.apply(yazilar, sinifListesiYaz_(sinif));
+    fsYaz_(yazilar);
+    Logger.log(sinif.ad + ': ' + (sinif.ogrenciler || []).length + ' öğrenci hazır.');
+  });
+  kurallariYayinla_(hamDosya_('firestore.rules') || (() => { throw new Error('Kurallar GitHub\'dan alınamadı.'); })());
+  Logger.log('Bitti: ' + cevrilen + ' öğrenciye kullanıcı adı ve şifre verildi. Öğretmen panelindeki "Giriş kartları"ndan yazdırabilirsiniz.');
 }
 
 /* ================= Firebase Authentication (yönetici yetkisiyle) ================= */
 
-function ogrEposta_(id) { return id + OGR_EPOSTA_SONU; }
+function ogrEposta_(kullanici) { return kullanici + OGR_EPOSTA_SONU; }
 
 const AUTH_KAPALI = 'Firebase Authentication henüz başlatılmamış. Firebase konsolunda Derleme → Authentication → Başlayın\'a tıklayın, ' +
   'Oturum açma yöntemi sekmesinde E-posta/Şifre ve Google\'ı etkinleştirin, sonra bu işlevi tekrar çalıştırın.';
@@ -420,20 +499,26 @@ function authKontrol_() {
   }
 }
 
-function authOlustur_(id, sifre, ad) {
+function authOlustur_(id, kullanici, sifre, ad) {
   const r = gIstek_('post', 'https://identitytoolkit.googleapis.com/v1/projects/' + FIREBASE_PROJE + '/accounts',
-    { localId: id, email: ogrEposta_(id), password: sifre, displayName: ad }, true);
+    { localId: id, email: ogrEposta_(kullanici), password: sifre, displayName: ad }, true);
   if (r.kod === 200) return;
   const mesaj = r.hata || '';
-  if (/DUPLICATE_LOCAL_ID|EMAIL_EXISTS/.test(mesaj)) { authGuncelle_(id, sifre); return; }
+  if (/DUPLICATE_LOCAL_ID/.test(mesaj)) { authGuncelle_(id, sifre, kullanici); return; }
+  if (/EMAIL_EXISTS/.test(mesaj)) throw new Error('"' + kullanici + '" kullanıcı adı başka bir hesapta var (' + ad + ').');
   if (/CONFIGURATION_NOT_FOUND/.test(mesaj)) throw new Error(AUTH_KAPALI);
   if (/OPERATION_NOT_ALLOWED|PASSWORD_LOGIN_DISABLED/.test(mesaj)) throw new Error('Firebase Authentication\'da E-posta/Şifre giriş yöntemi kapalı. Oturum açma yöntemi sekmesinden açın ve tekrar çalıştırın.');
   throw new Error('Öğrenci hesabı açılamadı (' + ad + '): ' + mesaj);
 }
 
-function authGuncelle_(id, sifre) {
-  gIstek_('post', 'https://identitytoolkit.googleapis.com/v1/projects/' + FIREBASE_PROJE + '/accounts:update',
-    { localId: id, password: sifre });
+function authGuncelle_(id, sifre, kullanici) {
+  const govde = { localId: id };
+  if (sifre) govde.password = sifre;
+  if (kullanici) govde.email = ogrEposta_(kullanici);
+  const r = gIstek_('post', 'https://identitytoolkit.googleapis.com/v1/projects/' + FIREBASE_PROJE + '/accounts:update', govde, true);
+  if (r.kod === 200) return;
+  if (/EMAIL_EXISTS/.test(r.hata || '')) throw new Error('"' + kullanici + '" kullanıcı adı başka bir hesapta var.');
+  throw new Error('Öğrenci hesabı güncellenemedi: ' + r.hata);
 }
 
 function authSil_(ids) {
